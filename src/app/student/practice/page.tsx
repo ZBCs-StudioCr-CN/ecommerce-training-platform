@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import {
   LayoutDashboard, BookOpen, Store, Award, FileText, MessageCircle, Bell, Globe,
-  Target, ShoppingCart, Megaphone, TrendingUp, PieChart, Shield, ChevronRight, Clock, CheckCircle2,
+  Target, ShoppingCart, Megaphone, TrendingUp, PieChart, Shield, ChevronRight, Clock, CheckCircle2, Play,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,12 +21,72 @@ const menuItems = [
 ];
 
 const practiceModules = [
-  { id: 1, title: '市场调研与选品', icon: Target, progress: 100, status: 'completed', score: 92 },
-  { id: 2, title: '独立站搭建', icon: ShoppingCart, progress: 75, status: 'in_progress', score: null },
-  { id: 3, title: '流量推广', icon: Megaphone, progress: 0, status: 'pending', score: null },
-  { id: 4, title: '转化运营', icon: TrendingUp, progress: 0, status: 'locked', score: null },
-  { id: 5, title: '数据分析', icon: PieChart, progress: 0, status: 'locked', score: null },
-  { id: 6, title: '合规风控', icon: Shield, progress: 0, status: 'locked', score: null },
+  { 
+    id: 1, 
+    title: '市场调研与选品', 
+    description: '学习海外市场分析方法，掌握选品策略与定价技巧',
+    icon: Target, 
+    progress: 100, 
+    status: 'completed', 
+    score: 92,
+    href: '/student/practice/research',
+    color: 'from-blue-500 to-cyan-500'
+  },
+  { 
+    id: 2, 
+    title: '独立站搭建', 
+    description: '1:1复刻Shopify建站流程，拖拽装修、商品管理、配置设置',
+    icon: ShoppingCart, 
+    progress: 75, 
+    status: 'in_progress', 
+    score: null,
+    href: '/student/practice/build',
+    color: 'from-emerald-500 to-teal-500'
+  },
+  { 
+    id: 3, 
+    title: '流量推广', 
+    description: '模拟Google/Facebook/TikTok广告投放，SEO优化全流程',
+    icon: Megaphone, 
+    progress: 0, 
+    status: 'pending', 
+    score: null,
+    href: '/student/practice/marketing',
+    color: 'from-orange-500 to-red-500'
+  },
+  { 
+    id: 4, 
+    title: '转化运营', 
+    description: '营销活动创建、优惠券管理、邮件营销、客诉处理',
+    icon: TrendingUp, 
+    progress: 0, 
+    status: 'pending', 
+    score: null,
+    href: '/student/practice/operations',
+    color: 'from-violet-500 to-purple-500'
+  },
+  { 
+    id: 5, 
+    title: '数据分析', 
+    description: '数据看板解读、转化漏斗分析、异常归因、优化建议',
+    icon: PieChart, 
+    progress: 0, 
+    status: 'pending', 
+    score: null,
+    href: '/student/practice/analytics',
+    color: 'from-blue-500 to-indigo-500'
+  },
+  { 
+    id: 6, 
+    title: '合规风控', 
+    description: 'GDPR合规设置、隐私政策、风险场景应急处理',
+    icon: Shield, 
+    progress: 0, 
+    status: 'pending', 
+    score: null,
+    href: '/student/practice/compliance',
+    color: 'from-slate-500 to-zinc-600'
+  },
 ];
 
 export default function StudentPracticePage() {
@@ -34,11 +94,21 @@ export default function StudentPracticePage() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'completed': return <Badge className="bg-green-100 text-green-700">已完成</Badge>;
-      case 'in_progress': return <Badge className="bg-blue-100 text-blue-700">进行中</Badge>;
+      case 'completed': return <Badge className="bg-green-100 text-green-700 border-green-200">已完成</Badge>;
+      case 'in_progress': return <Badge className="bg-blue-100 text-blue-700 border-blue-200">进行中</Badge>;
       case 'pending': return <Badge variant="secondary">未开始</Badge>;
       case 'locked': return <Badge variant="outline" className="text-gray-400">待解锁</Badge>;
       default: return null;
+    }
+  };
+
+  const getButtonText = (status: string) => {
+    switch (status) {
+      case 'completed': return '查看成果';
+      case 'in_progress': return '继续实训';
+      case 'pending': return '开始实训';
+      case 'locked': return '待解锁';
+      default: return '开始实训';
     }
   };
 
@@ -106,17 +176,18 @@ export default function StudentPracticePage() {
 
         <div className="grid grid-cols-2 gap-4">
           {practiceModules.map((module) => (
-            <Card key={module.id} className={`border-0 shadow-lg ${module.status === 'locked' ? 'opacity-60' : ''}`}>
+            <Card key={module.id} className={`border-0 shadow-lg hover:shadow-xl transition-shadow ${module.status === 'locked' ? 'opacity-60' : ''}`}>
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
-                  <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${module.status === 'completed' ? 'bg-green-100' : module.status === 'in_progress' ? 'bg-emerald-100' : 'bg-slate-100'}`}>
-                    <module.icon className={`h-7 w-7 ${module.status === 'completed' ? 'text-green-600' : module.status === 'in_progress' ? 'text-emerald-600' : 'text-slate-400'}`} />
+                  <div className={`w-14 h-14 rounded-xl flex items-center justify-center bg-gradient-to-br ${module.color}`}>
+                    <module.icon className="h-7 w-7 text-white" />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="font-semibold text-slate-800">{module.title}</h3>
                       {getStatusBadge(module.status)}
                     </div>
+                    <p className="text-sm text-slate-500 mb-3">{module.description}</p>
                     {module.progress > 0 && (
                       <div className="mb-3">
                         <Progress value={module.progress} className="h-2 mb-1" />
@@ -129,15 +200,39 @@ export default function StudentPracticePage() {
                   </div>
                 </div>
                 <div className="mt-4 pt-4 border-t border-slate-100">
-                  <Button className="w-full" disabled={module.status === 'locked'} variant={module.status === 'in_progress' ? 'default' : 'outline'}>
-                    {module.status === 'completed' ? '查看成果' : module.status === 'in_progress' ? '继续实训' : module.status === 'pending' ? '开始实训' : '待解锁'}
-                    <ChevronRight className="h-4 w-4 ml-2" />
-                  </Button>
+                  <Link href={module.href} className="block">
+                    <Button 
+                      className="w-full" 
+                      disabled={module.status === 'locked'} 
+                      variant={module.status === 'in_progress' ? 'default' : 'outline'}
+                    >
+                      {module.status === 'in_progress' && <Play className="h-4 w-4 mr-2" />}
+                      {getButtonText(module.status)}
+                      <ChevronRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </Link>
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
+
+        {/* Comprehensive Project */}
+        <Card className="border-0 shadow-lg mt-6 bg-gradient-to-r from-violet-500 to-purple-600 text-white">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold mb-2">综合项目实战</h3>
+                <p className="text-violet-100">完成从0到1的独立站全流程运营，生成运营报告与作品集</p>
+              </div>
+              <div className="text-right">
+                <Badge className="bg-white/20 text-white border-0 mb-2">需完成全部分项实训</Badge>
+                <br />
+                <Button variant="secondary" disabled>解锁综合实战</Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </main>
     </div>
   );
