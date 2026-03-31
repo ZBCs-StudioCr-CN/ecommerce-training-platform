@@ -296,10 +296,10 @@ export default function Home() {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
               <Globe className="h-4 w-4 text-white" />
             </div>
-            <span className="text-sm text-blue-200">外贸独立站实训平台</span>
+            <span className="text-sm text-blue-200">外贸独立站实训平台 V1.0</span>
           </div>
           <p className="text-sm text-blue-300">
-            外贸独立站实战模拟教学实训平台
+            外贸独立站实战模拟教学实训平台原型系统
           </p>
         </div>
       </footer>
