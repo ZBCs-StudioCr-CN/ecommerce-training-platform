@@ -9,15 +9,11 @@ import {
   ArrowRight,
   Building2,
   Users,
-  BookOpen,
   Target,
   ChevronRight,
   Play,
-  LayoutDashboard,
   Store,
   BarChart3,
-  Award,
-  FileText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -117,9 +113,6 @@ export default function Home() {
         </div>
 
         <div className="max-w-7xl mx-auto text-center relative z-10">
-          <Badge className="mb-6 bg-blue-500/20 text-blue-300 border-blue-500/30 text-sm px-4 py-1">
-            V1.0 原型系统
-          </Badge>
           <h2 className="text-5xl font-bold text-white mb-6 leading-tight">
             外贸独立站实战模拟<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">
