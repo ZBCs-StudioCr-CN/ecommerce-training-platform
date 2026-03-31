@@ -3,15 +3,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import {
-  LayoutDashboard,
-  BookOpen,
-  ClipboardList,
-  BarChart3,
-  MessageCircle,
   Bell,
   LogOut,
   Globe,
-  User,
   Users,
   Calendar,
   Clock,
@@ -21,26 +15,18 @@ import {
   Play,
   FileText,
   Target,
-  Award,
-  ChevronRight,
   Plus,
   Search,
+  MessageCircle,
+  Award,
+  ChevronRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
-
-const menuItems = [
-  { id: 'dashboard', label: '教学控制台', icon: LayoutDashboard, href: '/teacher/dashboard' },
-  { id: 'courses', label: '课程管理', icon: BookOpen, href: '/teacher/courses' },
-  { id: 'resources', label: '资源管理', icon: FileText, href: '/teacher/resources' },
-  { id: 'practice', label: '实训管理', icon: ClipboardList, href: '/teacher/practice' },
-  { id: 'grading', label: '考核评分', icon: Award, href: '/teacher/grading' },
-  { id: 'analysis', label: '学情分析', icon: BarChart3, href: '/teacher/analysis' },
-  { id: 'qa', label: '答疑社区', icon: MessageCircle, href: '/teacher/qa' },
-];
+import { teacherMenuItems } from '@/config/menu';
 
 export default function TeacherDashboard() {
   const [activeMenu, setActiveMenu] = useState('dashboard');
@@ -113,7 +99,7 @@ export default function TeacherDashboard() {
       {/* 侧边导航 */}
       <aside className="fixed left-0 top-16 bottom-0 w-60 bg-white border-r border-slate-200 overflow-y-auto">
         <nav className="p-4 space-y-1">
-          {menuItems.map((item) => (
+          {teacherMenuItems.map((item) => (
             <Link
               key={item.id}
               href={item.href}

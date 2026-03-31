@@ -3,22 +3,20 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import {
-  GraduationCap, BookOpen, Users, Award, BarChart3, MessageCircle, Settings, Bell, Globe,
-  Plus, Search, FolderOpen, Play, Clock, ChevronRight,
+  Bell,
+  Globe,
+  Plus,
+  Search,
+  FolderOpen,
+  Clock,
+  BookOpen,
+  LogOut,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-
-const menuItems = [
-  { id: 'dashboard', label: '教学控制台', icon: GraduationCap, href: '/teacher/dashboard' },
-  { id: 'courses', label: '课程管理', icon: BookOpen, href: '/teacher/courses' },
-  { id: 'practice', label: '实训管理', icon: Users, href: '/teacher/practice' },
-  { id: 'grading', label: '考核评分', icon: Award, href: '/teacher/grading' },
-  { id: 'analysis', label: '学情分析', icon: BarChart3, href: '/teacher/analysis' },
-  { id: 'qa', label: '答疑社区', icon: MessageCircle, href: '/teacher/qa' },
-];
+import { teacherMenuItems } from '@/config/menu';
 
 export default function TeacherCoursesPage() {
   const [activeMenu, setActiveMenu] = useState('courses');
@@ -35,7 +33,7 @@ export default function TeacherCoursesPage() {
       <header className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 z-50">
         <div className="flex items-center justify-between h-full px-6">
           <Link href="/login" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
               <Globe className="h-6 w-6 text-white" />
             </div>
             <div>
@@ -44,18 +42,27 @@ export default function TeacherCoursesPage() {
             </div>
           </Link>
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon"><Bell className="h-5 w-5 text-slate-600" /></Button>
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white">王</div>
+            <Button variant="ghost" size="icon" className="relative">
+              <Bell className="h-5 w-5 text-slate-600" />
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+            </Button>
+            <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
+              <div className="text-right">
+                <p className="text-sm font-medium text-slate-700">王老师</p>
+                <p className="text-xs text-slate-500">电商学院</p>
+              </div>
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-medium">王</div>
+            </div>
           </div>
         </div>
       </header>
 
       <aside className="fixed left-0 top-16 bottom-0 w-60 bg-white border-r border-slate-200 overflow-y-auto">
         <nav className="p-4 space-y-1">
-          {menuItems.map((item) => (
+          {teacherMenuItems.map((item) => (
             <Link key={item.id} href={item.href}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                activeMenu === item.id ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white' : 'text-slate-600 hover:bg-slate-100'
+                activeMenu === item.id ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg shadow-blue-500/25' : 'text-slate-600 hover:bg-slate-100'
               }`}
               onClick={() => setActiveMenu(item.id)}>
               <item.icon className="h-5 w-5" />
@@ -63,6 +70,12 @@ export default function TeacherCoursesPage() {
             </Link>
           ))}
         </nav>
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200 bg-white">
+          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors">
+            <LogOut className="h-5 w-5" />
+            <span className="font-medium">退出登录</span>
+          </button>
+        </div>
       </aside>
 
       <main className="ml-60 pt-16 min-h-screen p-6">
@@ -89,7 +102,7 @@ export default function TeacherCoursesPage() {
             <Card key={course.id} className="border-0 shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
-                  <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
                     <BookOpen className="h-8 w-8 text-blue-600" />
                   </div>
                   <div className="flex-1">

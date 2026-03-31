@@ -3,41 +3,37 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import {
-  GraduationCap, BookOpen, Users, Award, BarChart3, MessageCircle, Settings, Bell, Globe,
-  Search, CheckCircle, XCircle, ChevronRight, Clock,
+  Bell,
+  Globe,
+  LogOut,
+  Search,
+  Award,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-
-const menuItems = [
-  { id: 'dashboard', label: '教学控制台', icon: GraduationCap, href: '/teacher/dashboard' },
-  { id: 'courses', label: '课程管理', icon: BookOpen, href: '/teacher/courses' },
-  { id: 'practice', label: '实训管理', icon: Users, href: '/teacher/practice' },
-  { id: 'grading', label: '考核评分', icon: Award, href: '/teacher/grading' },
-  { id: 'analysis', label: '学情分析', icon: BarChart3, href: '/teacher/analysis' },
-  { id: 'qa', label: '答疑社区', icon: MessageCircle, href: '/teacher/qa' },
-];
-
-const submissions = [
-  { id: 1, student: '张小明', avatar: '张', exam: '独立站搭建考核', autoScore: 85, totalScore: 100, status: 'pending', submitTime: '2026-03-26 14:30' },
-  { id: 2, student: '李小红', avatar: '李', exam: '市场调研报告', autoScore: 72, totalScore: 100, status: 'pending', submitTime: '2026-03-26 15:00' },
-  { id: 3, student: '王小明', avatar: '王', exam: '独立站搭建考核', autoScore: 90, totalScore: 100, status: 'graded', submitTime: '2026-03-25 16:00' },
-  { id: 4, student: '陈小华', avatar: '陈', exam: '流量推广考核', autoScore: 88, totalScore: 100, status: 'graded', submitTime: '2026-03-25 17:30' },
-];
+import { teacherMenuItems } from '@/config/menu';
 
 export default function TeacherGradingPage() {
   const [activeMenu, setActiveMenu] = useState('grading');
+
+  const submissions = [
+    { id: 1, student: '张小明', avatar: '张', exam: '独立站搭建考核', autoScore: 85, totalScore: 100, status: 'pending', submitTime: '2026-03-26 14:30' },
+    { id: 2, student: '李小红', avatar: '李', exam: '市场调研报告', autoScore: 92, totalScore: 100, status: 'graded', submitTime: '2026-03-26 10:15' },
+    { id: 3, student: '王小华', avatar: '王', exam: '流量推广实训', autoScore: 78, totalScore: 100, status: 'pending', submitTime: '2026-03-25 16:45' },
+    { id: 4, student: '赵小芳', avatar: '赵', exam: '独立站搭建考核', autoScore: 88, totalScore: 100, status: 'pending', submitTime: '2026-03-25 14:20' },
+  ];
 
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 z-50">
         <div className="flex items-center justify-between h-full px-6">
           <Link href="/login" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
               <Globe className="h-6 w-6 text-white" />
             </div>
             <div>
@@ -46,18 +42,27 @@ export default function TeacherGradingPage() {
             </div>
           </Link>
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon"><Bell className="h-5 w-5 text-slate-600" /></Button>
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white">王</div>
+            <Button variant="ghost" size="icon" className="relative">
+              <Bell className="h-5 w-5 text-slate-600" />
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+            </Button>
+            <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
+              <div className="text-right">
+                <p className="text-sm font-medium text-slate-700">王老师</p>
+                <p className="text-xs text-slate-500">电商学院</p>
+              </div>
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-medium">王</div>
+            </div>
           </div>
         </div>
       </header>
 
       <aside className="fixed left-0 top-16 bottom-0 w-60 bg-white border-r border-slate-200 overflow-y-auto">
         <nav className="p-4 space-y-1">
-          {menuItems.map((item) => (
+          {teacherMenuItems.map((item) => (
             <Link key={item.id} href={item.href}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                activeMenu === item.id ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white' : 'text-slate-600 hover:bg-slate-100'
+                activeMenu === item.id ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg shadow-blue-500/25' : 'text-slate-600 hover:bg-slate-100'
               }`}
               onClick={() => setActiveMenu(item.id)}>
               <item.icon className="h-5 w-5" />
@@ -65,73 +70,95 @@ export default function TeacherGradingPage() {
             </Link>
           ))}
         </nav>
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200 bg-white">
+          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors">
+            <LogOut className="h-5 w-5" />
+            <span className="font-medium">退出登录</span>
+          </button>
+        </div>
       </aside>
 
       <main className="ml-60 pt-16 min-h-screen p-6">
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-slate-800">考核评分</h2>
-          <p className="text-slate-500">人工批改主观题与策略题，添加批注反馈</p>
+          <p className="text-slate-500">批改学生提交的实训作业和考核</p>
         </div>
 
         <div className="grid grid-cols-3 gap-4 mb-6">
-          <Card className="border-0 shadow-lg">
+          <Card className="border-0 shadow-sm">
             <CardContent className="p-4">
-              <p className="text-sm text-slate-500">待批改</p>
-              <p className="text-2xl font-bold text-amber-500">12份</p>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center">
+                  <Clock className="h-6 w-6 text-amber-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-slate-800">23</p>
+                  <p className="text-sm text-slate-500">待批改</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
-          <Card className="border-0 shadow-lg">
+          <Card className="border-0 shadow-sm">
             <CardContent className="p-4">
-              <p className="text-sm text-slate-500">已批改</p>
-              <p className="text-2xl font-bold text-green-600">28份</p>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
+                  <CheckCircle2 className="h-6 w-6 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-slate-800">156</p>
+                  <p className="text-sm text-slate-500">已批改</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
-          <Card className="border-0 shadow-lg">
+          <Card className="border-0 shadow-sm">
             <CardContent className="p-4">
-              <p className="text-sm text-slate-500">平均分</p>
-              <p className="text-2xl font-bold text-slate-800">82.5分</p>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+                  <Award className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-slate-800">82.5</p>
+                  <p className="text-sm text-slate-500">平均分</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
 
         <Card className="border-0 shadow-lg">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>答卷列表</CardTitle>
-                <CardDescription>点击进入批改页面</CardDescription>
-              </div>
-              <div className="flex items-center gap-2">
-                <select className="h-9 px-3 border rounded-lg text-sm">
-                  <option>全部状态</option>
-                  <option>待批改</option>
-                  <option>已批改</option>
-                </select>
-              </div>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>待批改作业</CardTitle>
+              <CardDescription>学生提交的实训作业和考核</CardDescription>
+            </div>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Input placeholder="搜索..." className="w-64 pl-9" />
             </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {submissions.map((sub) => (
-                <div key={sub.id} className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 hover:border-blue-300 transition-colors">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white">
-                    {sub.avatar}
+              {submissions.map((submission) => (
+                <div key={submission.id} className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 hover:border-blue-300 transition-colors">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-medium">
+                    {submission.avatar}
                   </div>
                   <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-slate-800">{sub.student}</span>
-                      <Badge variant="outline">{sub.exam}</Badge>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-medium text-slate-800">{submission.student}</span>
+                      <Badge className={submission.status === 'pending' ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'}>
+                        {submission.status === 'pending' ? '待批改' : '已批改'}
+                      </Badge>
                     </div>
-                    <p className="text-sm text-slate-500">提交时间：{sub.submitTime}</p>
+                    <div className="flex items-center gap-4 text-sm text-slate-500">
+                      <span>{submission.exam}</span>
+                      <span>·</span>
+                      <span>自动评分：{submission.autoScore}/{submission.totalScore}</span>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm text-slate-500">系统评分</p>
-                    <p className="text-lg font-bold text-slate-800">{sub.autoScore}/{sub.totalScore}</p>
-                  </div>
-                  <Badge className={sub.status === 'pending' ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'}>
-                    {sub.status === 'pending' ? '待批改' : '已批改'}
-                  </Badge>
-                  <Button size="sm">{sub.status === 'pending' ? '开始批改' : '查看详情'}</Button>
+                  <div className="text-sm text-slate-500">{submission.submitTime}</div>
+                  <Button size="sm">{submission.status === 'pending' ? '批改' : '查看'}</Button>
                 </div>
               ))}
             </div>

@@ -34,15 +34,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 
-const menuItems = [
-  { id: 'dashboard', label: '教学控制台', icon: LayoutDashboard, href: '/teacher/dashboard' },
-  { id: 'courses', label: '课程管理', icon: BookOpen, href: '/teacher/courses' },
-  { id: 'resources', label: '资源管理', icon: FolderOpen, href: '/teacher/resources' },
-  { id: 'practice', label: '实训管理', icon: ClipboardList, href: '/teacher/practice' },
-  { id: 'grading', label: '考核评分', icon: BarChart3, href: '/teacher/grading' },
-  { id: 'analysis', label: '学情分析', icon: BarChart3, href: '/teacher/analysis' },
-  { id: 'qa', label: '答疑社区', icon: MessageCircle, href: '/teacher/qa' },
-];
+import { teacherMenuItems } from '@/config/menu';
 
 // 视频分类
 const videoCategories = [
@@ -269,7 +261,7 @@ export default function TeacherResourcesPage() {
       {/* 侧边导航 */}
       <aside className="fixed left-0 top-16 bottom-0 w-60 bg-white border-r border-slate-200 overflow-y-auto">
         <nav className="p-4 space-y-1">
-          {menuItems.map((item) => (
+          {teacherMenuItems.map((item) => (
             <Link
               key={item.id}
               href={item.href}

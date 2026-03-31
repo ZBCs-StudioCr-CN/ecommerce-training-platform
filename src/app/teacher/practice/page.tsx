@@ -3,11 +3,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import {
-  LayoutDashboard,
-  BookOpen,
-  ClipboardList,
-  BarChart3,
-  MessageCircle,
   Bell,
   LogOut,
   Globe,
@@ -26,15 +21,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
-
-const menuItems = [
-  { id: 'dashboard', label: '教学控制台', icon: LayoutDashboard, href: '/teacher/dashboard' },
-  { id: 'courses', label: '课程管理', icon: BookOpen, href: '/teacher/courses' },
-  { id: 'practice', label: '实训管理', icon: ClipboardList, href: '/teacher/practice' },
-  { id: 'grading', label: '考核评分', icon: BarChart3, href: '/teacher/grading' },
-  { id: 'analysis', label: '学情分析', icon: BarChart3, href: '/teacher/analysis' },
-  { id: 'qa', label: '答疑社区', icon: MessageCircle, href: '/teacher/qa' },
-];
+import { teacherMenuItems } from '@/config/menu';
 
 const practiceModules = [
   { id: 'market', name: '市场调研与选品', weight: 15 },
@@ -105,7 +92,7 @@ export default function TeacherPracticePage() {
       {/* 侧边导航 */}
       <aside className="fixed left-0 top-16 bottom-0 w-60 bg-white border-r border-slate-200 overflow-y-auto">
         <nav className="p-4 space-y-1">
-          {menuItems.map((item) => (
+          {teacherMenuItems.map((item) => (
             <Link
               key={item.id}
               href={item.href}
