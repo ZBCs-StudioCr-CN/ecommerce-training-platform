@@ -3,15 +3,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import {
-  LayoutDashboard,
-  BookOpen,
-  Store,
-  Award,
-  FileText,
-  MessageCircle,
-  Bell,
-  LogOut,
-  Globe,
   Home,
   Package,
   ShoppingCart,
@@ -25,27 +16,21 @@ import {
   Palette,
   Plus,
   CheckCircle2,
-  Clock,
-  TrendingUp,
-  DollarSign,
-  ChevronRight,
   Eye,
   Edit,
+  DollarSign,
+  TrendingUp,
+  Store,
+  Globe,
+  Bell,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { StudentSidebar, StudentHeader } from '@/components/student-layout';
 
-const menuItems = [
-  { id: 'dashboard', label: '实训控制台', icon: LayoutDashboard, href: '/student/dashboard' },
-  { id: 'learning', label: '学习中心', icon: BookOpen, href: '/student/learning' },
-  { id: 'practice', label: '仿真实训', icon: Store, href: '/student/practice' },
-  { id: 'exam', label: '考核中心', icon: Award, href: '/student/exam' },
-  { id: 'achievement', label: '成果中心', icon: FileText, href: '/student/achievement' },
-  { id: 'qa', label: '答疑提问', icon: MessageCircle, href: '/student/qa' },
-];
-
+// Shopify风格后台菜单
 const adminMenuItems = [
   { id: 'home', label: '首页', icon: Home },
   { id: 'orders', label: '订单', icon: ShoppingCart, badge: 0 },
@@ -58,6 +43,7 @@ const adminMenuItems = [
   { id: 'settings', label: '设置', icon: Settings },
 ];
 
+// 模拟店铺数据
 const mockStore = {
   name: 'My Fashion Store',
   domain: 'my-fashion-store.myshopify.com',
@@ -75,7 +61,6 @@ const mockStore = {
 };
 
 export default function StudentPracticePage() {
-  const [activeMenu, setActiveMenu] = useState('practice');
   const [adminSection, setAdminSection] = useState('home');
   const [store] = useState(mockStore);
 
@@ -89,7 +74,7 @@ export default function StudentPracticePage() {
         <div className="flex items-center justify-between h-full px-4">
           <div className="flex items-center gap-4">
             <Link href="/login" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
                 <Store className="h-4 w-4 text-white" />
               </div>
               <span className="text-white font-semibold">{store.name}</span>
@@ -117,27 +102,28 @@ export default function StudentPracticePage() {
       {/* 左侧平台导航 */}
       <aside className="fixed left-0 top-14 bottom-0 w-16 bg-white border-r border-slate-200 z-40">
         <nav className="py-4 flex flex-col items-center space-y-2">
-          {menuItems.map((item) => (
-            <Link
-              key={item.id}
-              href={item.href}
-              className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
-                activeMenu === item.id
-                  ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white'
-                  : 'text-slate-500 hover:bg-slate-100'
-              }`}
-              onClick={() => setActiveMenu(item.id)}
-              title={item.label}
-            >
-              <item.icon className="h-5 w-5" />
-            </Link>
-          ))}
+          <Link
+            href="/student/dashboard"
+            className="w-12 h-12 rounded-xl flex items-center justify-center text-slate-500 hover:bg-slate-100"
+            title="实训控制台"
+          >
+            <BarChart3 className="h-5 w-5" />
+          </Link>
+          <Link
+            href="/student/learning"
+            className="w-12 h-12 rounded-xl flex items-center justify-center text-slate-500 hover:bg-slate-100"
+            title="学习中心"
+          >
+            <Package className="h-5 w-5" />
+          </Link>
+          <Link
+            href="/student/practice"
+            className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-emerald-500 to-teal-600 text-white"
+            title="仿真实训"
+          >
+            <Store className="h-5 w-5" />
+          </Link>
         </nav>
-        <div className="absolute bottom-4 left-0 right-0 flex justify-center">
-          <button className="w-12 h-12 rounded-xl flex items-center justify-center text-red-500 hover:bg-red-50">
-            <LogOut className="h-5 w-5" />
-          </button>
-        </div>
       </aside>
 
       {/* 店铺后台侧边栏 */}
@@ -160,7 +146,7 @@ export default function StudentPracticePage() {
                 <item.icon className="h-5 w-5" />
                 <span className="flex-1 text-sm font-medium">{item.label}</span>
                 {item.badge !== undefined && item.badge > 0 && (
-                  <Badge className="bg-blue-500 text-white text-xs">{item.badge}</Badge>
+                  <Badge className="bg-emerald-500 text-white text-xs">{item.badge}</Badge>
                 )}
               </button>
             ))}
@@ -184,7 +170,7 @@ export default function StudentPracticePage() {
               <div key={task.id} className="flex items-center gap-2 p-2 rounded-lg bg-slate-50">
                 <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                   task.completed 
-                    ? 'border-green-500 bg-green-500' 
+                    ? 'border-emerald-500 bg-emerald-500' 
                     : task.priority === 'high' 
                     ? 'border-red-400' 
                     : 'border-slate-300'
@@ -206,12 +192,12 @@ export default function StudentPracticePage() {
         {adminSection === 'home' && (
           <div className="space-y-6">
             {/* 欢迎卡片 */}
-            <Card className="border-0 shadow-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
+            <Card className="border-0 shadow-lg bg-gradient-to-r from-emerald-500 to-teal-600 text-white">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-xl font-bold">欢迎来到店铺后台！</h2>
-                    <p className="text-blue-100 mt-1">这是您的Shopify风格模拟店铺管理界面</p>
+                    <p className="text-emerald-100 mt-1">这是您的Shopify风格模拟店铺管理界面</p>
                     <div className="mt-4 flex gap-3">
                       <Button variant="secondary" size="sm" onClick={() => setAdminSection('products')}>
                         <Plus className="h-4 w-4 mr-2" />
@@ -233,8 +219,8 @@ export default function StudentPracticePage() {
               <Card className="border-0 shadow-sm">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                      <DollarSign className="h-5 w-5 text-blue-600" />
+                    <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
+                      <DollarSign className="h-5 w-5 text-emerald-600" />
                     </div>
                     <div>
                       <p className="text-sm text-slate-500">今日销售额</p>
@@ -246,8 +232,8 @@ export default function StudentPracticePage() {
               <Card className="border-0 shadow-sm">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                      <ShoppingCart className="h-5 w-5 text-green-600" />
+                    <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                      <ShoppingCart className="h-5 w-5 text-blue-600" />
                     </div>
                     <div>
                       <p className="text-sm text-slate-500">今日订单</p>
@@ -304,7 +290,6 @@ export default function StudentPracticePage() {
                     >
                       <action.icon className="h-5 w-5 text-slate-400" />
                       <span className="text-sm text-slate-700">{action.label}</span>
-                      <ChevronRight className="h-4 w-4 text-slate-400 ml-auto" />
                     </button>
                   ))}
                 </CardContent>
@@ -344,16 +329,16 @@ export default function StudentPracticePage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    <div className="p-3 rounded-lg bg-blue-50 border border-blue-200">
-                      <p className="text-sm font-medium text-blue-800">当前任务</p>
-                      <p className="text-sm text-blue-600 mt-1">完成产品上架，添加至少10款产品</p>
+                    <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200">
+                      <p className="text-sm font-medium text-emerald-800">当前任务</p>
+                      <p className="text-sm text-emerald-600 mt-1">完成产品上架，添加至少10款产品</p>
                       <Progress value={30} className="h-1.5 mt-2" />
                     </div>
                     <div className="p-3 rounded-lg bg-amber-50 border border-amber-200">
                       <p className="text-sm font-medium text-amber-800">提示</p>
                       <p className="text-sm text-amber-600 mt-1">点击左侧菜单探索店铺后台功能</p>
                     </div>
-                    <Button size="sm" className="w-full">
+                    <Button size="sm" className="w-full bg-gradient-to-r from-emerald-500 to-teal-600">
                       查看完整教程
                     </Button>
                   </div>
@@ -371,7 +356,7 @@ export default function StudentPracticePage() {
                 <h2 className="text-xl font-bold text-slate-800">产品</h2>
                 <p className="text-slate-500">管理您的产品信息</p>
               </div>
-              <Button>
+              <Button className="bg-gradient-to-r from-emerald-500 to-teal-600">
                 <Plus className="h-4 w-4 mr-2" />
                 添加产品
               </Button>
@@ -438,8 +423,8 @@ export default function StudentPracticePage() {
               <Card className="border-0 shadow-lg">
                 <CardHeader>
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
-                      <CreditCard className="h-6 w-6 text-blue-600" />
+                    <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
+                      <CreditCard className="h-6 w-6 text-emerald-600" />
                     </div>
                     <div>
                       <CardTitle className="text-base">PayPal</CardTitle>
@@ -453,7 +438,7 @@ export default function StudentPracticePage() {
                       <p>状态：<Badge variant="secondary">未配置</Badge></p>
                       <p className="mt-1">费率：2.9% + $0.30</p>
                     </div>
-                    <Button size="sm">配置</Button>
+                    <Button size="sm" className="bg-gradient-to-r from-emerald-500 to-teal-600">配置</Button>
                   </div>
                 </CardContent>
               </Card>
@@ -476,7 +461,7 @@ export default function StudentPracticePage() {
                       <p>状态：<Badge variant="secondary">未配置</Badge></p>
                       <p className="mt-1">费率：2.9% + $0.30</p>
                     </div>
-                    <Button size="sm">配置</Button>
+                    <Button size="sm" className="bg-gradient-to-r from-emerald-500 to-teal-600">配置</Button>
                   </div>
                 </CardContent>
               </Card>
@@ -492,7 +477,7 @@ export default function StudentPracticePage() {
                 <h2 className="text-xl font-bold text-slate-800">物流设置</h2>
                 <p className="text-slate-500">配置配送区域和运费</p>
               </div>
-              <Button>
+              <Button className="bg-gradient-to-r from-emerald-500 to-teal-600">
                 <Plus className="h-4 w-4 mr-2" />
                 添加配送区域
               </Button>
@@ -505,7 +490,7 @@ export default function StudentPracticePage() {
                 <p className="text-sm text-slate-500 mb-4">
                   创建配送区域，设置不同地区的运费方案
                 </p>
-                <Button>创建配送区域</Button>
+                <Button className="bg-gradient-to-r from-emerald-500 to-teal-600">创建配送区域</Button>
               </CardContent>
             </Card>
           </div>
@@ -521,7 +506,7 @@ export default function StudentPracticePage() {
 
             <div className="grid grid-cols-3 gap-4">
               {['Dawn', 'Debut', 'Brooklyn', 'Narrative', 'Minimal', 'Simple'].map((theme, index) => (
-                <Card key={theme} className={`border-0 shadow-lg ${index === 0 ? 'ring-2 ring-blue-500' : ''}`}>
+                <Card key={theme} className={`border-0 shadow-lg ${index === 0 ? 'ring-2 ring-emerald-500' : ''}`}>
                   <CardContent className="p-4">
                     <div className="aspect-[4/3] bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg mb-3 flex items-center justify-center">
                       <Palette className="h-8 w-8 text-slate-400" />
@@ -532,7 +517,7 @@ export default function StudentPracticePage() {
                         <p className="text-xs text-slate-500">免费主题</p>
                       </div>
                       {index === 0 ? (
-                        <Badge>当前使用</Badge>
+                        <Badge className="bg-emerald-500">当前使用</Badge>
                       ) : (
                         <Button size="sm" variant="outline">使用</Button>
                       )}
@@ -582,7 +567,9 @@ export default function StudentPracticePage() {
                   <p className="text-sm text-slate-500 mb-3">
                     创建搜索广告，吸引精准流量
                   </p>
-                  <Button size="sm" variant="outline">创建广告</Button>
+                  <Link href="/student/ads">
+                    <Button size="sm" variant="outline" className="w-full">创建广告</Button>
+                  </Link>
                 </CardContent>
               </Card>
 
@@ -595,7 +582,9 @@ export default function StudentPracticePage() {
                   <p className="text-sm text-slate-500 mb-3">
                     在社交平台推广您的产品
                   </p>
-                  <Button size="sm" variant="outline">创建广告</Button>
+                  <Link href="/student/ads">
+                    <Button size="sm" variant="outline" className="w-full">创建广告</Button>
+                  </Link>
                 </CardContent>
               </Card>
             </div>

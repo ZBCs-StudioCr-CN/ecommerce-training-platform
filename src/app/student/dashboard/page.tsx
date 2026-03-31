@@ -1,17 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import {
-  LayoutDashboard,
-  BookOpen,
   Store,
-  Award,
-  FileText,
-  MessageCircle,
-  Bell,
-  LogOut,
-  Globe,
   ChevronRight,
   CheckCircle2,
   Clock,
@@ -31,16 +23,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { PRACTICE_STAGES, type PracticeStage, type StageConfig, calculateLevel } from '@/data/practice';
-
-const menuItems = [
-  { id: 'dashboard', label: '实训控制台', icon: LayoutDashboard, href: '/student/dashboard' },
-  { id: 'learning', label: '学习中心', icon: BookOpen, href: '/student/learning' },
-  { id: 'practice', label: '仿真实训', icon: Store, href: '/student/practice' },
-  { id: 'exam', label: '考核中心', icon: Award, href: '/student/exam' },
-  { id: 'achievement', label: '成果中心', icon: FileText, href: '/student/achievement' },
-  { id: 'qa', label: '答疑提问', icon: MessageCircle, href: '/student/qa' },
-];
+import { StudentLayout } from '@/components/student-layout';
+import { PRACTICE_STAGES, type PracticeStage, type StageConfig } from '@/data/practice';
 
 // 阶段图标映射
 const stageIcons: Record<string, React.ElementType> = {
@@ -70,7 +54,7 @@ const mockProgress = {
   experience: 450,
   level: 3,
   achievements: ['market_analyst', 'store_builder', 'first_product'],
-  totalTimeSpent: 1200, // 分钟
+  totalTimeSpent: 1200,
 };
 
 // 模拟店铺数据
@@ -85,7 +69,6 @@ const mockStore = {
 };
 
 export default function StudentDashboardPage() {
-  const [activeMenu, setActiveMenu] = useState('dashboard');
   const [progress] = useState(mockProgress);
   const [store] = useState(mockStore);
 
@@ -136,68 +119,8 @@ export default function StudentDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50">
-      {/* 顶部导航栏 */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md border-b border-slate-200/80 z-50">
-        <div className="flex items-center justify-between h-full px-6">
-          <div className="flex items-center gap-3">
-            <Link href="/login" className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-                <Globe className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold text-slate-800">外贸独立站实训平台</h1>
-                <p className="text-xs text-slate-500">学生端</p>
-              </div>
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5 text-slate-600" />
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
-            </Button>
-            <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
-              <div className="text-right">
-                <p className="text-sm font-medium text-slate-700">张三</p>
-                <p className="text-xs text-slate-500">电商2201班</p>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-medium">张</div>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* 侧边导航 */}
-      <aside className="fixed left-0 top-16 bottom-0 w-60 bg-white border-r border-slate-200/80 overflow-y-auto">
-        <nav className="p-4 space-y-1">
-          {menuItems.map((item) => (
-            <Link
-              key={item.id}
-              href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${
-                activeMenu === item.id
-                  ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg shadow-blue-500/25'
-                  : 'text-slate-600 hover:bg-slate-100'
-              }`}
-              onClick={() => setActiveMenu(item.id)}
-            >
-              <item.icon className="h-5 w-5" />
-              <span className="font-medium">{item.label}</span>
-            </Link>
-          ))}
-        </nav>
-
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200 bg-white">
-          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors">
-            <LogOut className="h-5 w-5" />
-            <span className="font-medium">退出登录</span>
-          </button>
-        </div>
-      </aside>
-
-      {/* 主内容区 */}
-      <main className="ml-60 pt-16 min-h-screen p-8">
+    <StudentLayout activeMenu="dashboard">
+      <div className="p-8">
         {/* 页面标题 */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-slate-800">实训控制台</h2>
@@ -206,13 +129,13 @@ export default function StudentDashboardPage() {
 
         {/* 概览卡片 */}
         <div className="grid grid-cols-4 gap-4 mb-8">
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-blue-100 text-sm">实训进度</p>
+                  <p className="text-emerald-100 text-sm">实训进度</p>
                   <p className="text-3xl font-bold mt-1">{progress.overallProgress}%</p>
-                  <p className="text-blue-200 text-sm mt-1">{completedStages}/{totalStages} 阶段完成</p>
+                  <p className="text-emerald-200 text-sm mt-1">{completedStages}/{totalStages} 阶段完成</p>
                 </div>
                 <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center">
                   <Target className="h-7 w-7" />
@@ -272,14 +195,14 @@ export default function StudentDashboardPage() {
           <div className="col-span-2 space-y-6">
             {/* 当前任务 */}
             {currentStage && (
-              <Card className="border-0 shadow-lg border-l-4 border-l-blue-500">
+              <Card className="border-0 shadow-lg border-l-4 border-l-emerald-500">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
                         {(() => {
                           const Icon = stageIcons[currentStage.id];
-                          return Icon ? <Icon className="h-6 w-6 text-blue-600" /> : null;
+                          return Icon ? <Icon className="h-6 w-6 text-emerald-600" /> : null;
                         })()}
                       </div>
                       <div>
@@ -287,7 +210,7 @@ export default function StudentDashboardPage() {
                         <CardDescription>当前进行中 · {currentStage.duration}</CardDescription>
                       </div>
                     </div>
-                    <Badge className="bg-blue-100 text-blue-700">进行中</Badge>
+                    <Badge className="bg-emerald-100 text-emerald-700">进行中</Badge>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -298,13 +221,10 @@ export default function StudentDashboardPage() {
                         0/{currentStage.tasks.length}
                       </span>
                     </div>
-                    <Progress 
-                      value={0} 
-                      className="h-2" 
-                    />
+                    <Progress value={0} className="h-2" />
                     <div className="flex gap-3">
                       <Link href="/student/practice" className="flex-1">
-                        <Button className="w-full">
+                        <Button className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700">
                           <Play className="h-4 w-4 mr-2" />
                           继续实训
                         </Button>
@@ -338,9 +258,9 @@ export default function StudentDashboardPage() {
                           status === 'completed' 
                             ? 'border-green-200 bg-green-50' 
                             : status === 'in_progress'
-                            ? 'border-blue-300 bg-blue-50 shadow-sm'
+                            ? 'border-emerald-300 bg-emerald-50 shadow-sm'
                             : status === 'available'
-                            ? 'border-slate-200 hover:border-blue-300 hover:shadow-sm cursor-pointer'
+                            ? 'border-slate-200 hover:border-emerald-300 hover:shadow-sm cursor-pointer'
                             : 'border-slate-200 bg-slate-50 opacity-60'
                         }`}
                       >
@@ -348,7 +268,7 @@ export default function StudentDashboardPage() {
                           status === 'completed' 
                             ? 'bg-green-100' 
                             : status === 'in_progress'
-                            ? 'bg-blue-100'
+                            ? 'bg-emerald-100'
                             : status === 'available'
                             ? 'bg-slate-100'
                             : 'bg-slate-100'
@@ -359,7 +279,7 @@ export default function StudentDashboardPage() {
                             <Lock className="h-6 w-6 text-slate-400" />
                           ) : (
                             <Icon className={`h-6 w-6 ${
-                              status === 'in_progress' ? 'text-blue-600' : 'text-slate-500'
+                              status === 'in_progress' ? 'text-emerald-600' : 'text-slate-500'
                             }`} />
                           )}
                         </div>
@@ -382,11 +302,11 @@ export default function StudentDashboardPage() {
                             <Badge className="bg-green-500">已完成</Badge>
                           )}
                           {status === 'in_progress' && (
-                            <Badge className="bg-blue-500">进行中</Badge>
+                            <Badge className="bg-emerald-500">进行中</Badge>
                           )}
                           {status === 'available' && (
                             <Link href="/student/practice">
-                              <Button size="sm">开始</Button>
+                              <Button size="sm" className="bg-gradient-to-r from-emerald-500 to-teal-600">开始</Button>
                             </Link>
                           )}
                           {status === 'locked' && (
@@ -419,7 +339,7 @@ export default function StudentDashboardPage() {
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-slate-50 to-slate-100">
-                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xl font-bold">
+                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-xl font-bold">
                       {store.name.charAt(0)}
                     </div>
                     <div>
@@ -491,7 +411,7 @@ export default function StudentDashboardPage() {
             </Card>
 
             {/* 学习建议 */}
-            <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
+            <Card className="border-0 shadow-lg bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Gift className="h-5 w-5" />
@@ -502,11 +422,11 @@ export default function StudentDashboardPage() {
                 <div className="space-y-3">
                   <div className="p-3 rounded-lg bg-white/20">
                     <p className="font-medium">完成产品上架任务</p>
-                    <p className="text-sm text-blue-100 mt-1">上架3款新产品，获得+20积分</p>
+                    <p className="text-sm text-emerald-100 mt-1">上架3款新产品，获得+20积分</p>
                   </div>
                   <div className="p-3 rounded-lg bg-white/20">
                     <p className="font-medium">优化产品SEO</p>
-                    <p className="text-sm text-blue-100 mt-1">优化5个产品页面，获得+15积分</p>
+                    <p className="text-sm text-emerald-100 mt-1">优化5个产品页面，获得+15积分</p>
                   </div>
                   <Button variant="secondary" className="w-full mt-2">
                     查看全部任务
@@ -516,7 +436,7 @@ export default function StudentDashboardPage() {
             </Card>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </StudentLayout>
   );
 }

@@ -3,15 +3,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import {
-  LayoutDashboard,
-  BookOpen,
-  Store,
-  Award,
-  FileText,
-  MessageCircle,
-  Bell,
-  LogOut,
-  Globe,
   ChevronLeft,
   TrendingUp,
   TrendingDown,
@@ -20,29 +11,18 @@ import {
   DollarSign,
   ShoppingCart,
   BarChart3,
-  PieChart,
-  Calendar,
-  Download,
-  RefreshCw,
   MapPin,
   Monitor,
   Smartphone,
   Tablet,
+  Download,
+  RefreshCw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
-const menuItems = [
-  { id: 'dashboard', label: '实训控制台', icon: LayoutDashboard, href: '/student/dashboard' },
-  { id: 'learning', label: '学习中心', icon: BookOpen, href: '/student/learning' },
-  { id: 'practice', label: '仿真实训', icon: Store, href: '/student/practice' },
-  { id: 'exam', label: '考核中心', icon: Award, href: '/student/exam' },
-  { id: 'achievement', label: '成果中心', icon: FileText, href: '/student/achievement' },
-  { id: 'qa', label: '答疑提问', icon: MessageCircle, href: '/student/qa' },
-];
+import { StudentSidebar, StudentHeader } from '@/components/student-layout';
 
 // 模拟数据
 const mockStats = {
@@ -80,70 +60,16 @@ const mockStats = {
 };
 
 export default function StudentAnalyticsPage() {
-  const [activeMenu, setActiveMenu] = useState('practice');
   const [dateRange, setDateRange] = useState('last7days');
-
   const stats = mockStats;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50">
       {/* 顶部导航栏 */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md border-b border-slate-200/80 z-50">
-        <div className="flex items-center justify-between h-full px-6">
-          <div className="flex items-center gap-3">
-            <Link href="/login" className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-                <Globe className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold text-slate-800">外贸独立站实训平台</h1>
-                <p className="text-xs text-slate-500">学生端</p>
-              </div>
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5 text-slate-600" />
-            </Button>
-            <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
-              <div className="text-right">
-                <p className="text-sm font-medium text-slate-700">张三</p>
-                <p className="text-xs text-slate-500">电商2201班</p>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-medium">张</div>
-            </div>
-          </div>
-        </div>
-      </header>
+      <StudentHeader />
 
       {/* 侧边导航 */}
-      <aside className="fixed left-0 top-16 bottom-0 w-60 bg-white border-r border-slate-200/80 overflow-y-auto">
-        <nav className="p-4 space-y-1">
-          {menuItems.map((item) => (
-            <Link
-              key={item.id}
-              href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${
-                activeMenu === item.id
-                  ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg shadow-blue-500/25'
-                  : 'text-slate-600 hover:bg-slate-100'
-              }`}
-              onClick={() => setActiveMenu(item.id)}
-            >
-              <item.icon className="h-5 w-5" />
-              <span className="font-medium">{item.label}</span>
-            </Link>
-          ))}
-        </nav>
-
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200 bg-white">
-          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors">
-            <LogOut className="h-5 w-5" />
-            <span className="font-medium">退出登录</span>
-          </button>
-        </div>
-      </aside>
+      <StudentSidebar activeMenu="practice" />
 
       {/* 主内容区 */}
       <main className="ml-60 pt-16 min-h-screen p-8">
@@ -192,7 +118,7 @@ export default function StudentAnalyticsPage() {
               </div>
               <p className="text-2xl font-bold text-slate-800">${stats.overview.revenue.value.toLocaleString()}</p>
               <div className={`flex items-center gap-1 text-xs mt-1 ${
-                stats.overview.revenue.change >= 0 ? 'text-green-600' : 'text-red-600'
+                stats.overview.revenue.change >= 0 ? 'text-emerald-600' : 'text-red-600'
               }`}>
                 {stats.overview.revenue.change >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                 {Math.abs(stats.overview.revenue.change)}%
@@ -208,7 +134,7 @@ export default function StudentAnalyticsPage() {
               </div>
               <p className="text-2xl font-bold text-slate-800">{stats.overview.orders.value}</p>
               <div className={`flex items-center gap-1 text-xs mt-1 ${
-                stats.overview.orders.change >= 0 ? 'text-green-600' : 'text-red-600'
+                stats.overview.orders.change >= 0 ? 'text-emerald-600' : 'text-red-600'
               }`}>
                 {stats.overview.orders.change >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                 {Math.abs(stats.overview.orders.change)}%
@@ -224,7 +150,7 @@ export default function StudentAnalyticsPage() {
               </div>
               <p className="text-2xl font-bold text-slate-800">{(stats.overview.visitors.value / 1000).toFixed(1)}K</p>
               <div className={`flex items-center gap-1 text-xs mt-1 ${
-                stats.overview.visitors.change >= 0 ? 'text-green-600' : 'text-red-600'
+                stats.overview.visitors.change >= 0 ? 'text-emerald-600' : 'text-red-600'
               }`}>
                 {stats.overview.visitors.change >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                 {Math.abs(stats.overview.visitors.change)}%
@@ -240,7 +166,7 @@ export default function StudentAnalyticsPage() {
               </div>
               <p className="text-2xl font-bold text-slate-800">{stats.overview.conversionRate.value}%</p>
               <div className={`flex items-center gap-1 text-xs mt-1 ${
-                stats.overview.conversionRate.change >= 0 ? 'text-green-600' : 'text-red-600'
+                stats.overview.conversionRate.change >= 0 ? 'text-emerald-600' : 'text-red-600'
               }`}>
                 {stats.overview.conversionRate.change >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                 {Math.abs(stats.overview.conversionRate.change)}%
@@ -256,7 +182,7 @@ export default function StudentAnalyticsPage() {
               </div>
               <p className="text-2xl font-bold text-slate-800">${stats.overview.avgOrderValue.value}</p>
               <div className={`flex items-center gap-1 text-xs mt-1 ${
-                stats.overview.avgOrderValue.change >= 0 ? 'text-green-600' : 'text-red-600'
+                stats.overview.avgOrderValue.change >= 0 ? 'text-emerald-600' : 'text-red-600'
               }`}>
                 {stats.overview.avgOrderValue.change >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                 {Math.abs(stats.overview.avgOrderValue.change)}%
@@ -272,7 +198,7 @@ export default function StudentAnalyticsPage() {
               </div>
               <p className="text-2xl font-bold text-slate-800">{stats.overview.returningCustomers.value}%</p>
               <div className={`flex items-center gap-1 text-xs mt-1 ${
-                stats.overview.returningCustomers.change >= 0 ? 'text-green-600' : 'text-red-600'
+                stats.overview.returningCustomers.change >= 0 ? 'text-emerald-600' : 'text-red-600'
               }`}>
                 {stats.overview.returningCustomers.change >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                 {Math.abs(stats.overview.returningCustomers.change)}%
@@ -297,7 +223,7 @@ export default function StudentAnalyticsPage() {
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-slate-800">{source.visitors.toLocaleString()}</span>
                         {source.trend === 'up' ? (
-                          <TrendingUp className="h-3 w-3 text-green-500" />
+                          <TrendingUp className="h-3 w-3 text-emerald-500" />
                         ) : (
                           <TrendingDown className="h-3 w-3 text-red-500" />
                         )}
@@ -320,7 +246,7 @@ export default function StudentAnalyticsPage() {
               <div className="space-y-3">
                 {stats.topProducts.map((product, index) => (
                   <div key={index} className="flex items-center gap-3 p-3 rounded-lg bg-slate-50">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-semibold">
                       {index + 1}
                     </div>
                     <div className="flex-1">
@@ -388,11 +314,11 @@ export default function StudentAnalyticsPage() {
               <div className="flex items-center justify-around h-64">
                 {stats.devices.map((device) => (
                   <div key={device.device} className="text-center">
-                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center mx-auto mb-3">
-                      <device.icon className="h-10 w-10 text-blue-600" />
+                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center mx-auto mb-3">
+                      <device.icon className="h-10 w-10 text-emerald-600" />
                     </div>
                     <p className="font-semibold text-slate-800">{device.device}</p>
-                    <p className="text-2xl font-bold text-blue-600 mt-1">{device.percent}%</p>
+                    <p className="text-2xl font-bold text-emerald-600 mt-1">{device.percent}%</p>
                   </div>
                 ))}
               </div>

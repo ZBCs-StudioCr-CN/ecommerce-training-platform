@@ -49,7 +49,8 @@ src/
 │       ├── achievement/         # 成果中心
 │       └── qa/                  # 答疑提问
 ├── components/                   # 共享组件
-│   └── ui/                      # shadcn/ui 组件
+│   ├── ui/                      # shadcn/ui 组件
+│   └── student-layout.tsx       # 学生端统一布局组件
 ├── data/                        # 共享数据
 │   ├── courses.ts               # 课程数据（15门课程，100+章节）
 │   └── practice.ts              # 实训系统数据模型
@@ -111,6 +112,27 @@ src/
   - 管理员：紫色 (#8B5CF6)
   - 教师：蓝色 (#3B82F6)
   - 学生：绿色 (#10B981)
+
+### 学生端统一布局组件
+学生端所有页面**必须**使用统一的布局组件 `StudentLayout`，确保导航和主题一致：
+
+```tsx
+import { StudentLayout } from '@/components/student-layout';
+
+export default function StudentPage() {
+  return (
+    <StudentLayout activeMenu="page_id">
+      {/* 页面内容 */}
+    </StudentLayout>
+  );
+}
+```
+
+对于需要自定义布局的页面（如店铺后台），可以使用分离的组件：
+- `StudentHeader` - 仅顶部导航栏
+- `StudentSidebar` - 仅侧边导航栏
+
+**重要**：学生端主题色统一使用绿色渐变 (`from-emerald-500 to-teal-600`)。
 
 ### 数据管理
 - 前端采用状态管理模拟数据流转

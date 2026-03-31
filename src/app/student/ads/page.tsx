@@ -3,15 +3,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import {
-  LayoutDashboard,
-  BookOpen,
-  Store,
-  Award,
-  FileText,
-  MessageCircle,
-  Bell,
-  LogOut,
-  Globe,
   ChevronLeft,
   Play,
   Pause,
@@ -21,13 +12,9 @@ import {
   DollarSign,
   Target,
   MapPin,
-  Calendar,
-  Settings,
   BarChart3,
   Users,
-  Image,
-  CheckCircle2,
-  AlertCircle,
+  Plus,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,15 +22,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
-const menuItems = [
-  { id: 'dashboard', label: '实训控制台', icon: LayoutDashboard, href: '/student/dashboard' },
-  { id: 'learning', label: '学习中心', icon: BookOpen, href: '/student/learning' },
-  { id: 'practice', label: '仿真实训', icon: Store, href: '/student/practice' },
-  { id: 'exam', label: '考核中心', icon: Award, href: '/student/exam' },
-  { id: 'achievement', label: '成果中心', icon: FileText, href: '/student/achievement' },
-  { id: 'qa', label: '答疑提问', icon: MessageCircle, href: '/student/qa' },
-];
+import { StudentSidebar, StudentHeader } from '@/components/student-layout';
 
 // 模拟广告数据
 const mockAds = [
@@ -88,7 +67,6 @@ const mockAudiences = [
 ];
 
 export default function StudentAdsPage() {
-  const [activeMenu, setActiveMenu] = useState('practice');
   const [activeTab, setActiveTab] = useState('campaigns');
   const [ads, setAds] = useState(mockAds);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -113,63 +91,10 @@ export default function StudentAdsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50">
       {/* 顶部导航栏 */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md border-b border-slate-200/80 z-50">
-        <div className="flex items-center justify-between h-full px-6">
-          <div className="flex items-center gap-3">
-            <Link href="/login" className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-                <Globe className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold text-slate-800">外贸独立站实训平台</h1>
-                <p className="text-xs text-slate-500">学生端</p>
-              </div>
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5 text-slate-600" />
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">2</span>
-            </Button>
-            <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
-              <div className="text-right">
-                <p className="text-sm font-medium text-slate-700">张三</p>
-                <p className="text-xs text-slate-500">电商2201班</p>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-medium">张</div>
-            </div>
-          </div>
-        </div>
-      </header>
+      <StudentHeader />
 
       {/* 侧边导航 */}
-      <aside className="fixed left-0 top-16 bottom-0 w-60 bg-white border-r border-slate-200/80 overflow-y-auto">
-        <nav className="p-4 space-y-1">
-          {menuItems.map((item) => (
-            <Link
-              key={item.id}
-              href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${
-                activeMenu === item.id
-                  ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg shadow-blue-500/25'
-                  : 'text-slate-600 hover:bg-slate-100'
-              }`}
-              onClick={() => setActiveMenu(item.id)}
-            >
-              <item.icon className="h-5 w-5" />
-              <span className="font-medium">{item.label}</span>
-            </Link>
-          ))}
-        </nav>
-
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200 bg-white">
-          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors">
-            <LogOut className="h-5 w-5" />
-            <span className="font-medium">退出登录</span>
-          </button>
-        </div>
-      </aside>
+      <StudentSidebar activeMenu="practice" />
 
       {/* 主内容区 */}
       <main className="ml-60 pt-16 min-h-screen p-8">
@@ -185,7 +110,7 @@ export default function StudentAdsPage() {
             <h2 className="text-2xl font-bold text-slate-800">广告投放模拟器</h2>
             <p className="text-slate-500">模拟Google Ads和Facebook Ads广告投放</p>
           </div>
-          <Button onClick={() => setShowCreateModal(true)}>
+          <Button onClick={() => setShowCreateModal(true)} className="bg-gradient-to-r from-emerald-500 to-teal-600">
             创建广告
           </Button>
         </div>
@@ -195,8 +120,8 @@ export default function StudentAdsPage() {
           <Card className="border-0 shadow-lg">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                  <DollarSign className="h-5 w-5 text-blue-600" />
+                <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
+                  <DollarSign className="h-5 w-5 text-emerald-600" />
                 </div>
                 <div>
                   <p className="text-xs text-slate-500">预算</p>
@@ -208,8 +133,8 @@ export default function StudentAdsPage() {
           <Card className="border-0 shadow-lg">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                  <DollarSign className="h-5 w-5 text-green-600" />
+                <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                  <DollarSign className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
                   <p className="text-xs text-slate-500">已花费</p>
@@ -299,7 +224,7 @@ export default function StudentAdsPage() {
                             </Badge>
                           </td>
                           <td className="px-4 py-4">
-                            <Badge className={ad.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-700'}>
+                            <Badge className={ad.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700'}>
                               {ad.status === 'active' ? '投放中' : '已暂停'}
                             </Badge>
                           </td>
@@ -341,7 +266,7 @@ export default function StudentAdsPage() {
                     {mockAudiences.map((audience, index) => (
                       <div
                         key={index}
-                        className="p-4 rounded-lg border border-slate-200 hover:border-blue-300 cursor-pointer"
+                        className="p-4 rounded-lg border border-slate-200 hover:border-emerald-300 cursor-pointer"
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -356,7 +281,7 @@ export default function StudentAdsPage() {
                               ? 'bg-red-100 text-red-700' 
                               : audience.competition === 'medium'
                               ? 'bg-amber-100 text-amber-700'
-                              : 'bg-green-100 text-green-700'
+                              : 'bg-emerald-100 text-emerald-700'
                           }>
                             {audience.competition === 'high' ? '高竞争' : audience.competition === 'medium' ? '中竞争' : '低竞争'}
                           </Badge>
@@ -391,22 +316,6 @@ export default function StudentAdsPage() {
                             <span className="text-xs text-slate-600">{item.percent}%</span>
                           </div>
                         ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-slate-600">性别分布</span>
-                      </div>
-                      <div className="flex gap-4">
-                        <div className="flex-1 p-3 rounded-lg bg-pink-50 text-center">
-                          <p className="text-2xl font-bold text-pink-600">68%</p>
-                          <p className="text-xs text-pink-500">女性</p>
-                        </div>
-                        <div className="flex-1 p-3 rounded-lg bg-blue-50 text-center">
-                          <p className="text-2xl font-bold text-blue-600">32%</p>
-                          <p className="text-xs text-blue-500">男性</p>
-                        </div>
                       </div>
                     </div>
 
@@ -497,7 +406,7 @@ export default function StudentAdsPage() {
           </TabsContent>
         </Tabs>
 
-        {/* 创建广告弹窗（简化版） */}
+        {/* 创建广告弹窗 */}
         {showCreateModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -525,7 +434,7 @@ export default function StudentAdsPage() {
                   <div className="grid grid-cols-2 gap-3 mt-2">
                     <button
                       className={`p-4 rounded-lg border-2 ${
-                        newAd.platform === 'google' ? 'border-blue-500 bg-blue-50' : 'border-slate-200'
+                        newAd.platform === 'google' ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200'
                       }`}
                       onClick={() => setNewAd({ ...newAd, platform: 'google' })}
                     >
@@ -534,7 +443,7 @@ export default function StudentAdsPage() {
                     </button>
                     <button
                       className={`p-4 rounded-lg border-2 ${
-                        newAd.platform === 'facebook' ? 'border-blue-500 bg-blue-50' : 'border-slate-200'
+                        newAd.platform === 'facebook' ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200'
                       }`}
                       onClick={() => setNewAd({ ...newAd, platform: 'facebook' })}
                     >
@@ -555,35 +464,11 @@ export default function StudentAdsPage() {
                   />
                 </div>
 
-                {newAd.platform === 'google' && (
-                  <div>
-                    <label className="text-sm font-medium text-slate-700">关键词</label>
-                    <Input
-                      className="mt-1"
-                      placeholder="summer dress, women fashion"
-                      value={newAd.keywords}
-                      onChange={(e) => setNewAd({ ...newAd, keywords: e.target.value })}
-                    />
-                    <p className="text-xs text-slate-500 mt-1">多个关键词用逗号分隔</p>
-                  </div>
-                )}
-
-                <div>
-                  <label className="text-sm font-medium text-slate-700">广告文案</label>
-                  <textarea
-                    className="mt-1 w-full px-3 py-2 border border-slate-300 rounded-lg resize-none"
-                    rows={3}
-                    placeholder="输入广告标题和描述"
-                    value={newAd.adCopy}
-                    onChange={(e) => setNewAd({ ...newAd, adCopy: e.target.value })}
-                  />
-                </div>
-
                 <div className="flex gap-3 pt-4">
                   <Button variant="outline" className="flex-1" onClick={() => setShowCreateModal(false)}>
                     取消
                   </Button>
-                  <Button className="flex-1" onClick={() => setShowCreateModal(false)}>
+                  <Button className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600" onClick={() => setShowCreateModal(false)}>
                     创建广告
                   </Button>
                 </div>
