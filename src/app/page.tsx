@@ -137,9 +137,10 @@ export default function Home() {
                 <ArrowRight className="h-5 w-5 ml-2" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10" asChild>
+            <Button size="lg" className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg shadow-emerald-500/30" asChild>
               <Link href="/student/dashboard">
                 查看学生端演示
+                <Play className="h-5 w-5 ml-2" />
               </Link>
             </Button>
           </div>
