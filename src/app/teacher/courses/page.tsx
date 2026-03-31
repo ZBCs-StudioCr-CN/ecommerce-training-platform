@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
   Bell,
@@ -27,24 +27,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { teacherMenuItems } from '@/config/menu';
-
-interface Chapter {
-  id: number;
-  title: string;
-  duration: string;
-  videoKey?: string;
-  documentKeys?: string[];
-}
-
-interface Course {
-  id: number;
-  name: string;
-  description: string;
-  chapters: Chapter[];
-  duration: string;
-  status: 'published' | 'draft';
-  progress: number;
-}
+import type { Course, Chapter } from '@/data/courses';
 
 interface Resource {
   key: string;
@@ -61,6 +44,10 @@ export default function TeacherCoursesPage() {
   const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   
+  // 课程列表（从API获取）
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [isLoadingCourses, setIsLoadingCourses] = useState(false);
+  
   // 资源列表
   const [resources, setResources] = useState<Resource[]>([]);
   const [isLoadingResources, setIsLoadingResources] = useState(false);
@@ -72,59 +59,24 @@ export default function TeacherCoursesPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  // 课程列表
-  const [courses, setCourses] = useState<Course[]>([
-    {
-      id: 1,
-      name: '外贸独立站基础认知',
-      description: '了解独立站基本概念，学习市场调研方法和选品策略',
-      duration: '6课时',
-      status: 'published',
-      progress: 100,
-      chapters: [
-        { id: 1, title: '1.1 什么是独立站', duration: '8:20' },
-        { id: 2, title: '1.2 独立站 vs 平台店铺', duration: '7:15' },
-        { id: 3, title: '1.3 市场调研方法论', duration: '10:30' },
-        { id: 4, title: '1.4 竞品分析实战', duration: '9:45' },
-      ],
-    },
-    {
-      id: 2,
-      name: '独立站搭建实操',
-      description: '从零开始搭建独立站，掌握 Shopify 店铺装修技巧',
-      duration: '12课时',
-      status: 'published',
-      progress: 75,
-      chapters: [
-        { id: 1, title: '2.1 Shopify 账号注册', duration: '5:30' },
-        { id: 2, title: '2.2 店铺基础设置', duration: '8:15' },
-        { id: 3, title: '2.3 主题选择与安装', duration: '7:20' },
-      ],
-    },
-    {
-      id: 3,
-      name: '跨境流量推广',
-      description: '学习多渠道流量获取方法，掌握广告投放技巧',
-      duration: '10课时',
-      status: 'draft',
-      progress: 30,
-      chapters: [
-        { id: 1, title: '3.1 流量渠道概览', duration: '6:00' },
-      ],
-    },
-    {
-      id: 4,
-      name: '数据分析与优化',
-      description: '学会看懂数据，用数据驱动决策优化',
-      duration: '8课时',
-      status: 'draft',
-      progress: 0,
-      chapters: [],
-    },
-  ]);
+  // 加载课程列表
+  const loadCourses = useCallback(async () => {
+    setIsLoadingCourses(true);
+    try {
+      const response = await fetch('/api/courses');
+      const data = await response.json();
+      if (data.success) {
+        setCourses(data.courses);
+      }
+    } catch (error) {
+      console.error('加载课程失败:', error);
+    } finally {
+      setIsLoadingCourses(false);
+    }
+  }, []);
 
   // 加载资源
-  const loadResources = async () => {
+  const loadResources = useCallback(async () => {
     setIsLoadingResources(true);
     try {
       const response = await fetch('/api/resources');
@@ -137,11 +89,12 @@ export default function TeacherCoursesPage() {
     } finally {
       setIsLoadingResources(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
+    loadCourses();
     loadResources();
-  }, []);
+  }, [loadCourses, loadResources]);
 
   // 处理文件上传
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -239,6 +192,14 @@ export default function TeacherCoursesPage() {
   // 打开章节详情
   const openChapter = (chapter: Chapter) => {
     setSelectedChapter(chapter);
+  };
+
+  // 计算课程进度（基于章节数）
+  const getCourseProgress = (course: Course) => {
+    const total = course.chapters.length;
+    if (total === 0) return 0;
+    const completed = course.chapters.filter(ch => ch.videoKey).length;
+    return Math.round((completed / total) * 100);
   };
 
   return (
@@ -373,48 +334,56 @@ export default function TeacherCoursesPage() {
               </Card>
             </div>
 
-            {/* 课程列表 */}
-            <div className="grid grid-cols-2 gap-4">
-              {courses.map((course) => (
-                <Card 
-                  key={course.id} 
-                  className="border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer"
-                  onClick={() => setSelectedCourse(course)}
-                >
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
-                        <BookOpen className="h-8 w-8 text-blue-600" />
+            {/* 加载状态 */}
+            {isLoadingCourses ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+                <span className="ml-2 text-slate-500">加载课程中...</span>
+              </div>
+            ) : (
+              /* 课程列表 */
+              <div className="grid grid-cols-2 gap-4">
+                {courses.map((course) => (
+                  <Card 
+                    key={course.id} 
+                    className="border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer"
+                    onClick={() => setSelectedCourse(course)}
+                  >
+                    <CardContent className="p-6">
+                      <div className="flex items-start gap-4">
+                        <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
+                          <BookOpen className="h-8 w-8 text-blue-600" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-lg font-semibold text-slate-800">{course.name}</h3>
+                            <Badge className={course.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}>
+                              {course.status === 'published' ? '已发布' : '草稿'}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-slate-500 mb-3">{course.description}</p>
+                          <div className="flex items-center gap-4 text-sm text-slate-500">
+                            <span className="flex items-center gap-1">
+                              <FolderOpen className="h-4 w-4" />
+                              {course.chapters.length} 章节
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-4 w-4" />
+                              {course.duration}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-3 mt-3">
+                            <Progress value={getCourseProgress(course)} className="flex-1 h-2" />
+                            <span className="text-sm font-medium text-slate-600">{getCourseProgress(course)}%</span>
+                          </div>
+                        </div>
+                        <ChevronRight className="h-5 w-5 text-slate-400" />
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-2">
-                          <h3 className="text-lg font-semibold text-slate-800">{course.name}</h3>
-                          <Badge className={course.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}>
-                            {course.status === 'published' ? '已发布' : '草稿'}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-slate-500 mb-3">{course.description}</p>
-                        <div className="flex items-center gap-4 text-sm text-slate-500">
-                          <span className="flex items-center gap-1">
-                            <FolderOpen className="h-4 w-4" />
-                            {course.chapters.length} 章节
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            {course.duration}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-3 mt-3">
-                          <Progress value={course.progress} className="flex-1 h-2" />
-                          <span className="text-sm font-medium text-slate-600">{course.progress}%</span>
-                        </div>
-                      </div>
-                      <ChevronRight className="h-5 w-5 text-slate-400" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </>
         )}
 
@@ -577,7 +546,13 @@ export default function TeacherCoursesPage() {
                       <div className="flex items-center justify-between mb-3">
                         <h4 className="font-medium text-slate-700">关联视频</h4>
                         {selectedChapter.videoKey && (
-                          <Button size="sm" variant="outline" onClick={() => { selectedChapter.videoKey = undefined; setCourses([...courses]); }}>
+                          <Button size="sm" variant="outline" onClick={() => { 
+                            const chapter = selectedCourse.chapters.find(c => c.id === selectedChapter.id);
+                            if (chapter) {
+                              chapter.videoKey = undefined; 
+                              setCourses([...courses]);
+                            }
+                          }}>
                             取消关联
                           </Button>
                         )}
@@ -618,8 +593,11 @@ export default function TeacherCoursesPage() {
                                 <FileText className="h-5 w-5 text-red-500" />
                                 <span className="flex-1">{doc?.title || '文档'}</span>
                                 <Button size="sm" variant="ghost" onClick={() => {
-                                  selectedChapter.documentKeys = selectedChapter.documentKeys?.filter(k => k !== key);
-                                  setCourses([...courses]);
+                                  const chapter = selectedCourse.chapters.find(c => c.id === selectedChapter.id);
+                                  if (chapter && chapter.documentKeys) {
+                                    chapter.documentKeys = chapter.documentKeys.filter(k => k !== key);
+                                    setCourses([...courses]);
+                                  }
                                 }}>
                                   <X className="h-4 w-4" />
                                 </Button>
@@ -714,85 +692,60 @@ export default function TeacherCoursesPage() {
       {/* 上传弹窗 */}
       {showUploadModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <Card className="w-full max-w-lg border-0 shadow-xl">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>上传资源</CardTitle>
-                <CardDescription>上传视频或文档到课程资源库</CardDescription>
-              </div>
-              <Button variant="ghost" size="icon" onClick={() => setShowUploadModal(false)}>
-                <X className="h-5 w-5" />
-              </Button>
+          <Card className="w-full max-w-md border-0 shadow-2xl">
+            <CardHeader>
+              <CardTitle>上传资源</CardTitle>
+              <CardDescription>
+                支持 MP4、PDF、Word 等格式，最大 100MB
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* 文件选择 */}
               <div>
                 <label className="text-sm font-medium text-slate-700 mb-2 block">选择文件</label>
-                <div className="relative">
-                  <input
-                    type="file"
-                    accept="video/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx"
-                    onChange={handleFileSelect}
-                    className="hidden"
-                    id="file-upload"
+                <Input type="file" onChange={handleFileSelect} />
+              </div>
+
+              {/* 标题输入 */}
+              {uploadFile && (
+                <div>
+                  <label className="text-sm font-medium text-slate-700 mb-2 block">资源标题</label>
+                  <Input
+                    value={uploadTitle}
+                    onChange={(e) => setUploadTitle(e.target.value)}
+                    placeholder="请输入资源标题"
                   />
-                  <label
-                    htmlFor="file-upload"
-                    className="flex items-center justify-center gap-3 p-6 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 transition-colors"
-                  >
-                    {uploadFile ? (
-                      <div className="flex items-center gap-3">
-                        <Check className="h-5 w-5 text-green-500" />
-                        <span className="text-slate-700">{uploadFile.name}</span>
-                        <span className="text-sm text-slate-500">
-                          ({(uploadFile.size / 1024 / 1024).toFixed(2)} MB)
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="text-center">
-                        <Upload className="h-8 w-8 text-slate-400 mx-auto mb-2" />
-                        <p className="text-slate-600">点击或拖拽文件到此处</p>
-                        <p className="text-sm text-slate-400 mt-1">支持视频和文档文件</p>
-                      </div>
-                    )}
-                  </label>
-                </div>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium text-slate-700 mb-2 block">资源标题</label>
-                <Input
-                  placeholder="请输入资源标题"
-                  value={uploadTitle}
-                  onChange={(e) => setUploadTitle(e.target.value)}
-                />
-              </div>
-
-              {isUploading && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-slate-600">上传中...</span>
-                    <span className="font-medium">{uploadProgress}%</span>
-                  </div>
-                  <Progress value={uploadProgress} className="h-2" />
                 </div>
               )}
 
-              <div className="flex justify-end gap-3 pt-4">
-                <Button variant="outline" onClick={() => setShowUploadModal(false)}>
+              {/* 上传进度 */}
+              {isUploading && (
+                <div className="space-y-2">
+                  <Progress value={uploadProgress} className="h-2" />
+                  <p className="text-sm text-slate-500 text-center">{uploadProgress}%</p>
+                </div>
+              )}
+
+              {/* 操作按钮 */}
+              <div className="flex gap-3 pt-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    setShowUploadModal(false);
+                    setUploadFile(null);
+                    setUploadTitle('');
+                  }}
+                  disabled={isUploading}
+                >
                   取消
                 </Button>
-                <Button onClick={handleUpload} disabled={!uploadFile || isUploading}>
-                  {isUploading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      上传中...
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="h-4 w-4 mr-2" />
-                      开始上传
-                    </>
-                  )}
+                <Button
+                  className="flex-1"
+                  onClick={handleUpload}
+                  disabled={!uploadFile || isUploading}
+                >
+                  {isUploading ? '上传中...' : '确认上传'}
                 </Button>
               </div>
             </CardContent>
