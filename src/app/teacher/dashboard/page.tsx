@@ -80,7 +80,7 @@ export default function TeacherDashboard() {
               </div>
               <div>
                 <h1 className="text-lg font-bold text-slate-800">外贸独立站实训平台</h1>
-                <p className="text-xs text-slate-500">教师端 - 王老师</p>
+                <p className="text-xs text-slate-500">教师端</p>
               </div>
             </Link>
           </div>
