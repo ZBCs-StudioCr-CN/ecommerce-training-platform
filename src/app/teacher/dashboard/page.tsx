@@ -152,7 +152,7 @@ export default function TeacherDashboard() {
                 <Plus className="h-4 w-4 mr-2" />
                 发布实训任务
               </Button>
-              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+              <Button variant="secondary">
                 <FileText className="h-4 w-4 mr-2" />
                 进入课堂
               </Button>
