@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   LayoutDashboard,
@@ -12,24 +12,26 @@ import {
   Bell,
   LogOut,
   Globe,
-  User,
-  Star,
-  Target,
+  ChevronRight,
   CheckCircle2,
   Clock,
-  Play,
-  ChevronRight,
-  ShoppingCart,
+  Target,
+  Zap,
+  Trophy,
   TrendingUp,
-  PieChart,
-  Shield,
-  Megaphone,
-  AlertCircle,
+  BarChart3,
+  Users,
+  DollarSign,
+  Play,
+  Lock,
+  Star,
+  Gift,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { PRACTICE_STAGES, type PracticeStage, type StageConfig, calculateLevel } from '@/data/practice';
 
 const menuItems = [
   { id: 'dashboard', label: '实训控制台', icon: LayoutDashboard, href: '/student/dashboard' },
@@ -40,104 +42,97 @@ const menuItems = [
   { id: 'qa', label: '答疑提问', icon: MessageCircle, href: '/student/qa' },
 ];
 
-const practiceModules = [
-  {
-    id: 1,
-    title: '市场调研与选品',
-    description: '模拟海外市场数据，进行选品分析、定价与品牌定位',
-    icon: Target,
-    progress: 100,
-    status: 'completed',
-    score: 92,
-    steps: ['市场分析', '竞品调研', '选品决策', '定价策略', '品牌定位'],
-  },
-  {
-    id: 2,
-    title: '独立站搭建',
-    description: '拖拽式装修、商品上传、支付物流配置、GDPR合规设置',
-    icon: ShoppingCart,
-    progress: 65,
-    status: 'in_progress',
-    score: null,
-    steps: ['域名申请', '模板选择', '页面装修', '商品上传', '支付配置', '物流设置', '合规设置'],
-  },
-  {
-    id: 3,
-    title: '流量推广',
-    description: 'Google SEO/Ads、社媒广告、网红营销全渠道模拟',
-    icon: Megaphone,
-    progress: 0,
-    status: 'pending',
-    score: null,
-    steps: ['SEO优化', 'Google Ads', '社媒广告', '网红营销', '效果分析'],
-  },
-  {
-    id: 4,
-    title: '转化运营',
-    description: '营销活动、私域邮件、弃购挽回、售后客诉处理',
-    icon: TrendingUp,
-    progress: 0,
-    status: 'locked',
-    score: null,
-    steps: ['营销活动', '邮件营销', '弃购挽回', '客诉处理', '复购运营'],
-  },
-  {
-    id: 5,
-    title: '数据分析',
-    description: '仿真数据看板解读，异常归因，优化方案制定',
-    icon: PieChart,
-    progress: 0,
-    status: 'locked',
-    score: null,
-    steps: ['数据看板', '流量分析', '转化分析', '归因分析', '优化方案'],
-  },
-  {
-    id: 6,
-    title: '合规风控',
-    description: '海外政策学习，风险场景应急处理',
-    icon: Shield,
-    progress: 0,
-    status: 'locked',
-    score: null,
-    steps: ['政策学习', '风险识别', '应急处理', '合规检查'],
-  },
-];
+// 阶段图标映射
+const stageIcons: Record<string, React.ElementType> = {
+  market_research: Target,
+  store_setup: Store,
+  product_listing: BarChart3,
+  payment_logistics: DollarSign,
+  traffic_promotion: TrendingUp,
+  operation_service: Users,
+  data_analysis: BarChart3,
+  final_assessment: Trophy,
+};
 
-const todoTasks = [
-  { id: 1, title: '完成独立站搭建实训 - 商品上传', deadline: '今天 18:00', type: 'practice', urgent: true },
-  { id: 2, title: '提交市场调研报告', deadline: '明天 23:59', type: 'homework', urgent: false },
-  { id: 3, title: '参加期末综合考核', deadline: '3月30日 14:00', type: 'exam', urgent: false },
-];
+// 模拟实训进度数据
+const mockProgress = {
+  stages: {
+    market_research: { started: true, completed: true, score: 85, startedAt: '2024-01-15', completedAt: '2024-01-18' },
+    store_setup: { started: true, completed: true, score: 92, startedAt: '2024-01-19', completedAt: '2024-01-25' },
+    product_listing: { started: true, completed: false, score: 70, startedAt: '2024-01-26' },
+    payment_logistics: { started: false, completed: false },
+    traffic_promotion: { started: false, completed: false },
+    operation_service: { started: false, completed: false },
+    data_analysis: { started: false, completed: false },
+    final_assessment: { started: false, completed: false },
+  },
+  overallProgress: 35,
+  experience: 450,
+  level: 3,
+  achievements: ['market_analyst', 'store_builder', 'first_product'],
+  totalTimeSpent: 1200, // 分钟
+};
 
-export default function StudentDashboard() {
+// 模拟店铺数据
+const mockStore = {
+  name: 'My Fashion Store',
+  domain: 'my-fashion-store.myshopify.com',
+  status: 'development',
+  products: 8,
+  orders: 0,
+  visitors: 1250,
+  revenue: 0,
+};
+
+export default function StudentDashboardPage() {
   const [activeMenu, setActiveMenu] = useState('dashboard');
+  const [progress] = useState(mockProgress);
+  const [store] = useState(mockStore);
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return <Badge className="bg-green-100 text-green-700 border-green-200">已完成</Badge>;
-      case 'in_progress':
-        return <Badge className="bg-blue-100 text-blue-700 border-blue-200">进行中</Badge>;
-      case 'pending':
-        return <Badge variant="secondary">未开始</Badge>;
-      case 'locked':
-        return <Badge variant="outline" className="text-gray-400">待解锁</Badge>;
-      default:
-        return null;
+  // 计算统计数据
+  const completedStages = Object.values(progress.stages).filter(s => s.completed).length;
+  const totalStages = PRACTICE_STAGES.length;
+  const totalPoints = PRACTICE_STAGES.reduce((sum, stage) => 
+    sum + stage.tasks.reduce((tSum, task) => tSum + task.points, 0), 0
+  );
+  const earnedPoints = PRACTICE_STAGES.reduce((sum, stage) => {
+    const stageProgress = progress.stages[stage.id];
+    if (stageProgress?.completed && 'score' in stageProgress) {
+      return sum + stage.tasks.reduce((tSum, task) => tSum + task.points, 0) * (stageProgress.score || 0) / 100;
     }
+    return sum;
+  }, 0);
+
+  // 获取当前阶段
+  const getCurrentStage = (): StageConfig | null => {
+    for (const stage of PRACTICE_STAGES) {
+      const stageProgress = progress.stages[stage.id];
+      if (stageProgress?.started && !stageProgress?.completed) {
+        return stage;
+      }
+    }
+    return null;
   };
 
-  const getTaskTypeIcon = (type: string) => {
-    switch (type) {
-      case 'practice':
-        return <Store className="h-4 w-4" />;
-      case 'homework':
-        return <FileText className="h-4 w-4" />;
-      case 'exam':
-        return <Award className="h-4 w-4" />;
-      default:
-        return <Clock className="h-4 w-4" />;
+  const currentStage = getCurrentStage();
+
+  // 检查阶段是否可开始
+  const canStartStage = (stage: StageConfig): boolean => {
+    if (!stage.prerequisites || stage.prerequisites.length === 0) {
+      return true;
     }
+    return stage.prerequisites.every(preId => progress.stages[preId]?.completed);
+  };
+
+  // 获取阶段状态
+  const getStageStatus = (stageId: PracticeStage): 'completed' | 'in_progress' | 'available' | 'locked' => {
+    const stageProgress = progress.stages[stageId];
+    if (stageProgress?.completed) return 'completed';
+    if (stageProgress?.started) return 'in_progress';
+    
+    const stage = PRACTICE_STAGES.find(s => s.id === stageId);
+    if (stage && canStartStage(stage)) return 'available';
+    return 'locked';
   };
 
   return (
@@ -203,291 +198,319 @@ export default function StudentDashboard() {
 
       {/* 主内容区 */}
       <main className="ml-60 pt-16 min-h-screen p-8">
-        {/* 欢迎横幅 */}
-        <div className="mb-8 p-6 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 text-white relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-1/2 w-32 h-32 bg-white/10 rounded-full translate-y-1/2" />
-          <div className="relative z-10 flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold mb-2">欢迎回来，张三同学！</h2>
-              <p className="text-blue-100">继续你的外贸独立站实训之旅，今天要完成独立站搭建模块哦</p>
-            </div>
-            <div className="flex items-center gap-8">
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-1 mb-1">
-                  <Star className="h-5 w-5 text-amber-300 fill-amber-300" />
-                  <span className="text-2xl font-bold">92</span>
+        {/* 页面标题 */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-slate-800">实训控制台</h2>
+          <p className="text-slate-500">全链路外贸独立站实战模拟</p>
+        </div>
+
+        {/* 概览卡片 */}
+        <div className="grid grid-cols-4 gap-4 mb-8">
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-blue-100 text-sm">实训进度</p>
+                  <p className="text-3xl font-bold mt-1">{progress.overallProgress}%</p>
+                  <p className="text-blue-200 text-sm mt-1">{completedStages}/{totalStages} 阶段完成</p>
                 </div>
-                <p className="text-xs text-blue-200">综合成绩</p>
-              </div>
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-1 mb-1">
-                  <Award className="h-5 w-5 text-amber-300" />
-                  <span className="text-2xl font-bold">第3名</span>
+                <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center">
+                  <Target className="h-7 w-7" />
                 </div>
-                <p className="text-xs text-blue-200">班级排名</p>
               </div>
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-1 mb-1">
-                  <CheckCircle2 className="h-5 w-5 text-green-300" />
-                  <span className="text-2xl font-bold">1/6</span>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-amber-500 to-orange-600 text-white">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-amber-100 text-sm">当前等级</p>
+                  <p className="text-3xl font-bold mt-1">Lv.{progress.level}</p>
+                  <p className="text-amber-200 text-sm mt-1">{progress.experience} 经验值</p>
                 </div>
-                <p className="text-xs text-blue-200">完成模块</p>
+                <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center">
+                  <Zap className="h-7 w-7" />
+                </div>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-green-500 to-emerald-600 text-white">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-green-100 text-sm">累计积分</p>
+                  <p className="text-3xl font-bold mt-1">{Math.round(earnedPoints)}</p>
+                  <p className="text-green-200 text-sm mt-1">总分 {totalPoints}</p>
+                </div>
+                <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center">
+                  <Star className="h-7 w-7" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-500 to-violet-600 text-white">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-purple-100 text-sm">实训时长</p>
+                  <p className="text-3xl font-bold mt-1">{Math.round(progress.totalTimeSpent / 60)}h</p>
+                  <p className="text-purple-200 text-sm mt-1">持续学习中</p>
+                </div>
+                <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center">
+                  <Clock className="h-7 w-7" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="grid grid-cols-3 gap-6">
-          {/* 左侧：实训模块 + 独立站预览 */}
+          {/* 左侧：实训阶段 */}
           <div className="col-span-2 space-y-6">
-            {/* 实训模块卡片 */}
-            <Card className="border-0 shadow-xl shadow-slate-200/50">
-              <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-xl">分项技能实训</CardTitle>
-                    <CardDescription>按步骤完成六大核心技能模块</CardDescription>
+            {/* 当前任务 */}
+            {currentStage && (
+              <Card className="border-0 shadow-lg border-l-4 border-l-blue-500">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+                        {(() => {
+                          const Icon = stageIcons[currentStage.id];
+                          return Icon ? <Icon className="h-6 w-6 text-blue-600" /> : null;
+                        })()}
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg">{currentStage.name}</CardTitle>
+                        <CardDescription>当前进行中 · {currentStage.duration}</CardDescription>
+                      </div>
+                    </div>
+                    <Badge className="bg-blue-100 text-blue-700">进行中</Badge>
                   </div>
-                  <Button variant="outline" size="sm">查看全部</Button>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-600">任务进度</span>
+                      <span className="font-medium text-slate-800">
+                        0/{currentStage.tasks.length}
+                      </span>
+                    </div>
+                    <Progress 
+                      value={0} 
+                      className="h-2" 
+                    />
+                    <div className="flex gap-3">
+                      <Link href="/student/practice" className="flex-1">
+                        <Button className="w-full">
+                          <Play className="h-4 w-4 mr-2" />
+                          继续实训
+                        </Button>
+                      </Link>
+                      <Button variant="outline" className="flex-1">
+                        查看任务详情
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* 实训阶段列表 */}
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle>实训阶段</CardTitle>
+                <CardDescription>完成各阶段任务，掌握独立站全链路技能</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {PRACTICE_STAGES.map((stage) => {
+                    const status = getStageStatus(stage.id);
+                    const Icon = stageIcons[stage.id] || Target;
+                    const stageProgress = progress.stages[stage.id];
+                    
+                    return (
+                      <div
+                        key={stage.id}
+                        className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${
+                          status === 'completed' 
+                            ? 'border-green-200 bg-green-50' 
+                            : status === 'in_progress'
+                            ? 'border-blue-300 bg-blue-50 shadow-sm'
+                            : status === 'available'
+                            ? 'border-slate-200 hover:border-blue-300 hover:shadow-sm cursor-pointer'
+                            : 'border-slate-200 bg-slate-50 opacity-60'
+                        }`}
+                      >
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                          status === 'completed' 
+                            ? 'bg-green-100' 
+                            : status === 'in_progress'
+                            ? 'bg-blue-100'
+                            : status === 'available'
+                            ? 'bg-slate-100'
+                            : 'bg-slate-100'
+                        }`}>
+                          {status === 'completed' ? (
+                            <CheckCircle2 className="h-6 w-6 text-green-600" />
+                          ) : status === 'locked' ? (
+                            <Lock className="h-6 w-6 text-slate-400" />
+                          ) : (
+                            <Icon className={`h-6 w-6 ${
+                              status === 'in_progress' ? 'text-blue-600' : 'text-slate-500'
+                            }`} />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-medium text-slate-800">{stage.name}</h4>
+                            {status === 'completed' && 'score' in stageProgress && stageProgress.score && (
+                              <Badge className="bg-green-100 text-green-700">{Math.round(stageProgress.score)}分</Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-slate-500 mt-1">{stage.description}</p>
+                          <div className="flex items-center gap-4 mt-2 text-xs text-slate-500">
+                            <span>{stage.tasks.length} 个任务</span>
+                            <span>{stage.duration}</span>
+                            {stage.rewards.badge && <span>🎖️ {stage.rewards.badge}</span>}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {status === 'completed' && (
+                            <Badge className="bg-green-500">已完成</Badge>
+                          )}
+                          {status === 'in_progress' && (
+                            <Badge className="bg-blue-500">进行中</Badge>
+                          )}
+                          {status === 'available' && (
+                            <Link href="/student/practice">
+                              <Button size="sm">开始</Button>
+                            </Link>
+                          )}
+                          {status === 'locked' && (
+                            <Badge variant="outline" className="text-slate-400">需完成前置</Badge>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* 右侧：店铺概览 & 成就 */}
+          <div className="space-y-6">
+            {/* 我的店铺 */}
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>我的店铺</CardTitle>
+                  <Link href="/student/practice">
+                    <Button size="sm" variant="outline">
+                      进入后台
+                      <ChevronRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  </Link>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  {practiceModules.map((module) => (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-slate-50 to-slate-100">
+                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xl font-bold">
+                      {store.name.charAt(0)}
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-slate-800">{store.name}</h4>
+                      <p className="text-sm text-slate-500">{store.domain}</p>
+                      <Badge className="mt-1" variant="outline">
+                        {store.status === 'development' ? '开发中' : '已上线'}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="p-3 rounded-lg bg-slate-50 text-center">
+                      <p className="text-2xl font-bold text-slate-800">{store.products}</p>
+                      <p className="text-xs text-slate-500">产品数量</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-slate-50 text-center">
+                      <p className="text-2xl font-bold text-slate-800">{store.visitors}</p>
+                      <p className="text-xs text-slate-500">访问人数</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-slate-50 text-center">
+                      <p className="text-2xl font-bold text-slate-800">{store.orders}</p>
+                      <p className="text-xs text-slate-500">订单数量</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-slate-50 text-center">
+                      <p className="text-2xl font-bold text-slate-800">${store.revenue}</p>
+                      <p className="text-xs text-slate-500">销售额</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 成就徽章 */}
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>成就徽章</CardTitle>
+                  <Badge variant="secondary">{progress.achievements.length} 已获得</Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { id: 'market_analyst', name: '市场分析师', icon: '📊', unlocked: true },
+                    { id: 'store_builder', name: '建站达人', icon: '🏪', unlocked: true },
+                    { id: 'first_product', name: '首个产品', icon: '📦', unlocked: true },
+                    { id: 'seo_master', name: 'SEO大师', icon: '🔍', unlocked: false },
+                    { id: 'ad_expert', name: '广告专家', icon: '📢', unlocked: false },
+                    { id: 'sales_star', name: '销售之星', icon: '⭐', unlocked: false },
+                    { id: 'data_analyst', name: '数据分析师', icon: '📈', unlocked: false },
+                    { id: 'operation_pro', name: '运营专家', icon: '🎯', unlocked: false },
+                    { id: 'master', name: '独立站大师', icon: '🏆', unlocked: false },
+                  ].map((badge) => (
                     <div
-                      key={module.id}
-                      className={`p-4 rounded-xl border-2 transition-all duration-300 ${
-                        module.status === 'locked'
-                          ? 'bg-slate-50 border-slate-200 opacity-60'
-                          : module.status === 'in_progress'
-                          ? 'bg-blue-50/50 border-blue-200 shadow-lg shadow-blue-100'
-                          : module.status === 'completed'
-                          ? 'bg-green-50/50 border-green-200'
-                          : 'bg-white border-slate-200 hover:border-blue-300 hover:shadow-lg'
+                      key={badge.id}
+                      className={`p-3 rounded-xl text-center ${
+                        badge.unlocked ? 'bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200' : 'bg-slate-100 opacity-50'
                       }`}
                     >
-                      <div className="flex items-start justify-between mb-3">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                          module.status === 'completed'
-                            ? 'bg-green-100 text-green-600'
-                            : module.status === 'in_progress'
-                            ? 'bg-blue-100 text-blue-600'
-                            : 'bg-slate-100 text-slate-400'
-                        }`}>
-                          <module.icon className="h-6 w-6" />
-                        </div>
-                        {getStatusBadge(module.status)}
-                      </div>
-                      <h3 className="font-semibold text-slate-800 mb-1">{module.title}</h3>
-                      <p className="text-sm text-slate-500 mb-3 line-clamp-2">{module.description}</p>
-                      
-                      {module.status !== 'locked' && (
-                        <>
-                          <div className="mb-2">
-                            <div className="flex items-center justify-between text-xs mb-1">
-                              <span className="text-slate-500">完成进度</span>
-                              <span className="font-medium">{module.progress}%</span>
-                            </div>
-                            <Progress value={module.progress} className="h-2" />
-                          </div>
-                          <div className="flex items-center justify-between">
-                            {module.score !== null ? (
-                              <div className="flex items-center gap-1">
-                                <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
-                                <span className="font-bold text-amber-600">{module.score}分</span>
-                              </div>
-                            ) : (
-                              <span className="text-xs text-slate-400">未评分</span>
-                            )}
-                            {module.status !== 'completed' && (
-                              <Button size="sm" className="h-8" asChild>
-                                <Link href={`/practice/${module.id}`}>
-                                  {module.status === 'in_progress' ? '继续实训' : '开始实训'}
-                                </Link>
-                              </Button>
-                            )}
-                          </div>
-                        </>
-                      )}
+                      <div className="text-2xl mb-1">{badge.icon}</div>
+                      <p className={`text-xs font-medium ${badge.unlocked ? 'text-slate-700' : 'text-slate-400'}`}>
+                        {badge.name}
+                      </p>
                     </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
 
-            {/* 独立站搭建预览 */}
-            <Card className="border-0 shadow-xl shadow-slate-200/50">
+            {/* 学习建议 */}
+            <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-xl">我的独立站预览</CardTitle>
-                    <CardDescription>当前正在搭建的仿真独立站</CardDescription>
-                  </div>
-                  <Button asChild>
-                    <Link href="/builder">
-                      <Store className="h-4 w-4 mr-2" />
-                      进入编辑
-                    </Link>
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="rounded-xl border-2 border-dashed border-slate-200 p-4 bg-slate-50/50">
-                  <div className="aspect-video bg-white rounded-lg shadow-sm overflow-hidden relative">
-                    {/* 模拟网站预览 */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-slate-100 to-white">
-                      {/* 网站头部 */}
-                      <div className="h-12 bg-white border-b flex items-center justify-between px-4">
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded bg-gradient-to-br from-violet-500 to-purple-600" />
-                          <span className="text-sm font-medium">My Fashion Store</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs text-slate-500">首页</span>
-                          <span className="text-xs text-slate-500">商品</span>
-                          <span className="text-xs text-slate-500">关于我们</span>
-                          <div className="w-5 h-5 rounded-full bg-slate-200" />
-                        </div>
-                      </div>
-                      {/* Banner */}
-                      <div className="h-24 bg-gradient-to-r from-rose-100 via-pink-100 to-purple-100 flex items-center justify-center">
-                        <div className="text-center">
-                          <p className="text-lg font-bold text-slate-800">新品上市</p>
-                          <p className="text-xs text-slate-500">探索2026春季系列</p>
-                        </div>
-                      </div>
-                      {/* 商品展示 */}
-                      <div className="p-3 grid grid-cols-4 gap-2">
-                        {[1, 2, 3, 4].map((i) => (
-                          <div key={i} className="aspect-square rounded bg-slate-200/50 flex items-center justify-center">
-                            <span className="text-xs text-slate-400">商品{i}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    {/* 覆盖层 */}
-                    <div className="absolute inset-0 bg-black/5 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                      <Button variant="secondary" size="sm" asChild>
-                        <Link href="/builder">预览网站</Link>
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="mt-3 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline">fashion-store.simulation.com</Badge>
-                      <Badge className="bg-amber-100 text-amber-700">搭建中</Badge>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-slate-500">
-                      <Clock className="h-4 w-4" />
-                      <span>上次编辑：今天 14:30</span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* 右侧：待办 + 综合实战 */}
-          <div className="space-y-6">
-            {/* 待办任务 */}
-            <Card className="border-0 shadow-xl shadow-slate-200/50">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <AlertCircle className="h-5 w-5 text-amber-500" />
-                  待办任务
+                <CardTitle className="flex items-center gap-2">
+                  <Gift className="h-5 w-5" />
+                  今日任务
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                {todoTasks.map((task) => (
-                  <div
-                    key={task.id}
-                    className={`p-3 rounded-xl border-2 ${
-                      task.urgent ? 'bg-red-50 border-red-200' : 'bg-white border-slate-200'
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                        task.urgent ? 'bg-red-100 text-red-600' : 'bg-slate-100 text-slate-600'
-                      }`}>
-                        {getTaskTypeIcon(task.type)}
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium text-sm text-slate-800">{task.title}</p>
-                        <div className="flex items-center gap-1 mt-1 text-xs text-slate-500">
-                          <Clock className="h-3 w-3" />
-                          <span>{task.deadline}</span>
-                        </div>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-slate-400" />
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            {/* 综合实战入口 */}
-            <Card className="border-0 shadow-xl shadow-slate-200/50 bg-gradient-to-br from-indigo-500 to-purple-600 text-white overflow-hidden relative">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-              <CardHeader>
-                <CardTitle className="text-lg">综合项目实战</CardTitle>
-                <CardDescription className="text-indigo-100">
-                  完成从0到1的独立站全流程运营
-                </CardDescription>
-              </CardHeader>
               <CardContent>
-                <div className="space-y-3 mb-4">
-                  <div className="flex items-center gap-2 text-sm">
-                    <CheckCircle2 className="h-4 w-4 text-green-300" />
-                    <span>完成所有分项实训后解锁</span>
+                <div className="space-y-3">
+                  <div className="p-3 rounded-lg bg-white/20">
+                    <p className="font-medium">完成产品上架任务</p>
+                    <p className="text-sm text-blue-100 mt-1">上架3款新产品，获得+20积分</p>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <User className="h-4 w-4" />
-                    <span>支持个人或小组（4-6人）组队</span>
+                  <div className="p-3 rounded-lg bg-white/20">
+                    <p className="font-medium">优化产品SEO</p>
+                    <p className="text-sm text-blue-100 mt-1">优化5个产品页面，获得+15积分</p>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <PieChart className="h-4 w-4" />
-                    <span>实时查看数据排名与运营报告</span>
-                  </div>
-                </div>
-                <Button variant="secondary" className="w-full" disabled>
-                  <Play className="h-4 w-4 mr-2" />
-                  开始综合实战
-                </Button>
-                <p className="text-xs text-indigo-200 mt-2 text-center">
-                  需完成所有分项实训模块
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* 学习进度统计 */}
-            <Card className="border-0 shadow-xl shadow-slate-200/50">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">学习进度</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex items-center justify-between text-sm mb-1">
-                      <span className="text-slate-600">理论课程</span>
-                      <span className="font-medium">80%</span>
-                    </div>
-                    <Progress value={80} className="h-2" />
-                  </div>
-                  <div>
-                    <div className="flex items-center justify-between text-sm mb-1">
-                      <span className="text-slate-600">实训任务</span>
-                      <span className="font-medium">25%</span>
-                    </div>
-                    <Progress value={25} className="h-2" />
-                  </div>
-                  <div>
-                    <div className="flex items-center justify-between text-sm mb-1">
-                      <span className="text-slate-600">考核通过率</span>
-                      <span className="font-medium">100%</span>
-                    </div>
-                    <Progress value={100} className="h-2" />
-                  </div>
+                  <Button variant="secondary" className="w-full mt-2">
+                    查看全部任务
+                  </Button>
                 </div>
               </CardContent>
             </Card>

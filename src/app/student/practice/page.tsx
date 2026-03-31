@@ -3,8 +3,34 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import {
-  LayoutDashboard, BookOpen, Store, Award, FileText, MessageCircle, Bell, Globe,
-  Target, ShoppingCart, Megaphone, TrendingUp, PieChart, Shield, ChevronRight, Clock, CheckCircle2, Play,
+  LayoutDashboard,
+  BookOpen,
+  Store,
+  Award,
+  FileText,
+  MessageCircle,
+  Bell,
+  LogOut,
+  Globe,
+  Home,
+  Package,
+  ShoppingCart,
+  Users,
+  BarChart3,
+  Settings,
+  Megaphone,
+  CreditCard,
+  Truck,
+  Tag,
+  Palette,
+  Plus,
+  CheckCircle2,
+  Clock,
+  TrendingUp,
+  DollarSign,
+  ChevronRight,
+  Eye,
+  Edit,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,219 +46,609 @@ const menuItems = [
   { id: 'qa', label: '答疑提问', icon: MessageCircle, href: '/student/qa' },
 ];
 
-const practiceModules = [
-  { 
-    id: 1, 
-    title: '市场调研与选品', 
-    description: '学习海外市场分析方法，掌握选品策略与定价技巧',
-    icon: Target, 
-    progress: 100, 
-    status: 'completed', 
-    score: 92,
-    href: '/student/practice/research',
-    color: 'from-blue-500 to-cyan-500'
-  },
-  { 
-    id: 2, 
-    title: '独立站搭建', 
-    description: '1:1复刻Shopify建站流程，拖拽装修、商品管理、配置设置',
-    icon: ShoppingCart, 
-    progress: 75, 
-    status: 'in_progress', 
-    score: null,
-    href: '/student/practice/build',
-    color: 'from-emerald-500 to-teal-500'
-  },
-  { 
-    id: 3, 
-    title: '流量推广', 
-    description: '模拟Google/Facebook/TikTok广告投放，SEO优化全流程',
-    icon: Megaphone, 
-    progress: 0, 
-    status: 'pending', 
-    score: null,
-    href: '/student/practice/marketing',
-    color: 'from-orange-500 to-red-500'
-  },
-  { 
-    id: 4, 
-    title: '转化运营', 
-    description: '营销活动创建、优惠券管理、邮件营销、客诉处理',
-    icon: TrendingUp, 
-    progress: 0, 
-    status: 'pending', 
-    score: null,
-    href: '/student/practice/operations',
-    color: 'from-violet-500 to-purple-500'
-  },
-  { 
-    id: 5, 
-    title: '数据分析', 
-    description: '数据看板解读、转化漏斗分析、异常归因、优化建议',
-    icon: PieChart, 
-    progress: 0, 
-    status: 'pending', 
-    score: null,
-    href: '/student/practice/analytics',
-    color: 'from-blue-500 to-indigo-500'
-  },
-  { 
-    id: 6, 
-    title: '合规风控', 
-    description: 'GDPR合规设置、隐私政策、风险场景应急处理',
-    icon: Shield, 
-    progress: 0, 
-    status: 'pending', 
-    score: null,
-    href: '/student/practice/compliance',
-    color: 'from-slate-500 to-zinc-600'
-  },
+const adminMenuItems = [
+  { id: 'home', label: '首页', icon: Home },
+  { id: 'orders', label: '订单', icon: ShoppingCart, badge: 0 },
+  { id: 'products', label: '产品', icon: Package },
+  { id: 'analytics', label: '分析', icon: BarChart3 },
+  { id: 'marketing', label: '营销', icon: Megaphone },
+  { id: 'themes', label: '主题', icon: Palette },
+  { id: 'payments', label: '支付', icon: CreditCard },
+  { id: 'shipping', label: '物流', icon: Truck },
+  { id: 'settings', label: '设置', icon: Settings },
 ];
+
+const mockStore = {
+  name: 'My Fashion Store',
+  domain: 'my-fashion-store.myshopify.com',
+  status: 'development',
+  products: [
+    { id: '1', title: '夏季连衣裙', price: 29.99, inventory: 50, status: 'active' },
+    { id: '2', title: '休闲T恤', price: 19.99, inventory: 100, status: 'active' },
+    { id: '3', title: '牛仔裤', price: 39.99, inventory: 30, status: 'active' },
+  ],
+  tasks: [
+    { id: '1', title: '添加产品图片', priority: 'high', completed: false },
+    { id: '2', title: '配置支付方式', priority: 'high', completed: false },
+    { id: '3', title: '设置物流方案', priority: 'medium', completed: false },
+  ],
+};
 
 export default function StudentPracticePage() {
   const [activeMenu, setActiveMenu] = useState('practice');
+  const [adminSection, setAdminSection] = useState('home');
+  const [store] = useState(mockStore);
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'completed': return <Badge className="bg-green-100 text-green-700 border-green-200">已完成</Badge>;
-      case 'in_progress': return <Badge className="bg-blue-100 text-blue-700 border-blue-200">进行中</Badge>;
-      case 'pending': return <Badge variant="secondary">未开始</Badge>;
-      case 'locked': return <Badge variant="outline" className="text-gray-400">待解锁</Badge>;
-      default: return null;
-    }
-  };
-
-  const getButtonText = (status: string) => {
-    switch (status) {
-      case 'completed': return '查看成果';
-      case 'in_progress': return '继续实训';
-      case 'pending': return '开始实训';
-      case 'locked': return '待解锁';
-      default: return '开始实训';
-    }
-  };
+  const completedTasks = store.tasks.filter(t => t.completed).length;
+  const progress = Math.round((completedTasks / 10) * 100);
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 z-50">
-        <div className="flex items-center justify-between h-full px-6">
-          <Link href="/login" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-              <Globe className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-slate-800">外贸独立站实训平台</h1>
-              <p className="text-xs text-slate-500">学生端</p>
-            </div>
-          </Link>
+    <div className="min-h-screen bg-slate-100">
+      {/* 顶部导航 */}
+      <header className="fixed top-0 left-0 right-0 h-14 bg-slate-900 border-b border-slate-800 z-50">
+        <div className="flex items-center justify-between h-full px-4">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon"><Bell className="h-5 w-5 text-slate-600" /></Button>
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white">张</div>
+            <Link href="/login" className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+                <Store className="h-4 w-4 text-white" />
+              </div>
+              <span className="text-white font-semibold">{store.name}</span>
+            </Link>
+            <Badge variant="secondary" className="bg-slate-800 text-slate-300">
+              开发中
+            </Badge>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white">
+              <Eye className="h-4 w-4 mr-2" />
+              预览店铺
+            </Button>
+            <Button variant="ghost" size="icon" className="text-slate-300">
+              <Bell className="h-5 w-5" />
+            </Button>
+            <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white text-sm font-medium">
+              张
+            </div>
           </div>
         </div>
       </header>
 
-      <aside className="fixed left-0 top-16 bottom-0 w-60 bg-white border-r border-slate-200 overflow-y-auto">
-        <nav className="p-4 space-y-1">
+      {/* 左侧平台导航 */}
+      <aside className="fixed left-0 top-14 bottom-0 w-16 bg-white border-r border-slate-200 z-40">
+        <nav className="py-4 flex flex-col items-center space-y-2">
           {menuItems.map((item) => (
-            <Link key={item.id} href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                activeMenu === item.id ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white' : 'text-slate-600 hover:bg-slate-100'
+            <Link
+              key={item.id}
+              href={item.href}
+              className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
+                activeMenu === item.id
+                  ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white'
+                  : 'text-slate-500 hover:bg-slate-100'
               }`}
-              onClick={() => setActiveMenu(item.id)}>
+              onClick={() => setActiveMenu(item.id)}
+              title={item.label}
+            >
               <item.icon className="h-5 w-5" />
-              <span className="font-medium">{item.label}</span>
             </Link>
           ))}
         </nav>
+        <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+          <button className="w-12 h-12 rounded-xl flex items-center justify-center text-red-500 hover:bg-red-50">
+            <LogOut className="h-5 w-5" />
+          </button>
+        </div>
       </aside>
 
-      <main className="ml-60 pt-16 min-h-screen p-6">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-slate-800">仿真实训</h2>
-          <p className="text-slate-500">分项技能实训，逐步掌握独立站运营核心技能</p>
+      {/* 店铺后台侧边栏 */}
+      <aside className="fixed left-16 top-14 bottom-0 w-56 bg-white border-r border-slate-200 overflow-y-auto z-30">
+        <div className="p-4">
+          <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+            店铺管理
+          </h3>
+          <nav className="space-y-1">
+            {adminMenuItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setAdminSection(item.id)}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                  adminSection === item.id
+                    ? 'bg-slate-100 text-slate-900'
+                    : 'text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                <item.icon className="h-5 w-5" />
+                <span className="flex-1 text-sm font-medium">{item.label}</span>
+                {item.badge !== undefined && item.badge > 0 && (
+                  <Badge className="bg-blue-500 text-white text-xs">{item.badge}</Badge>
+                )}
+              </button>
+            ))}
+          </nav>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <Card className="border-0 shadow-lg">
-            <CardContent className="p-4">
-              <p className="text-sm text-slate-500">已完成模块</p>
-              <p className="text-2xl font-bold text-green-600">1/6</p>
-            </CardContent>
-          </Card>
-          <Card className="border-0 shadow-lg">
-            <CardContent className="p-4">
-              <p className="text-sm text-slate-500">总分</p>
-              <p className="text-2xl font-bold text-slate-800">92分</p>
-            </CardContent>
-          </Card>
-          <Card className="border-0 shadow-lg">
-            <CardContent className="p-4">
-              <p className="text-sm text-slate-500">剩余时间</p>
-              <p className="text-2xl font-bold text-amber-500">3天</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          {practiceModules.map((module) => (
-            <Card key={module.id} className={`border-0 shadow-lg hover:shadow-xl transition-shadow ${module.status === 'locked' ? 'opacity-60' : ''}`}>
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <div className={`w-14 h-14 rounded-xl flex items-center justify-center bg-gradient-to-br ${module.color}`}>
-                    <module.icon className="h-7 w-7 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-semibold text-slate-800">{module.title}</h3>
-                      {getStatusBadge(module.status)}
-                    </div>
-                    <p className="text-sm text-slate-500 mb-3">{module.description}</p>
-                    {module.progress > 0 && (
-                      <div className="mb-3">
-                        <Progress value={module.progress} className="h-2 mb-1" />
-                        <span className="text-xs text-slate-500">{module.progress}% 完成</span>
-                      </div>
-                    )}
-                    {module.score && (
-                      <p className="text-sm text-green-600 font-medium">得分：{module.score}分</p>
-                    )}
-                  </div>
+        {/* 实训任务面板 */}
+        <div className="border-t border-slate-200 p-4">
+          <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+            实训任务
+          </h3>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-slate-600">完成进度</span>
+              <span className="font-medium text-slate-900">{progress}%</span>
+            </div>
+            <Progress value={progress} className="h-2" />
+          </div>
+          <div className="mt-3 space-y-2">
+            {store.tasks.slice(0, 3).map((task) => (
+              <div key={task.id} className="flex items-center gap-2 p-2 rounded-lg bg-slate-50">
+                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                  task.completed 
+                    ? 'border-green-500 bg-green-500' 
+                    : task.priority === 'high' 
+                    ? 'border-red-400' 
+                    : 'border-slate-300'
+                }`}>
+                  {task.completed && <CheckCircle2 className="h-3 w-3 text-white" />}
                 </div>
-                <div className="mt-4 pt-4 border-t border-slate-100">
-                  <Link href={module.href} className="block">
-                    <Button 
-                      className="w-full" 
-                      disabled={module.status === 'locked'} 
-                      variant={module.status === 'in_progress' ? 'default' : 'outline'}
-                    >
-                      {module.status === 'in_progress' && <Play className="h-4 w-4 mr-2" />}
-                      {getButtonText(module.status)}
-                      <ChevronRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  </Link>
+                <span className={`text-xs ${task.completed ? 'text-slate-400 line-through' : 'text-slate-700'}`}>
+                  {task.title}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </aside>
+
+      {/* 主内容区 */}
+      <main className="ml-72 mt-14 p-6">
+        {/* 首页 */}
+        {adminSection === 'home' && (
+          <div className="space-y-6">
+            {/* 欢迎卡片 */}
+            <Card className="border-0 shadow-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold">欢迎来到店铺后台！</h2>
+                    <p className="text-blue-100 mt-1">这是您的Shopify风格模拟店铺管理界面</p>
+                    <div className="mt-4 flex gap-3">
+                      <Button variant="secondary" size="sm" onClick={() => setAdminSection('products')}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        添加产品
+                      </Button>
+                      <Button variant="outline" size="sm" className="border-white/30 text-white hover:bg-white/10">
+                        <Eye className="h-4 w-4 mr-2" />
+                        预览店铺
+                      </Button>
+                    </div>
+                  </div>
+                  <Store className="h-20 w-20 text-white/30" />
                 </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
 
-        {/* Comprehensive Project */}
-        <Card className="border-0 shadow-lg mt-6 bg-gradient-to-r from-violet-500 to-purple-600 text-white">
-          <CardContent className="p-6">
+            {/* 数据概览 */}
+            <div className="grid grid-cols-4 gap-4">
+              <Card className="border-0 shadow-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                      <DollarSign className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-slate-500">今日销售额</p>
+                      <p className="text-xl font-bold text-slate-800">$0.00</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border-0 shadow-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
+                      <ShoppingCart className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-slate-500">今日订单</p>
+                      <p className="text-xl font-bold text-slate-800">0</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border-0 shadow-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
+                      <Users className="h-5 w-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-slate-500">今日访客</p>
+                      <p className="text-xl font-bold text-slate-800">156</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border-0 shadow-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
+                      <TrendingUp className="h-5 w-5 text-amber-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-slate-500">转化率</p>
+                      <p className="text-xl font-bold text-slate-800">0%</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* 快速操作 */}
+            <div className="grid grid-cols-3 gap-6">
+              <Card className="border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-base">快速操作</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {[
+                    { label: '添加产品', icon: Package, section: 'products' },
+                    { label: '配置支付', icon: CreditCard, section: 'payments' },
+                    { label: '设置物流', icon: Truck, section: 'shipping' },
+                    { label: '选择主题', icon: Palette, section: 'themes' },
+                  ].map((action) => (
+                    <button
+                      key={action.label}
+                      onClick={() => setAdminSection(action.section)}
+                      className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors text-left"
+                    >
+                      <action.icon className="h-5 w-5 text-slate-400" />
+                      <span className="text-sm text-slate-700">{action.label}</span>
+                      <ChevronRight className="h-4 w-4 text-slate-400 ml-auto" />
+                    </button>
+                  ))}
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-base">产品列表</CardTitle>
+                  <CardDescription>{store.products.length} 个产品</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {store.products.map((product) => (
+                      <div key={product.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50">
+                        <div className="w-10 h-10 rounded-lg bg-slate-200 flex items-center justify-center">
+                          <Package className="h-5 w-5 text-slate-400" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-slate-800">{product.title}</p>
+                          <p className="text-xs text-slate-500">${product.price} · 库存 {product.inventory}</p>
+                        </div>
+                        <Badge variant={product.status === 'active' ? 'default' : 'secondary'} className="text-xs">
+                          {product.status === 'active' ? '上架' : '下架'}
+                        </Badge>
+                      </div>
+                    ))}
+                    <Button variant="outline" size="sm" className="w-full mt-2" onClick={() => setAdminSection('products')}>
+                      查看全部产品
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-base">实训指南</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="p-3 rounded-lg bg-blue-50 border border-blue-200">
+                      <p className="text-sm font-medium text-blue-800">当前任务</p>
+                      <p className="text-sm text-blue-600 mt-1">完成产品上架，添加至少10款产品</p>
+                      <Progress value={30} className="h-1.5 mt-2" />
+                    </div>
+                    <div className="p-3 rounded-lg bg-amber-50 border border-amber-200">
+                      <p className="text-sm font-medium text-amber-800">提示</p>
+                      <p className="text-sm text-amber-600 mt-1">点击左侧菜单探索店铺后台功能</p>
+                    </div>
+                    <Button size="sm" className="w-full">
+                      查看完整教程
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        {/* 产品管理 */}
+        {adminSection === 'products' && (
+          <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-xl font-bold mb-2">综合项目实战</h3>
-                <p className="text-violet-100">完成从0到1的独立站全流程运营，生成运营报告与作品集</p>
+                <h2 className="text-xl font-bold text-slate-800">产品</h2>
+                <p className="text-slate-500">管理您的产品信息</p>
               </div>
-              <div className="text-right">
-                <Badge className="bg-white/20 text-white border-0 mb-2">需完成全部分项实训</Badge>
-                <br />
-                <Button variant="secondary" disabled>解锁综合实战</Button>
-              </div>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                添加产品
+              </Button>
             </div>
-          </CardContent>
-        </Card>
+
+            <Card className="border-0 shadow-lg">
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-slate-50 border-b border-slate-200">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">产品</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">状态</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">库存</th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">价格</th>
+                        <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase">操作</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200">
+                      {store.products.map((product) => (
+                        <tr key={product.id} className="hover:bg-slate-50">
+                          <td className="px-4 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-12 rounded-lg bg-slate-200 flex items-center justify-center">
+                                <Package className="h-6 w-6 text-slate-400" />
+                              </div>
+                              <div>
+                                <p className="font-medium text-slate-800">{product.title}</p>
+                                <p className="text-xs text-slate-500">SKU-{product.id}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <Badge variant={product.status === 'active' ? 'default' : 'secondary'}>
+                              {product.status === 'active' ? '上架' : '下架'}
+                            </Badge>
+                          </td>
+                          <td className="px-4 py-4 text-slate-600">{product.inventory} 件</td>
+                          <td className="px-4 py-4 text-slate-600">${product.price}</td>
+                          <td className="px-4 py-4 text-right">
+                            <Button variant="ghost" size="sm">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* 支付设置 */}
+        {adminSection === 'payments' && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xl font-bold text-slate-800">支付设置</h2>
+              <p className="text-slate-500">配置支付方式</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Card className="border-0 shadow-lg">
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+                      <CreditCard className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">PayPal</CardTitle>
+                      <CardDescription>跨境支付首选</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-slate-600">
+                      <p>状态：<Badge variant="secondary">未配置</Badge></p>
+                      <p className="mt-1">费率：2.9% + $0.30</p>
+                    </div>
+                    <Button size="sm">配置</Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-lg">
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
+                      <CreditCard className="h-6 w-6 text-purple-600" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">Stripe</CardTitle>
+                      <CardDescription>信用卡支付</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-slate-600">
+                      <p>状态：<Badge variant="secondary">未配置</Badge></p>
+                      <p className="mt-1">费率：2.9% + $0.30</p>
+                    </div>
+                    <Button size="sm">配置</Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        {/* 物流设置 */}
+        {adminSection === 'shipping' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-slate-800">物流设置</h2>
+                <p className="text-slate-500">配置配送区域和运费</p>
+              </div>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                添加配送区域
+              </Button>
+            </div>
+
+            <Card className="border-0 shadow-lg">
+              <CardContent className="p-8 text-center">
+                <Truck className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+                <h3 className="font-medium text-slate-800 mb-2">暂无配送区域</h3>
+                <p className="text-sm text-slate-500 mb-4">
+                  创建配送区域，设置不同地区的运费方案
+                </p>
+                <Button>创建配送区域</Button>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* 主题设置 */}
+        {adminSection === 'themes' && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xl font-bold text-slate-800">主题</h2>
+              <p className="text-slate-500">自定义店铺外观</p>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              {['Dawn', 'Debut', 'Brooklyn', 'Narrative', 'Minimal', 'Simple'].map((theme, index) => (
+                <Card key={theme} className={`border-0 shadow-lg ${index === 0 ? 'ring-2 ring-blue-500' : ''}`}>
+                  <CardContent className="p-4">
+                    <div className="aspect-[4/3] bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg mb-3 flex items-center justify-center">
+                      <Palette className="h-8 w-8 text-slate-400" />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-slate-800">{theme}</p>
+                        <p className="text-xs text-slate-500">免费主题</p>
+                      </div>
+                      {index === 0 ? (
+                        <Badge>当前使用</Badge>
+                      ) : (
+                        <Button size="sm" variant="outline">使用</Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 分析 */}
+        {adminSection === 'analytics' && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xl font-bold text-slate-800">分析</h2>
+              <p className="text-slate-500">查看店铺数据和表现</p>
+            </div>
+
+            <Card className="border-0 shadow-lg">
+              <CardContent className="p-8 text-center">
+                <BarChart3 className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+                <h3 className="font-medium text-slate-800 mb-2">数据积累中</h3>
+                <p className="text-sm text-slate-500">
+                  完成更多实训任务后，您将看到店铺运营数据
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* 营销 */}
+        {adminSection === 'marketing' && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xl font-bold text-slate-800">营销</h2>
+              <p className="text-slate-500">推广您的店铺</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Card className="border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-base">Google Ads</CardTitle>
+                  <CardDescription>搜索引擎广告</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-slate-500 mb-3">
+                    创建搜索广告，吸引精准流量
+                  </p>
+                  <Button size="sm" variant="outline">创建广告</Button>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-base">Facebook Ads</CardTitle>
+                  <CardDescription>社交媒体广告</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-slate-500 mb-3">
+                    在社交平台推广您的产品
+                  </p>
+                  <Button size="sm" variant="outline">创建广告</Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        {/* 设置 */}
+        {adminSection === 'settings' && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xl font-bold text-slate-800">设置</h2>
+              <p className="text-slate-500">管理店铺设置</p>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              {[
+                { label: '基本信息', desc: '店铺名称、联系方式' },
+                { label: '域名设置', desc: '自定义域名绑定' },
+                { label: '货币设置', desc: '货币和汇率' },
+                { label: '结账设置', desc: '结账流程配置' },
+                { label: '通知设置', desc: '邮件通知模板' },
+                { label: '法律政策', desc: '隐私政策、服务条款' },
+              ].map((item) => (
+                <Card key={item.label} className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                  <CardContent className="p-4">
+                    <p className="font-medium text-slate-800">{item.label}</p>
+                    <p className="text-sm text-slate-500 mt-1">{item.desc}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 订单 */}
+        {adminSection === 'orders' && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xl font-bold text-slate-800">订单</h2>
+              <p className="text-slate-500">管理客户订单</p>
+            </div>
+
+            <Card className="border-0 shadow-lg">
+              <CardContent className="p-8 text-center">
+                <ShoppingCart className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+                <h3 className="font-medium text-slate-800 mb-2">暂无订单</h3>
+                <p className="text-sm text-slate-500">
+                  完成实训推广任务后，将生成模拟订单
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </main>
     </div>
   );
