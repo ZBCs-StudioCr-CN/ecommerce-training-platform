@@ -5,7 +5,6 @@ import {
   BarChart3,
   MessageCircle,
   Award,
-  FolderOpen,
 } from 'lucide-react';
 
 export interface MenuItem {
@@ -18,7 +17,6 @@ export interface MenuItem {
 export const teacherMenuItems: MenuItem[] = [
   { id: 'dashboard', label: '教学控制台', icon: LayoutDashboard, href: '/teacher/dashboard' },
   { id: 'courses', label: '课程管理', icon: BookOpen, href: '/teacher/courses' },
-  { id: 'resources', label: '资源管理', icon: FolderOpen, href: '/teacher/resources' },
   { id: 'practice', label: '实训管理', icon: ClipboardList, href: '/teacher/practice' },
   { id: 'grading', label: '考核评分', icon: Award, href: '/teacher/grading' },
   { id: 'analysis', label: '学情分析', icon: BarChart3, href: '/teacher/analysis' },
