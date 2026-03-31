@@ -121,7 +121,7 @@ export default function AccountsPage() {
               </div>
               <div>
                 <h1 className="text-lg font-bold text-slate-800">外贸独立站实训平台</h1>
-                <p className="text-xs text-slate-500">管理员端 - 广东XX职业技术学院</p>
+                <p className="text-xs text-slate-500">管理员端</p>
               </div>
             </Link>
           </div>
