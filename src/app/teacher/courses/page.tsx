@@ -20,6 +20,11 @@ import {
   Loader2,
   Check,
   X,
+  GraduationCap,
+  Target,
+  Wrench,
+  TrendingUp,
+  Award as CertificateIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,7 +32,16 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { teacherMenuItems } from '@/config/menu';
-import type { Course, Chapter } from '@/data/courses';
+import type { Course, Chapter, CourseCategory } from '@/data/courses';
+
+// 课程分类配置
+const categoryConfig: Record<CourseCategory, { name: string; icon: React.ElementType; color: string; bgColor: string }> = {
+  foundation: { name: '专业基础', icon: GraduationCap, color: 'text-blue-600', bgColor: 'bg-blue-100' },
+  core: { name: '专业核心', icon: Target, color: 'text-indigo-600', bgColor: 'bg-indigo-100' },
+  practice: { name: '实践操作', icon: Wrench, color: 'text-green-600', bgColor: 'bg-green-100' },
+  extension: { name: '拓展提升', icon: TrendingUp, color: 'text-amber-600', bgColor: 'bg-amber-100' },
+  certification: { name: '考证培训', icon: CertificateIcon, color: 'text-purple-600', bgColor: 'bg-purple-100' },
+};
 
 interface Resource {
   key: string;
@@ -43,6 +57,7 @@ export default function TeacherCoursesPage() {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<CourseCategory | 'all'>('all');
   
   // 课程列表（从API获取）
   const [courses, setCourses] = useState<Course[]>([]);
@@ -194,13 +209,31 @@ export default function TeacherCoursesPage() {
     setSelectedChapter(chapter);
   };
 
-  // 计算课程进度（基于章节数）
+  // 根据分类筛选课程
+  const filteredCourses = selectedCategory === 'all' 
+    ? courses 
+    : courses.filter(c => c.category === selectedCategory);
+
+  // 按分类分组课程
+  const groupedCourses = courses.reduce((acc, course) => {
+    const cat = course.category;
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(course);
+    return acc;
+  }, {} as Record<CourseCategory, Course[]>);
+
+  // 计算课程进度
   const getCourseProgress = (course: Course) => {
     const total = course.chapters.length;
     if (total === 0) return 0;
     const completed = course.chapters.filter(ch => ch.videoKey).length;
     return Math.round((completed / total) * 100);
   };
+
+  // 统计数据
+  const totalCourses = courses.length;
+  const totalChapters = courses.reduce((sum, c) => sum + c.chapters.length, 0);
+  const totalCredits = courses.reduce((sum, c) => sum + (c.credit || 0), 0);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -277,16 +310,16 @@ export default function TeacherCoursesPage() {
             </div>
 
             {/* 快捷统计 */}
-            <div className="grid grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-5 gap-4 mb-6">
               <Card className="border-0 shadow-sm">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
-                      <BookOpen className="h-6 w-6 text-blue-600" />
+                    <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+                      <BookOpen className="h-5 w-5 text-blue-600" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-slate-800">{courses.length}</p>
-                      <p className="text-sm text-slate-500">课程总数</p>
+                      <p className="text-2xl font-bold text-slate-800">{totalCourses}</p>
+                      <p className="text-xs text-slate-500">课程总数</p>
                     </div>
                   </div>
                 </CardContent>
@@ -294,12 +327,25 @@ export default function TeacherCoursesPage() {
               <Card className="border-0 shadow-sm">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
-                      <Video className="h-6 w-6 text-green-600" />
+                    <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
+                      <FolderOpen className="h-5 w-5 text-indigo-600" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-slate-800">{totalChapters}</p>
+                      <p className="text-xs text-slate-500">章节总数</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border-0 shadow-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
+                      <Video className="h-5 w-5 text-green-600" />
                     </div>
                     <div>
                       <p className="text-2xl font-bold text-slate-800">{videoResources.length}</p>
-                      <p className="text-sm text-slate-500">视频资源</p>
+                      <p className="text-xs text-slate-500">视频资源</p>
                     </div>
                   </div>
                 </CardContent>
@@ -307,12 +353,12 @@ export default function TeacherCoursesPage() {
               <Card className="border-0 shadow-sm">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center">
-                      <FileText className="h-6 w-6 text-red-600" />
+                    <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
+                      <FileText className="h-5 w-5 text-red-600" />
                     </div>
                     <div>
                       <p className="text-2xl font-bold text-slate-800">{documentResources.length}</p>
-                      <p className="text-sm text-slate-500">文档资源</p>
+                      <p className="text-xs text-slate-500">文档资源</p>
                     </div>
                   </div>
                 </CardContent>
@@ -320,18 +366,43 @@ export default function TeacherCoursesPage() {
               <Card className="border-0 shadow-sm">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center">
-                      <FolderOpen className="h-6 w-6 text-amber-600" />
+                    <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+                      <GraduationCap className="h-5 w-5 text-amber-600" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-slate-800">
-                        {courses.reduce((sum, c) => sum + c.chapters.length, 0)}
-                      </p>
-                      <p className="text-sm text-slate-500">章节总数</p>
+                      <p className="text-2xl font-bold text-slate-800">{totalCredits}</p>
+                      <p className="text-xs text-slate-500">总学分</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
+            </div>
+
+            {/* 课程分类筛选 */}
+            <div className="flex gap-2 mb-6 flex-wrap">
+              <Button
+                variant={selectedCategory === 'all' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedCategory('all')}
+              >
+                全部课程
+              </Button>
+              {(Object.keys(categoryConfig) as CourseCategory[]).map((cat) => {
+                const config = categoryConfig[cat];
+                const Icon = config.icon;
+                return (
+                  <Button
+                    key={cat}
+                    variant={selectedCategory === cat ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSelectedCategory(cat)}
+                    className="gap-2"
+                  >
+                    <Icon className="h-4 w-4" />
+                    {config.name}
+                  </Button>
+                );
+              })}
             </div>
 
             {/* 加载状态 */}
@@ -340,48 +411,123 @@ export default function TeacherCoursesPage() {
                 <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
                 <span className="ml-2 text-slate-500">加载课程中...</span>
               </div>
-            ) : (
-              /* 课程列表 */
-              <div className="grid grid-cols-2 gap-4">
-                {courses.map((course) => (
-                  <Card 
-                    key={course.id} 
-                    className="border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer"
-                    onClick={() => setSelectedCourse(course)}
-                  >
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-4">
-                        <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
-                          <BookOpen className="h-8 w-8 text-blue-600" />
+            ) : selectedCategory === 'all' ? (
+              /* 按模块分组显示 */
+              <div className="space-y-8">
+                {(Object.keys(categoryConfig) as CourseCategory[]).map((cat) => {
+                  const catCourses = groupedCourses[cat] || [];
+                  if (catCourses.length === 0) return null;
+                  
+                  const config = categoryConfig[cat];
+                  const Icon = config.icon;
+                  
+                  return (
+                    <div key={cat}>
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className={`w-8 h-8 rounded-lg ${config.bgColor} flex items-center justify-center`}>
+                          <Icon className={`h-4 w-4 ${config.color}`} />
                         </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-2">
-                            <h3 className="text-lg font-semibold text-slate-800">{course.name}</h3>
-                            <Badge className={course.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}>
-                              {course.status === 'published' ? '已发布' : '草稿'}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-slate-500 mb-3">{course.description}</p>
-                          <div className="flex items-center gap-4 text-sm text-slate-500">
-                            <span className="flex items-center gap-1">
-                              <FolderOpen className="h-4 w-4" />
-                              {course.chapters.length} 章节
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Clock className="h-4 w-4" />
-                              {course.duration}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-3 mt-3">
-                            <Progress value={getCourseProgress(course)} className="flex-1 h-2" />
-                            <span className="text-sm font-medium text-slate-600">{getCourseProgress(course)}%</span>
-                          </div>
-                        </div>
-                        <ChevronRight className="h-5 w-5 text-slate-400" />
+                        <h3 className="text-lg font-semibold text-slate-800">{config.name}模块</h3>
+                        <Badge variant="secondary">{catCourses.length} 门课程</Badge>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      <div className="grid grid-cols-2 gap-4">
+                        {catCourses.map((course) => (
+                          <Card 
+                            key={course.id} 
+                            className="border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer"
+                            onClick={() => setSelectedCourse(course)}
+                          >
+                            <CardContent className="p-5">
+                              <div className="flex items-start gap-4">
+                                <div className={`w-14 h-14 rounded-xl ${config.bgColor} flex items-center justify-center`}>
+                                  <Icon className={`h-7 w-7 ${config.color}`} />
+                                </div>
+                                <div className="flex-1">
+                                  <div className="flex items-center justify-between mb-1">
+                                    <h4 className="font-semibold text-slate-800">{course.name}</h4>
+                                    <Badge className={course.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}>
+                                      {course.status === 'published' ? '已发布' : '草稿'}
+                                    </Badge>
+                                  </div>
+                                  <p className="text-sm text-slate-500 mb-3 line-clamp-2">{course.description}</p>
+                                  <div className="flex items-center gap-4 text-sm text-slate-500">
+                                    <span className="flex items-center gap-1">
+                                      <FolderOpen className="h-4 w-4" />
+                                      {course.chapters.length} 章节
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      <Clock className="h-4 w-4" />
+                                      {course.duration}
+                                    </span>
+                                    {course.credit && (
+                                      <span>{course.credit} 学分</span>
+                                    )}
+                                  </div>
+                                  <div className="flex items-center gap-3 mt-3">
+                                    <Progress value={getCourseProgress(course)} className="flex-1 h-2" />
+                                    <span className="text-sm font-medium text-slate-600">{getCourseProgress(course)}%</span>
+                                  </div>
+                                </div>
+                                <ChevronRight className="h-5 w-5 text-slate-400" />
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              /* 单分类列表 */
+              <div className="grid grid-cols-2 gap-4">
+                {filteredCourses.map((course) => {
+                  const config = categoryConfig[course.category];
+                  const Icon = config.icon;
+                  
+                  return (
+                    <Card 
+                      key={course.id} 
+                      className="border-0 shadow-lg hover:shadow-xl transition-all cursor-pointer"
+                      onClick={() => setSelectedCourse(course)}
+                    >
+                      <CardContent className="p-5">
+                        <div className="flex items-start gap-4">
+                          <div className={`w-14 h-14 rounded-xl ${config.bgColor} flex items-center justify-center`}>
+                            <Icon className={`h-7 w-7 ${config.color}`} />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-1">
+                              <h4 className="font-semibold text-slate-800">{course.name}</h4>
+                              <Badge className={course.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}>
+                                {course.status === 'published' ? '已发布' : '草稿'}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-slate-500 mb-3 line-clamp-2">{course.description}</p>
+                            <div className="flex items-center gap-4 text-sm text-slate-500">
+                              <span className="flex items-center gap-1">
+                                <FolderOpen className="h-4 w-4" />
+                                {course.chapters.length} 章节
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-4 w-4" />
+                                {course.duration}
+                              </span>
+                              {course.credit && (
+                                <span>{course.credit} 学分</span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-3 mt-3">
+                              <Progress value={getCourseProgress(course)} className="flex-1 h-2" />
+                              <span className="text-sm font-medium text-slate-600">{getCourseProgress(course)}%</span>
+                            </div>
+                          </div>
+                          <ChevronRight className="h-5 w-5 text-slate-400" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </>
@@ -401,6 +547,14 @@ export default function TeacherCoursesPage() {
                 <Card className="border-0 shadow-lg">
                   <CardHeader className="flex flex-row items-center justify-between">
                     <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge className={`${categoryConfig[selectedCourse.category].bgColor} ${categoryConfig[selectedCourse.category].color}`}>
+                          {categoryConfig[selectedCourse.category].name}
+                        </Badge>
+                        {selectedCourse.credit && (
+                          <Badge variant="outline">{selectedCourse.credit} 学分</Badge>
+                        )}
+                      </div>
                       <CardTitle>{selectedCourse.name}</CardTitle>
                       <CardDescription>{selectedCourse.description}</CardDescription>
                     </div>
@@ -427,7 +581,12 @@ export default function TeacherCoursesPage() {
                             </div>
                             <div className="flex-1">
                               <p className="font-medium text-slate-800">{chapter.title}</p>
-                              <p className="text-sm text-slate-500">{chapter.duration}</p>
+                              <div className="flex items-center gap-3 text-sm text-slate-500">
+                                <span>{chapter.duration}</span>
+                                {chapter.difficulty === 'advanced' && (
+                                  <Badge className="bg-red-100 text-red-700 text-xs">进阶</Badge>
+                                )}
+                              </div>
                             </div>
                             <div className="flex items-center gap-2">
                               {chapter.videoKey && (

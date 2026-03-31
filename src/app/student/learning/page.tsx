@@ -21,6 +21,11 @@ import {
   Bookmark,
   Upload,
   Loader2,
+  GraduationCap,
+  Target,
+  Wrench,
+  TrendingUp,
+  Award as CertificateIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -28,6 +33,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { VideoPlayer } from '@/components/video-player';
+import type { Course, Chapter, CourseCategory } from '@/data/courses';
 
 const menuItems = [
   { id: 'dashboard', label: '实训控制台', icon: LayoutDashboard, href: '/student/dashboard' },
@@ -38,25 +44,14 @@ const menuItems = [
   { id: 'qa', label: '答疑提问', icon: MessageCircle, href: '/student/qa' },
 ];
 
-interface Chapter {
-  id: number;
-  title: string;
-  duration: string;
-  videoKey?: string;
-  documentKeys?: string[];
-  description?: string;
-}
-
-interface Course {
-  id: number;
-  name: string;
-  description: string;
-  chapters: Chapter[];
-  duration: string;
-  status: 'published' | 'draft';
-  progress: number;
-  completed: number;
-}
+// 课程分类配置
+const categoryConfig: Record<CourseCategory, { name: string; icon: React.ElementType; color: string; bgColor: string }> = {
+  foundation: { name: '专业基础', icon: GraduationCap, color: 'text-blue-600', bgColor: 'bg-blue-100' },
+  core: { name: '专业核心', icon: Target, color: 'text-indigo-600', bgColor: 'bg-indigo-100' },
+  practice: { name: '实践操作', icon: Wrench, color: 'text-green-600', bgColor: 'bg-green-100' },
+  extension: { name: '拓展提升', icon: TrendingUp, color: 'text-amber-600', bgColor: 'bg-amber-100' },
+  certification: { name: '考证培训', icon: CertificateIcon, color: 'text-purple-600', bgColor: 'bg-purple-100' },
+};
 
 interface VideoItem {
   key: string;
@@ -77,6 +72,7 @@ export default function StudentLearningPage() {
   const [activeTab, setActiveTab] = useState('courses');
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<CourseCategory | 'all'>('all');
   
   // 课程列表（从API获取）
   const [courses, setCourses] = useState<Course[]>([]);
@@ -200,6 +196,26 @@ export default function StudentLearningPage() {
     setPlayingVideo(video);
   };
 
+  // 根据分类筛选课程
+  const filteredCourses = selectedCategory === 'all' 
+    ? courses 
+    : courses.filter(c => c.category === selectedCategory);
+
+  // 按分类分组课程
+  const groupedCourses = courses.reduce((acc, course) => {
+    const cat = course.category;
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(course);
+    return acc;
+  }, {} as Record<CourseCategory, Course[]>);
+
+  // 计算学习统计
+  const totalCourses = courses.length;
+  const completedCourses = courses.filter(c => (c.progress || 0) === 100).length;
+  const inProgressCourses = courses.filter(c => (c.progress || 0) > 0 && (c.progress || 0) < 100).length;
+  const totalChapters = courses.reduce((sum, c) => sum + c.chapters.length, 0);
+  const completedChapters = courses.reduce((sum, c) => sum + (c.completed || 0), 0);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50">
       {/* 顶部导航栏 */}
@@ -266,7 +282,63 @@ export default function StudentLearningPage() {
         {/* 页面标题 */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-slate-800">学习中心</h2>
-          <p className="text-slate-500">课程学习、微课视频、知识库查询</p>
+          <p className="text-slate-500">课程体系 · 微课视频 · 知识库</p>
+        </div>
+
+        {/* 学习统计卡片 */}
+        <div className="grid grid-cols-4 gap-4 mb-6">
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                  <BookOpen className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-slate-800">{totalCourses}</p>
+                  <p className="text-xs text-slate-500">全部课程</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
+                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-slate-800">{completedCourses}</p>
+                  <p className="text-xs text-slate-500">已完成</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
+                  <Play className="h-5 w-5 text-amber-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-slate-800">{inProgressCourses}</p>
+                  <p className="text-xs text-slate-500">学习中</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center">
+                  <Clock className="h-5 w-5 text-indigo-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-slate-800">{completedChapters}/{totalChapters}</p>
+                  <p className="text-xs text-slate-500">章节进度</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
@@ -301,6 +373,14 @@ export default function StudentLearningPage() {
                   <div className="col-span-2">
                     <Card className="border-0 shadow-lg">
                       <CardHeader>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge className={`${categoryConfig[selectedCourse.category].bgColor} ${categoryConfig[selectedCourse.category].color}`}>
+                            {categoryConfig[selectedCourse.category].name}
+                          </Badge>
+                          {selectedCourse.credit && (
+                            <Badge variant="outline">{selectedCourse.credit} 学分</Badge>
+                          )}
+                        </div>
                         <CardTitle>{selectedCourse.name}</CardTitle>
                         <CardDescription>{selectedCourse.description}</CardDescription>
                       </CardHeader>
@@ -329,14 +409,21 @@ export default function StudentLearningPage() {
                               <p className="text-sm text-blue-600">
                                 {selectedChapter.description || '本节课程将详细讲解相关知识点，帮助您掌握核心技能。'}
                               </p>
+                              {selectedChapter.tags && (
+                                <div className="flex gap-2 mt-2">
+                                  {selectedChapter.tags.map(tag => (
+                                    <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                           </div>
                         ) : (
                           /* 章节列表 */
                           <div className="space-y-3">
-                            {selectedCourse.chapters.map((chapter) => {
-                              const isCompleted = selectedCourse.completed > 0 && 
-                                selectedCourse.chapters.indexOf(chapter) < selectedCourse.completed;
+                            {selectedCourse.chapters.map((chapter, index) => {
+                              const isCompleted = (selectedCourse.completed || 0) > 0 && 
+                                index < (selectedCourse.completed || 0);
                               
                               return (
                                 <div
@@ -359,7 +446,12 @@ export default function StudentLearningPage() {
                                   </div>
                                   <div className="flex-1">
                                     <p className="font-medium text-slate-800">{chapter.title}</p>
-                                    <p className="text-sm text-slate-500">{chapter.duration}</p>
+                                    <div className="flex items-center gap-3 text-sm text-slate-500">
+                                      <span>{chapter.duration}</span>
+                                      {chapter.difficulty === 'advanced' && (
+                                        <Badge className="bg-red-100 text-red-700 text-xs">进阶</Badge>
+                                      )}
+                                    </div>
                                   </div>
                                   {isCompleted && (
                                     <Badge className="bg-green-500">已完成</Badge>
@@ -384,15 +476,15 @@ export default function StudentLearningPage() {
                           <div className="flex items-center justify-between">
                             <span className="text-slate-600">已完成章节</span>
                             <span className="font-bold text-blue-600">
-                              {selectedCourse.completed} / {selectedCourse.chapters.length}
+                              {selectedCourse.completed || 0} / {selectedCourse.chapters.length}
                             </span>
                           </div>
                           <Progress 
-                            value={(selectedCourse.completed / selectedCourse.chapters.length) * 100} 
+                            value={((selectedCourse.completed || 0) / selectedCourse.chapters.length) * 100} 
                             className="h-3" 
                           />
                           <div className="text-center text-sm text-slate-500">
-                            完成率 {((selectedCourse.completed / selectedCourse.chapters.length) * 100).toFixed(0)}%
+                            完成率 {(((selectedCourse.completed || 0) / selectedCourse.chapters.length) * 100).toFixed(0)}%
                           </div>
                         </div>
                       </CardContent>
@@ -412,6 +504,12 @@ export default function StudentLearningPage() {
                             <span className="text-slate-500">章节数</span>
                             <span className="font-medium">{selectedCourse.chapters.length} 节</span>
                           </div>
+                          {selectedCourse.credit && (
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-slate-500">学分</span>
+                              <span className="font-medium">{selectedCourse.credit} 学分</span>
+                            </div>
+                          )}
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-slate-500">状态</span>
                             <Badge className="bg-green-100 text-green-700">学习中</Badge>
@@ -426,9 +524,9 @@ export default function StudentLearningPage() {
                       </CardHeader>
                       <CardContent>
                         <p className="text-sm text-blue-100 mb-3">
-                          {selectedCourse.completed === selectedCourse.chapters.length
+                          {(selectedCourse.completed || 0) === selectedCourse.chapters.length
                             ? '恭喜！您已完成本课程所有章节，可以进行复习或开始下一课程。'
-                            : selectedCourse.completed > 0
+                            : (selectedCourse.completed || 0) > 0
                             ? '继续加油！保持学习节奏，每天进步一点点。'
                             : '开始您的学习之旅吧！建议按章节顺序学习。'}
                         </p>
@@ -440,60 +538,127 @@ export default function StudentLearningPage() {
             ) : (
               /* 课程列表 */
               <>
+                {/* 课程分类筛选 */}
+                <div className="flex gap-2 mb-6 flex-wrap">
+                  <Button
+                    variant={selectedCategory === 'all' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSelectedCategory('all')}
+                  >
+                    全部课程
+                  </Button>
+                  {(Object.keys(categoryConfig) as CourseCategory[]).map((cat) => {
+                    const config = categoryConfig[cat];
+                    const Icon = config.icon;
+                    return (
+                      <Button
+                        key={cat}
+                        variant={selectedCategory === cat ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setSelectedCategory(cat)}
+                        className="gap-2"
+                      >
+                        <Icon className="h-4 w-4" />
+                        {config.name}
+                      </Button>
+                    );
+                  })}
+                </div>
+
                 {isLoadingCourses ? (
                   <div className="flex items-center justify-center py-12">
                     <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
                     <span className="ml-2 text-slate-500">加载课程中...</span>
                   </div>
-                ) : (
-                  <div className="grid grid-cols-2 gap-4">
-                    {courses.map((course) => (
-                      <Card 
-                        key={course.id} 
-                        className="border-0 shadow-lg shadow-slate-200/50 hover:shadow-xl transition-all cursor-pointer"
-                        onClick={() => openCourse(course)}
-                      >
-                        <CardContent className="p-6">
-                          <div className="flex items-start gap-4">
-                            <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-2xl ${
-                              course.completed === course.chapters.length
-                                ? 'bg-green-100'
-                                : course.completed > 0
-                                ? 'bg-blue-100'
-                                : 'bg-slate-100'
-                            }`}>
-                              {course.completed === course.chapters.length ? '✅' : course.completed > 0 ? '📖' : '📚'}
+                ) : selectedCategory === 'all' ? (
+                  /* 按模块分组显示 */
+                  <div className="space-y-8">
+                    {(Object.keys(categoryConfig) as CourseCategory[]).map((cat) => {
+                      const catCourses = groupedCourses[cat] || [];
+                      if (catCourses.length === 0) return null;
+                      
+                      const config = categoryConfig[cat];
+                      const Icon = config.icon;
+                      
+                      return (
+                        <div key={cat}>
+                          <div className="flex items-center gap-2 mb-4">
+                            <div className={`w-8 h-8 rounded-lg ${config.bgColor} flex items-center justify-center`}>
+                              <Icon className={`h-4 w-4 ${config.color}`} />
                             </div>
-                            <div className="flex-1">
-                              <h3 className="font-semibold text-slate-800 mb-1">{course.name}</h3>
-                              <p className="text-sm text-slate-500 mb-3 line-clamp-2">{course.description}</p>
-                              <div className="flex items-center gap-4 text-sm text-slate-500 mb-3">
-                                <span className="flex items-center gap-1">
-                                  <Video className="h-4 w-4" />
-                                  {course.chapters.length} 课时
-                                </span>
-                                <span className="flex items-center gap-1">
-                                  <Clock className="h-4 w-4" />
-                                  {course.duration}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-3">
-                                <Progress 
-                                  value={(course.completed / course.chapters.length) * 100} 
-                                  className="flex-1 h-2" 
-                                />
-                                <span className="text-sm font-medium text-slate-600">
-                                  {course.completed}/{course.chapters.length}
-                                </span>
-                              </div>
-                            </div>
-                            <Button size="sm" variant={course.completed === course.chapters.length ? 'outline' : 'default'}>
-                              {course.completed === course.chapters.length ? '复习' : course.completed > 0 ? '继续学习' : '开始学习'}
-                            </Button>
+                            <h3 className="text-lg font-semibold text-slate-800">{config.name}模块</h3>
+                            <Badge variant="secondary">{catCourses.length} 门课程</Badge>
                           </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                          <div className="grid grid-cols-2 gap-4">
+                            {catCourses.map((course) => (
+                              <Card 
+                                key={course.id} 
+                                className="border-0 shadow-lg shadow-slate-200/50 hover:shadow-xl transition-all cursor-pointer"
+                                onClick={() => openCourse(course)}
+                              >
+                                <CardContent className="p-5">
+                                  <div className="flex items-start gap-4">
+                                    <div className={`w-12 h-12 rounded-xl ${config.bgColor} flex items-center justify-center`}>
+                                      <Icon className={`h-6 w-6 ${config.color}`} />
+                                    </div>
+                                    <div className="flex-1">
+                                      <h4 className="font-semibold text-slate-800 mb-1">{course.name}</h4>
+                                      <p className="text-sm text-slate-500 mb-3 line-clamp-2">{course.description}</p>
+                                      <div className="flex items-center gap-4 text-sm text-slate-500">
+                                        <span>{course.chapters.length} 章节</span>
+                                        <span>{course.duration}</span>
+                                        {course.credit && <span>{course.credit} 学分</span>}
+                                      </div>
+                                      <div className="flex items-center gap-3 mt-3">
+                                        <Progress value={course.progress || 0} className="flex-1 h-2" />
+                                        <span className="text-sm font-medium text-slate-600">{course.progress || 0}%</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  /* 单分类列表 */
+                  <div className="grid grid-cols-2 gap-4">
+                    {filteredCourses.map((course) => {
+                      const config = categoryConfig[course.category];
+                      const Icon = config.icon;
+                      
+                      return (
+                        <Card 
+                          key={course.id} 
+                          className="border-0 shadow-lg shadow-slate-200/50 hover:shadow-xl transition-all cursor-pointer"
+                          onClick={() => openCourse(course)}
+                        >
+                          <CardContent className="p-5">
+                            <div className="flex items-start gap-4">
+                              <div className={`w-12 h-12 rounded-xl ${config.bgColor} flex items-center justify-center`}>
+                                <Icon className={`h-6 w-6 ${config.color}`} />
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-slate-800 mb-1">{course.name}</h4>
+                                <p className="text-sm text-slate-500 mb-3 line-clamp-2">{course.description}</p>
+                                <div className="flex items-center gap-4 text-sm text-slate-500">
+                                  <span>{course.chapters.length} 章节</span>
+                                  <span>{course.duration}</span>
+                                  {course.credit && <span>{course.credit} 学分</span>}
+                                </div>
+                                <div className="flex items-center gap-3 mt-3">
+                                  <Progress value={course.progress} className="flex-1 h-2" />
+                                  <span className="text-sm font-medium text-slate-600">{course.progress}%</span>
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
                   </div>
                 )}
               </>
