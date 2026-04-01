@@ -11,11 +11,19 @@ import {
   EyeOff,
   ArrowRight,
   Building2,
-  BookOpen,
+  Brain,
+  Target,
+  LineChart,
+  AlertTriangle,
+  ShoppingCart,
+  ShoppingBag,
+  Store,
+  Sparkles,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 
 type UserRole = 'admin' | 'teacher' | 'student';
 
@@ -59,6 +67,21 @@ const roles: RoleConfig[] = [
   },
 ];
 
+// 三大电商场景
+const scenarios = [
+  { name: '国内电商', icon: ShoppingCart, platforms: '淘宝/天猫、拼多多、抖音' },
+  { name: '跨境平台', icon: ShoppingBag, platforms: '亚马逊、Shopee、Lazada' },
+  { name: '外贸独立站', icon: Store, platforms: 'Shopify类建站+运营' },
+];
+
+// 四大核心能力
+const coreAbilities = [
+  { name: '商业决策', icon: Target, desc: 'AI提供选项，学生做决策' },
+  { name: '流量逻辑', icon: LineChart, desc: '理解流量背后的商业逻辑' },
+  { name: '数据复盘', icon: LineChart, desc: '真正理解数据背后的含义' },
+  { name: '风险应对', icon: AlertTriangle, desc: '应对真实市场不确定性' },
+];
+
 export default function LoginPage() {
   const router = useRouter();
   const [selectedRole, setSelectedRole] = useState<UserRole>('student');
@@ -83,7 +106,7 @@ export default function LoginPage() {
       <div className="hidden lg:flex lg:w-[55%] flex-col justify-center relative z-10 px-16 py-12 h-full">
         <div className="max-w-xl">
           {/* Logo和名称 */}
-          <div className="flex items-center gap-4 mb-12">
+          <div className="flex items-center gap-4 mb-8">
             <div className="w-14 h-14 rounded-xl bg-blue-900 flex items-center justify-center">
               <Globe className="h-8 w-8 text-white" />
             </div>
@@ -93,41 +116,67 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* 功能模块 */}
-          <div className="space-y-8">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-slate-700/50 flex items-center justify-center flex-shrink-0">
-                <BookOpen className="h-6 w-6 text-slate-400" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-white text-lg mb-1">产教融合</h3>
-                <p className="text-sm text-slate-400 leading-relaxed">面向中高职、本科院校电商/跨境电商专业，打造"教学-实训-考核-就业"全闭环</p>
-              </div>
+          {/* 核心定位 */}
+          <div className="mb-8">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/20 border border-purple-500/30 mb-4">
+              <Brain className="h-4 w-4 text-purple-400" />
+              <span className="text-purple-300 text-sm font-medium">AI时代电商运营决策能力培养平台</span>
             </div>
+            <h2 className="text-3xl font-bold text-white leading-tight">
+              驾驭AI · 培养能力<br />
+              <span className="text-blue-400">做不被AI替代的电商人才</span>
+            </h2>
+          </div>
 
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-slate-700/50 flex items-center justify-center flex-shrink-0">
-                <Globe className="h-6 w-6 text-slate-400" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-white text-lg mb-1">仿真引擎</h3>
-                <p className="text-sm text-slate-400 leading-relaxed">1:1复刻Shopify建站平台，虚拟域名、资金、流量，零风险全流程模拟</p>
-              </div>
+          {/* 三大电商场景 */}
+          <div className="mb-8">
+            <h3 className="text-sm font-medium text-slate-400 mb-3">三大电商场景全覆盖</h3>
+            <div className="flex gap-3">
+              {scenarios.map((scenario, index) => (
+                <div key={index} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-700/50">
+                  <scenario.icon className="h-4 w-4 text-blue-400" />
+                  <div>
+                    <p className="text-sm font-medium text-white">{scenario.name}</p>
+                    <p className="text-xs text-slate-400">{scenario.platforms}</p>
+                  </div>
+                </div>
+              ))}
             </div>
+          </div>
 
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-slate-700/50 flex items-center justify-center flex-shrink-0">
-                <GraduationCap className="h-6 w-6 text-slate-400" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-white text-lg mb-1">实战技能</h3>
-                <p className="text-sm text-slate-400 leading-relaxed">6大核心技能模块，从0到1搭建独立站，掌握建站、推广、运营全链路技能</p>
-              </div>
+          {/* 四大核心能力 */}
+          <div className="mb-10">
+            <h3 className="text-sm font-medium text-slate-400 mb-3">四大不可替代的核心能力</h3>
+            <div className="grid grid-cols-2 gap-3">
+              {coreAbilities.map((ability, index) => (
+                <div key={index} className="flex items-center gap-3 p-3 rounded-lg bg-slate-700/30">
+                  <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                    <ability.icon className="h-5 w-5 text-blue-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-white">{ability.name}</p>
+                    <p className="text-xs text-slate-400">{ability.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* AI辅助设计原则 */}
+          <div className="p-4 rounded-xl bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20">
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="h-4 w-4 text-purple-400" />
+              <span className="text-sm font-medium text-purple-300">AI辅助设计原则</span>
+            </div>
+            <div className="flex items-center gap-4 text-sm">
+              <span className="text-purple-200">AI提供选项</span>
+              <ArrowRight className="h-4 w-4 text-purple-400" />
+              <span className="text-emerald-300">学生做决策</span>
             </div>
           </div>
 
           {/* 数据展示 */}
-          <div className="mt-12 flex items-center gap-8">
+          <div className="mt-8 flex items-center gap-8">
             <div className="text-center">
               <p className="text-3xl font-bold text-white">50+</p>
               <p className="text-sm text-slate-400">合作院校</p>
@@ -139,8 +188,13 @@ export default function LoginPage() {
             </div>
             <div className="w-px h-12 bg-slate-700" />
             <div className="text-center">
-              <p className="text-3xl font-bold text-white">98%</p>
-              <p className="text-sm text-slate-400">满意度</p>
+              <p className="text-3xl font-bold text-white">3</p>
+              <p className="text-sm text-slate-400">电商场景</p>
+            </div>
+            <div className="w-px h-12 bg-slate-700" />
+            <div className="text-center">
+              <p className="text-3xl font-bold text-white">4</p>
+              <p className="text-sm text-slate-400">核心能力</p>
             </div>
           </div>
         </div>
