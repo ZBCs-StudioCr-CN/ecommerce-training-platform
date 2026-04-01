@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   Home,
@@ -490,30 +490,42 @@ const platformConfigs = {
   },
 };
 
-// 模拟店铺数据
-const mockStoreData: Record<string, { name: string; platform: string; products: any[]; orders: any[]; stats: any }> = {
-  'store-1': {
-    name: '潮流服饰旗舰店',
+// 存储键名
+const STORES_STORAGE_KEY = 'ecommerce_practice_stores';
+
+// 默认店铺详细数据模板
+const defaultStoreTemplates: Record<string, { name: string; platform: string; products: any[]; orders: any[]; stats: any }> = {
+  'taobao': {
+    name: '淘宝店铺',
     platform: 'taobao',
     products: [
       { id: '1', title: '2024夏季新款连衣裙', price: 299, originalPrice: 599, inventory: 50, status: 'active', sales: 1280, views: 15600 },
       { id: '2', title: '纯棉休闲T恤', price: 99, originalPrice: 199, inventory: 100, status: 'active', sales: 2560, views: 28900 },
       { id: '3', title: '高腰牛仔裤显瘦修身', price: 199, originalPrice: 399, inventory: 30, status: 'active', sales: 890, views: 12400 },
-      { id: '4', title: '针织开衫外套春秋薄款', price: 159, originalPrice: 299, inventory: 45, status: 'active', sales: 678, views: 8900 },
     ],
     orders: [],
-    stats: { 
-      visitors: 15680, 
-      orders: 156, 
-      revenue: 42850, 
-      conversion: 3.2,
-      pendingOrders: 12,
-      waitingShip: 8,
-      waitingPay: 5,
-    },
+    stats: { visitors: 15680, orders: 156, revenue: 42850, conversion: 3.2, pendingOrders: 12, waitingShip: 8, waitingPay: 5 },
   },
-  'store-2': {
-    name: 'TechGadget Store',
+  'pdd': {
+    name: '拼多多店铺',
+    platform: 'pdd',
+    products: [
+      { id: '1', title: '特价清仓连衣裙', price: 89, originalPrice: 199, inventory: 100, status: 'active', sales: 3560, views: 45000 },
+    ],
+    orders: [],
+    stats: { visitors: 25000, orders: 256, revenue: 22800, conversion: 4.5 },
+  },
+  'douyin': {
+    name: '抖音店铺',
+    platform: 'douyin',
+    products: [
+      { id: '1', title: '网红同款T恤', price: 79, originalPrice: 159, inventory: 200, status: 'active', sales: 5680, views: 89000 },
+    ],
+    orders: [],
+    stats: { visitors: 45000, orders: 380, revenue: 35000, conversion: 5.2 },
+  },
+  'amazon': {
+    name: 'Amazon Store',
     platform: 'amazon',
     products: [
       { id: '1', title: 'Wireless Bluetooth Earbuds Pro', price: 29.99, inventory: 200, status: 'active', sales: 4560, views: 89200 },
@@ -523,20 +535,85 @@ const mockStoreData: Record<string, { name: string; platform: string; products: 
     orders: [],
     stats: { visitors: 32000, orders: 89, revenue: 4560, conversion: 2.8 },
   },
-  'store-3': {
-    name: 'Fashion Plus',
+  'shopee': {
+    name: 'Shopee Store',
+    platform: 'shopee',
+    products: [
+      { id: '1', title: 'Fashion Dress Summer', price: 15.99, inventory: 150, status: 'active', sales: 2340, views: 45000 },
+    ],
+    orders: [],
+    stats: { visitors: 18000, orders: 120, revenue: 1920, conversion: 3.8 },
+  },
+  'lazada': {
+    name: 'Lazada Store',
+    platform: 'lazada',
+    products: [
+      { id: '1', title: 'Casual Top Women', price: 12.99, inventory: 180, status: 'active', sales: 1890, views: 32000 },
+    ],
+    orders: [],
+    stats: { visitors: 15000, orders: 95, revenue: 1235, conversion: 3.5 },
+  },
+  'shopify': {
+    name: 'Shopify Store',
     platform: 'shopify',
     products: [
       { id: '1', title: 'Summer Floral Dress', price: 49.99, inventory: 80, status: 'active', sales: 2340, views: 45000 },
       { id: '2', title: 'Casual Cotton Top', price: 29.99, inventory: 150, status: 'active', sales: 4560, views: 78000 },
       { id: '3', title: 'Classic Denim Jeans', price: 59.99, inventory: 60, status: 'active', sales: 1780, views: 34000 },
-      { id: '4', title: 'Elegant Blouse', price: 39.99, inventory: 90, status: 'active', sales: 1230, views: 28000 },
-      { id: '5', title: 'Cozy Cardigan', price: 44.99, inventory: 70, status: 'active', sales: 890, views: 19000 },
     ],
     orders: [],
     stats: { visitors: 45000, orders: 234, revenue: 18500, conversion: 5.2 },
   },
+  'shoplazza': {
+    name: '店匠店铺',
+    platform: 'shoplazza',
+    products: [
+      { id: '1', title: '时尚连衣裙', price: 199, inventory: 100, status: 'active', sales: 1560, views: 28000 },
+    ],
+    orders: [],
+    stats: { visitors: 22000, orders: 156, revenue: 30900, conversion: 4.2 },
+  },
+  'woocommerce': {
+    name: 'WooCommerce Store',
+    platform: 'woocommerce',
+    products: [
+      { id: '1', title: 'Premium Cotton Shirt', price: 39.99, inventory: 120, status: 'active', sales: 890, views: 18000 },
+    ],
+    orders: [],
+    stats: { visitors: 12000, orders: 78, revenue: 3120, conversion: 3.9 },
+  },
 };
+
+// 根据店铺ID获取店铺数据
+function getStoreData(storeId: string): { name: string; platform: string; products: any[]; orders: any[]; stats: any } {
+  if (typeof window === 'undefined') {
+    return defaultStoreTemplates['shopify'];
+  }
+  
+  try {
+    // 从localStorage读取店铺列表
+    const savedStores = localStorage.getItem(STORES_STORAGE_KEY);
+    if (savedStores) {
+      const stores = JSON.parse(savedStores);
+      const storeInfo = stores.find((s: any) => s.id === storeId);
+      
+      if (storeInfo) {
+        // 获取对应平台的模板数据
+        const template = defaultStoreTemplates[storeInfo.platform] || defaultStoreTemplates['shopify'];
+        return {
+          ...template,
+          name: storeInfo.name,
+          platform: storeInfo.platform,
+        };
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load store data:', e);
+  }
+  
+  // 返回默认模板
+  return defaultStoreTemplates['shopify'];
+}
 
 // 实训任务
 const mockTasks = [
@@ -555,7 +632,15 @@ export default function StoreAdminPage() {
   
   const [activeMenu, setActiveMenu] = useState('home');
   const [expandedMenus, setExpandedMenus] = useState<string[]>(['products']);
-  const [store] = useState(mockStoreData[storeId as keyof typeof mockStoreData] || mockStoreData['store-3']);
+  const [store, setStore] = useState(() => getStoreData(storeId));
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // 客户端加载店铺数据
+  useEffect(() => {
+    const storeData = getStoreData(storeId);
+    setStore(storeData);
+    setIsLoading(false);
+  }, [storeId]);
   
   const platformConfig = platformConfigs[store.platform as keyof typeof platformConfigs] || platformConfigs.shopify;
 
@@ -1390,6 +1475,19 @@ export default function StoreAdminPage() {
   // ========================================
   // 主渲染
   // ========================================
+  
+  // 加载状态
+  if (isLoading || !store) {
+    return (
+      <div className="min-h-screen bg-slate-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-slate-600">加载店铺数据...</p>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div className="min-h-screen bg-slate-100">
       {/* 顶部导航栏 */}
