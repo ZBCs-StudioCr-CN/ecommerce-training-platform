@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -211,40 +211,80 @@ const platformThemes = {
   },
 };
 
-// 模拟店铺数据
-const mockStoreData: Record<string, any> = {
-  'store-1': {
-    name: '潮流服饰旗舰店',
+// localStorage存储Key
+const STORES_STORAGE_KEY = 'practice_stores';
+
+// 默认店铺模板数据（用于新创建的店铺）
+const defaultStoreTemplates: Record<string, any> = {
+  taobao: {
+    name: '新店铺',
     platform: 'taobao',
-    slogan: '时尚前沿，品质生活',
+    slogan: '品质生活，从这里开始',
     products: [
       { id: '1', title: '2024夏季新款连衣裙 优雅气质修身显瘦中长款', price: 299, originalPrice: 599, sales: 1280, rating: 4.8, reviews: 256, stock: 50, tags: ['新品', '热销'] },
       { id: '2', title: '纯棉休闲T恤 简约百搭款 纯色短袖上衣', price: 99, originalPrice: 199, sales: 2560, rating: 4.9, reviews: 512, stock: 100, tags: ['热销'] },
       { id: '3', title: '高腰牛仔裤 显瘦修身 直筒长裤女', price: 199, originalPrice: 399, sales: 890, rating: 4.7, reviews: 178, stock: 30, tags: [] },
       { id: '4', title: '针织开衫外套 春秋薄款 V领修身', price: 159, originalPrice: 299, sales: 678, rating: 4.8, reviews: 136, stock: 45, tags: ['新品'] },
-      { id: '5', title: '西装裤直筒 职场通勤 高腰显瘦', price: 179, originalPrice: 359, sales: 456, rating: 4.6, reviews: 91, stock: 60, tags: [] },
-      { id: '6', title: '雪纺衬衫女 气质优雅 宽松显瘦', price: 139, originalPrice: 279, sales: 890, rating: 4.7, reviews: 178, stock: 80, tags: ['热销'] },
-      { id: '7', title: '网纱半身裙 夏季新款 A字裙显瘦', price: 129, originalPrice: 259, sales: 567, rating: 4.5, reviews: 113, stock: 55, tags: [] },
-      { id: '8', title: '休闲运动裤 宽松显瘦 束脚长裤', price: 149, originalPrice: 299, sales: 789, rating: 4.8, reviews: 158, stock: 70, tags: [] },
     ],
-    categories: ['连衣裙', 'T恤', '裤装', '外套', '衬衫', '套装', '半身裙', '运动装'],
+    categories: ['连衣裙', 'T恤', '裤装', '外套', '衬衫', '套装'],
   },
-  'store-2': {
-    name: 'TechGadget Store',
+  pdd: {
+    name: '新店铺',
+    platform: 'pdd',
+    slogan: '拼着买，更便宜',
+    products: [
+      { id: '1', title: '百亿补贴 纯棉T恤男女同款', price: 29.9, originalPrice: 99, sales: 50000, rating: 4.8, reviews: 10000, stock: 500, tags: ['百亿补贴'] },
+      { id: '2', title: '爆款牛仔裤 高腰显瘦', price: 49.9, originalPrice: 199, sales: 30000, rating: 4.7, reviews: 6000, stock: 300, tags: ['热销'] },
+      { id: '3', title: '夏季连衣裙 气质优雅', price: 59.9, originalPrice: 299, sales: 25000, rating: 4.9, reviews: 5000, stock: 200, tags: ['秒杀'] },
+    ],
+    categories: ['服饰', '鞋包', '美妆', '家居', '食品', '数码'],
+  },
+  douyin: {
+    name: '新店铺',
+    platform: 'douyin',
+    slogan: '发现好物，分享生活',
+    products: [
+      { id: '1', title: '抖音爆款 网红连衣裙', price: 168, originalPrice: 299, sales: 8000, rating: 4.9, reviews: 1600, stock: 100, tags: ['直播热卖'] },
+      { id: '2', title: '短视频推荐 休闲套装', price: 138, originalPrice: 258, sales: 6500, rating: 4.8, reviews: 1300, stock: 80, tags: ['爆款'] },
+      { id: '3', title: '达人同款 潮流卫衣', price: 198, originalPrice: 358, sales: 4200, rating: 4.7, reviews: 840, stock: 60, tags: ['新品'] },
+    ],
+    categories: ['推荐', '服饰', '美妆', '食品', '家居', '数码'],
+  },
+  amazon: {
+    name: 'New Store',
     platform: 'amazon',
-    slogan: 'Quality Tech, Better Life',
+    slogan: 'Shop Quality Products',
     products: [
       { id: '1', title: 'Wireless Bluetooth Earbuds Pro with Active Noise Cancelling', price: 29.99, originalPrice: 49.99, sales: 4560, rating: 4.5, reviews: 892, stock: 200, tags: ['Best Seller'] },
       { id: '2', title: 'Silicone Phone Case for iPhone 15 Pro Max - Shockproof', price: 9.99, originalPrice: 19.99, sales: 8920, rating: 4.3, reviews: 1784, stock: 500, tags: ['Best Seller'] },
       { id: '3', title: 'USB-C Fast Charging Cable 3-Pack - 6ft Nylon Braided', price: 14.99, originalPrice: 24.99, sales: 6780, rating: 4.4, reviews: 1356, stock: 300, tags: [] },
-      { id: '4', title: 'Portable Power Bank 20000mAh - Fast Charging', price: 39.99, originalPrice: 59.99, sales: 2340, rating: 4.6, reviews: 468, stock: 150, tags: ['Prime'] },
-      { id: '5', title: 'Wireless Charging Pad - Compatible with All Qi Devices', price: 19.99, originalPrice: 34.99, sales: 3450, rating: 4.4, reviews: 690, stock: 180, tags: [] },
-      { id: '6', title: 'Bluetooth Speaker Portable - Waterproof IPX7', price: 24.99, originalPrice: 44.99, sales: 2180, rating: 4.7, reviews: 436, stock: 120, tags: ['Prime'] },
     ],
-    categories: ['Audio', 'Phone Accessories', 'Chargers', 'Power Banks', 'Smart Home', 'Speakers'],
+    categories: ['Electronics', 'Fashion', 'Home', 'Beauty', 'Sports', 'Toys'],
   },
-  'store-3': {
-    name: 'Fashion Plus',
+  shopee: {
+    name: '新店铺',
+    platform: 'shopee',
+    slogan: 'Shopee - 享受购物的乐趣',
+    products: [
+      { id: '1', title: '韩国进口护肤品套装 保湿补水', price: 128, originalPrice: 258, sales: 3500, rating: 4.8, reviews: 700, stock: 150, tags: ['热卖'] },
+      { id: '2', title: '日系简约双肩包 大容量通勤', price: 89, originalPrice: 168, sales: 2800, rating: 4.7, reviews: 560, stock: 100, tags: ['新品'] },
+      { id: '3', title: '泰式风格连衣裙 夏季新款', price: 68, originalPrice: 138, sales: 4200, rating: 4.6, reviews: 840, stock: 80, tags: ['秒杀'] },
+    ],
+    categories: ['美妆', '服饰', '鞋包', '数码', '家居', '食品'],
+  },
+  lazada: {
+    name: '新店铺',
+    platform: 'lazada',
+    slogan: 'Lazada - 品质生活，轻松购物',
+    products: [
+      { id: '1', title: '东南亚风格休闲裤 宽松舒适', price: 79, originalPrice: 158, sales: 3200, rating: 4.7, reviews: 640, stock: 120, tags: ['热卖'] },
+      { id: '2', title: '轻便运动鞋 透气防滑', price: 129, originalPrice: 259, sales: 2500, rating: 4.8, reviews: 500, stock: 90, tags: ['新品'] },
+      { id: '3', title: '防晒衣 轻薄透气 夏季必备', price: 59, originalPrice: 119, sales: 5800, rating: 4.6, reviews: 1160, stock: 200, tags: ['爆款'] },
+    ],
+    categories: ['服饰', '鞋靴', '箱包', '运动', '家居', '美妆'],
+  },
+  shopify: {
+    name: 'New Store',
     platform: 'shopify',
     slogan: 'Express Your Style',
     products: [
@@ -252,25 +292,79 @@ const mockStoreData: Record<string, any> = {
       { id: '2', title: 'Casual Cotton Top', price: 29.99, originalPrice: 49.99, sales: 4560, rating: 4.7, reviews: 912, stock: 150, tags: ['Best Seller'] },
       { id: '3', title: 'Classic Denim Jeans', price: 59.99, originalPrice: 89.99, sales: 1780, rating: 4.6, reviews: 356, stock: 60, tags: [] },
       { id: '4', title: 'Elegant Blouse', price: 39.99, originalPrice: 69.99, sales: 1230, rating: 4.8, reviews: 246, stock: 90, tags: ['New'] },
-      { id: '5', title: 'Cozy Cardigan', price: 44.99, originalPrice: 74.99, sales: 890, rating: 4.5, reviews: 178, stock: 70, tags: [] },
-      { id: '6', title: 'Stylish Skirt', price: 34.99, originalPrice: 59.99, sales: 1560, rating: 4.7, reviews: 312, stock: 85, tags: ['Best Seller'] },
-      { id: '7', title: 'Silk Scarf', price: 24.99, originalPrice: 44.99, sales: 890, rating: 4.6, reviews: 178, stock: 100, tags: [] },
-      { id: '8', title: 'Leather Belt', price: 19.99, originalPrice: 39.99, sales: 1120, rating: 4.4, reviews: 224, stock: 120, tags: [] },
     ],
-    categories: ['Dresses', 'Tops', 'Pants', 'Skirts', 'Outerwear', 'Accessories', 'New Arrivals', 'Sale'],
+    categories: ['Dresses', 'Tops', 'Pants', 'Skirts', 'Outerwear', 'Accessories'],
+  },
+  shoplazza: {
+    name: '新店铺',
+    platform: 'shoplazza',
+    slogan: '跨境电商，从店匠开始',
+    products: [
+      { id: '1', title: '北欧风格连衣裙 简约设计', price: 189, originalPrice: 358, sales: 1800, rating: 4.8, reviews: 360, stock: 80, tags: ['新品'] },
+      { id: '2', title: '纯棉T恤 男女同款 百搭款', price: 99, originalPrice: 198, sales: 3200, rating: 4.7, reviews: 640, stock: 150, tags: ['热卖'] },
+      { id: '3', title: '设计师款外套 春秋新款', price: 399, originalPrice: 698, sales: 980, rating: 4.9, reviews: 196, stock: 50, tags: ['设计师'] },
+    ],
+    categories: ['新品', '热卖', '女装', '男装', '配饰', '设计师'],
+  },
+  woocommerce: {
+    name: '新店铺',
+    platform: 'woocommerce',
+    slogan: 'Powered by WooCommerce',
+    products: [
+      { id: '1', title: 'Premium WordPress Theme', price: 59, originalPrice: 99, sales: 4500, rating: 4.8, reviews: 900, stock: 999, tags: ['Popular'] },
+      { id: '2', title: 'E-commerce Plugin Bundle', price: 79, originalPrice: 149, sales: 3200, rating: 4.7, reviews: 640, stock: 999, tags: ['Best Seller'] },
+      { id: '3', title: 'Website Security Package', price: 29, originalPrice: 59, sales: 5600, rating: 4.6, reviews: 1120, stock: 999, tags: ['New'] },
+    ],
+    categories: ['Themes', 'Plugins', 'Services', 'Support', 'Customization'],
   },
 };
+
+// 从localStorage获取店铺数据
+function getStoreData(storeId: string): any {
+  if (typeof window === 'undefined') {
+    return defaultStoreTemplates['shopify'];
+  }
+  
+  try {
+    const savedStores = localStorage.getItem(STORES_STORAGE_KEY);
+    if (savedStores) {
+      const stores = JSON.parse(savedStores);
+      const storeInfo = stores.find((s: any) => s.id === storeId);
+      
+      if (storeInfo) {
+        const template = defaultStoreTemplates[storeInfo.platform] || defaultStoreTemplates['shopify'];
+        return {
+          ...template,
+          name: storeInfo.name,
+          platform: storeInfo.platform,
+        };
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load store data:', e);
+  }
+  
+  return defaultStoreTemplates['shopify'];
+}
 
 export default function StorePreviewPage() {
   const params = useParams();
   const router = useRouter();
   const storeId = params.id as string;
   
-  const [store] = useState(mockStoreData[storeId as keyof typeof mockStoreData] || mockStoreData['store-3']);
+  const [store, setStore] = useState(() => getStoreData(storeId));
+  const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [cartCount, setCartCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // 客户端加载店铺数据
+  useEffect(() => {
+    const storeData = getStoreData(storeId);
+    setStore(storeData);
+    setIsLoading(false);
+  }, [storeId]);
   
   const theme = platformThemes[store.platform as keyof typeof platformThemes] || platformThemes.shopify;
   
