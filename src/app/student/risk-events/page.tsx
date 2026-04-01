@@ -798,7 +798,7 @@ export default function RiskEventsPage() {
                     <CardDescription>
                       请根据事件详情，制定详细的应对方案。AI将根据评分标准对您的方案进行评分。
                       <span className="block mt-2 text-red-600 font-medium">
-                        ⚠️ 重要提示：系统会自动检测AI生成内容，AI耦合度高于40%将直接判0分！
+                        ⚠️ 重要提示：系统会自动检测AI生成内容，AI耦合度高于60%将直接判0分！
                       </span>
                     </CardDescription>
                   </CardHeader>
