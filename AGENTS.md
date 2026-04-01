@@ -110,12 +110,30 @@
 - **教师**（蓝色标识）：班级管理、学生管理、任务发布、成绩查看
 - **学生**（绿色标识）：实训操作、数据分析、考核评分
 
+### 5. AI智能助手 (`src/app/student/ai-assistant/page.tsx`)
+- **9大核心功能模块**：
+  1. 市场分析 - 行业趋势、竞品分析、市场机会洞察
+  2. 选品建议 - 爆款挖掘、利润分析、供应链评估
+  3. 智能店铺搭建 - 店铺装修、页面优化、转化率提升
+  4. 投放建议 - 广告策略、预算分配、ROI优化
+  5. 运营策略 - 日常运营、活动策划、增长策略
+  6. 营销话术 - 文案撰写、话术优化、内容创意
+  7. 客户服务 - 客服培训、投诉处理、满意度提升
+  8. 数据复盘 - 数据分析、问题诊断、优化建议
+  9. 危机处理 - 风险预警、危机应对、舆情管理
+- **核心特性**：
+  - 流式AI对话（SSE协议）
+  - 每个模块独立的系统提示词
+  - 快捷问题引导
+  - 消息反馈机制（点赞/点踩）
+  - 使用统计记录
+
 ## 数据持久化策略
 
 ### localStorage使用规范
 ```typescript
-// 存储Key
-const STORES_KEY = 'practice_stores';
+// 存储Key（注意：必须保持一致）
+const STORES_KEY = 'ecommerce_practice_stores';
 
 // 保存店铺列表
 localStorage.setItem(STORES_KEY, JSON.stringify(stores));
@@ -129,6 +147,19 @@ const stores = JSON.parse(localStorage.getItem(STORES_KEY) || '[]');
 2. 跳转到店铺后台 → 从localStorage读取店铺信息
 3. 后台操作 → 模拟数据流转（前端状态管理）
 4. 刷新页面 → 数据从localStorage恢复
+
+### AI助手API (`src/app/api/ai-assistant/route.ts`)
+- **请求方式**：POST
+- **请求参数**：
+  ```typescript
+  {
+    message: string;    // 用户消息
+    module: string;     // 模块ID（market-analysis, product-selection等）
+    history?: Message[] // 历史对话（可选，最多10条）
+  }
+  ```
+- **响应格式**：SSE流式响应（text/event-stream）
+- **支持模块**：9个功能模块，每个模块有独立的系统提示词
 
 ## 开发规范
 
@@ -228,3 +259,5 @@ A: 运行`npx tsc --noEmit`检查类型，确保所有Props都有正确的类型
 - ✅ 修复新建店铺跳转问题
 - ✅ 修复预览页面localStorage键名不一致问题（统一为 `ecommerce_practice_stores`）
 - ✅ 修复预览页面抖音/Shopee/Lazada平台渲染错误（更新renderHeader逻辑）
+- ✅ 完成AI智能助手页面开发（9大核心功能模块）
+- ✅ 集成LLM实现流式AI对话功能
