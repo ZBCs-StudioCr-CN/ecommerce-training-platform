@@ -139,18 +139,26 @@ const riskEvents = [
 
 // 目标市场配置
 const targetMarkets = [
-  { id: 'us', name: '美国', currency: 'USD', language: '英语', features: ['成熟市场', '竞争激烈', '消费力强'] },
-  { id: 'uk', name: '英国', currency: 'GBP', language: '英语', features: ['欧洲门户', '法规严格', '品牌意识强'] },
-  { id: 'de', name: '德国', currency: 'EUR', language: '德语', features: ['欧洲最大市场', '质量要求高', '退货率高'] },
-  { id: 'jp', name: '日本', currency: 'JPY', language: '日语', features: ['消费精细', '服务要求高', '复购率高'] },
-  { id: 'au', name: '澳大利亚', currency: 'AUD', language: '英语', features: ['竞争较小', '物流成本高', '季节相反'] },
+  { id: 'cn', name: '中国', currency: 'CNY', language: '中文', features: ['国内市场', '熟悉环境', '供应链优势'], type: 'domestic' },
+  { id: 'us', name: '美国', currency: 'USD', language: '英语', features: ['成熟市场', '竞争激烈', '消费力强'], type: 'cross-border' },
+  { id: 'uk', name: '英国', currency: 'GBP', language: '英语', features: ['欧洲门户', '法规严格', '品牌意识强'], type: 'cross-border' },
+  { id: 'de', name: '德国', currency: 'EUR', language: '德语', features: ['欧洲最大市场', '质量要求高', '退货率高'], type: 'cross-border' },
+  { id: 'jp', name: '日本', currency: 'JPY', language: '日语', features: ['消费精细', '服务要求高', '复购率高'], type: 'cross-border' },
+  { id: 'au', name: '澳大利亚', currency: 'AUD', language: '英语', features: ['竞争较小', '物流成本高', '季节相反'], type: 'cross-border' },
 ];
 
-// 虚拟预算配置
-const budgetTemplates = [
-  { level: '入门级', total: 3000, ad: 2000, operation: 500, reserve: 500, description: '适合新手团队，基础预算' },
-  { level: '标准级', total: 5000, ad: 3000, operation: 1000, reserve: 1000, description: '标准预算，适合大多数团队' },
-  { level: '挑战级', total: 10000, ad: 6000, operation: 2000, reserve: 2000, description: '高预算，挑战更高目标' },
+// 虚拟预算配置 - 国内市场
+const budgetTemplatesDomestic = [
+  { level: '入门级', total: 20000, ad: 12000, operation: 4000, reserve: 4000, description: '适合新手，基础预算（人民币）' },
+  { level: '标准级', total: 35000, ad: 20000, operation: 8000, reserve: 7000, description: '标准预算，适合大多数项目（人民币）' },
+  { level: '挑战级', total: 60000, ad: 35000, operation: 15000, reserve: 10000, description: '高预算，挑战更高目标（人民币）' },
+];
+
+// 虚拟预算配置 - 跨境市场
+const budgetTemplatesCrossBorder = [
+  { level: '入门级', total: 3000, ad: 2000, operation: 500, reserve: 500, description: '适合新手，基础预算（美元）' },
+  { level: '标准级', total: 5000, ad: 3000, operation: 1000, reserve: 1000, description: '标准预算，适合大多数项目（美元）' },
+  { level: '挑战级', total: 10000, ad: 6000, operation: 2000, reserve: 2000, description: '高预算，挑战更高目标（美元）' },
 ];
 
 // 模拟学生列表
@@ -180,13 +188,16 @@ export default function ComprehensivePracticePage() {
   const [selectedClass, setSelectedClass] = useState('电商2201班');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  
+  // 项目模式：单人 / 小组
+  const [projectMode, setProjectMode] = useState<'solo' | 'team'>('solo');
 
   // 市场与预算
-  const [selectedMarket, setSelectedMarket] = useState('us');
+  const [selectedMarket, setSelectedMarket] = useState('cn');
   const [selectedBudget, setSelectedBudget] = useState('标准级');
-  const [customBudget, setCustomBudget] = useState({ total: 5000, ad: 3000, operation: 1000, reserve: 1000 });
+  const [customBudget, setCustomBudget] = useState({ total: 35000, ad: 20000, operation: 8000, reserve: 7000 });
 
-  // 小组配置
+  // 小组配置（仅在团队模式下使用）
   const [groupSize, setGroupSize] = useState(5);
   const [groupMethod, setGroupMethod] = useState<'random' | 'self' | 'manual'>('random');
   const [groups, setGroups] = useState<Array<Array<{ id: number; name: string; class: string; ability: { decision: number; traffic: number; data: number; risk: number } }>>>([]);
@@ -200,6 +211,11 @@ export default function ComprehensivePracticePage() {
   const [riskEnabled, setRiskEnabled] = useState(true);
   const [selectedRisks, setSelectedRisks] = useState<string[]>(['ad-ban', 'customer', 'shipping']);
   const [riskTriggerMode, setRiskTriggerMode] = useState<'random' | 'scheduled' | 'manual'>('random');
+  
+  // 根据市场类型获取预算模板
+  const isDomesticMarket = selectedMarket === 'cn';
+  const currentBudgetTemplates = isDomesticMarket ? budgetTemplatesDomestic : budgetTemplatesCrossBorder;
+  const currencySymbol = isDomesticMarket ? '¥' : '$';
 
   // AI配置
   const [aiAssistLevel, setAiAssistLevel] = useState<'low' | 'medium' | 'high'>('medium');
@@ -303,7 +319,7 @@ export default function ComprehensivePracticePage() {
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-slate-800">综合项目实战设置</h2>
-            <p className="text-slate-500">配置全链路实训项目，支持小组协作和动态风险事件</p>
+            <p className="text-slate-500">配置全链路实训项目，支持单人完成或小组协作，培养完整运营能力</p>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline">
@@ -328,14 +344,20 @@ export default function ComprehensivePracticePage() {
 
         {/* 步骤指示器 */}
         <div className="mb-6 flex items-center gap-2">
-          {[
+          {(projectMode === 'solo' ? [
             { step: 1, name: '项目基础', icon: Target },
-            { step: 2, name: '市场与预算', icon: DollarSign },
+            { step: 2, name: '市场预算', icon: DollarSign },
+            { step: 3, name: '阶段设置', icon: Layers },
+            { step: 4, name: '风险配置', icon: AlertTriangle },
+            { step: 5, name: 'AI设置', icon: Brain },
+          ] : [
+            { step: 1, name: '项目基础', icon: Target },
+            { step: 2, name: '市场预算', icon: DollarSign },
             { step: 3, name: '小组配置', icon: Users },
             { step: 4, name: '阶段设置', icon: Layers },
             { step: 5, name: '风险配置', icon: AlertTriangle },
             { step: 6, name: 'AI设置', icon: Brain },
-          ].map((item, index) => (
+          ]).map((item, index, arr) => (
             <div key={item.step} className="flex items-center">
               <button
                 onClick={() => setCurrentStep(item.step)}
@@ -354,7 +376,7 @@ export default function ComprehensivePracticePage() {
                 )}
                 <span className="font-medium">{item.name}</span>
               </button>
-              {index < 5 && <ChevronRight className="h-4 w-4 text-slate-400 mx-1" />}
+              {index < arr.length - 1 && <ChevronRight className="h-4 w-4 text-slate-400 mx-1" />}
             </div>
           ))}
         </div>
@@ -370,14 +392,14 @@ export default function ComprehensivePracticePage() {
                     <Target className="h-5 w-5 text-blue-500" />
                     项目基础信息
                   </CardTitle>
-                  <CardDescription>设置项目名称、描述和时间安排</CardDescription>
+                  <CardDescription>设置项目名称、模式和参与对象</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-medium text-slate-700 mb-2 block">项目名称 *</label>
                       <Input
-                        placeholder="如：美国服装品牌独立站全链路运营"
+                        placeholder="如：品牌独立站全链路运营"
                         value={projectName}
                         onChange={(e) => setProjectName(e.target.value)}
                       />
@@ -393,6 +415,59 @@ export default function ComprehensivePracticePage() {
                         <option>跨境电商2203班</option>
                         <option>电商2202班</option>
                       </select>
+                    </div>
+                  </div>
+
+                  {/* 项目模式选择 */}
+                  <div>
+                    <label className="text-sm font-medium text-slate-700 mb-3 block">项目模式 *</label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <button
+                        onClick={() => setProjectMode('solo')}
+                        className={`p-4 rounded-xl border-2 text-left transition-all ${
+                          projectMode === 'solo'
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-slate-200 hover:border-slate-300'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                            projectMode === 'solo' ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-500'
+                          }`}>
+                            <Users className="h-5 w-5" />
+                          </div>
+                          <span className="font-semibold">单人模式</span>
+                        </div>
+                        <p className="text-sm text-slate-500 mb-2">学生独立完成全链路任务，培养个人综合能力</p>
+                        <div className="flex flex-wrap gap-1">
+                          <Badge variant="outline" className="text-xs">全链路能力</Badge>
+                          <Badge variant="outline" className="text-xs">独立决策</Badge>
+                          <Badge variant="outline" className="text-xs">个人评分</Badge>
+                        </div>
+                      </button>
+                      <button
+                        onClick={() => setProjectMode('team')}
+                        className={`p-4 rounded-xl border-2 text-left transition-all ${
+                          projectMode === 'team'
+                            ? 'border-purple-500 bg-purple-50'
+                            : 'border-slate-200 hover:border-slate-300'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                            projectMode === 'team' ? 'bg-purple-100 text-purple-600' : 'bg-slate-100 text-slate-500'
+                          }`}>
+                            <Users className="h-5 w-5" />
+                          </div>
+                          <span className="font-semibold">小组模式</span>
+                        </div>
+                        <p className="text-sm text-slate-500 mb-2">团队协作完成项目，培养分工协作与沟通能力</p>
+                        <div className="flex flex-wrap gap-1">
+                          <Badge variant="outline" className="text-xs">角色分工</Badge>
+                          <Badge variant="outline" className="text-xs">团队协作</Badge>
+                          <Badge variant="outline" className="text-xs">互评机制</Badge>
+                        </div>
+                      </button>
                     </div>
                   </div>
 
@@ -432,9 +507,10 @@ export default function ComprehensivePracticePage() {
                     </h4>
                     <ul className="text-sm text-blue-700 space-y-1">
                       <li>• 全流程闭环，覆盖市场调研到数据分析完整链路</li>
-                      <li>• 支持小组协作（4-6人），角色分工明确</li>
+                      <li>• {projectMode === 'solo' ? '单人独立完成，培养全链路综合能力' : '小组协作（4-6人），角色分工明确'}</li>
+                      <li>• 支持国内市场和跨境市场场景</li>
                       <li>• 动态风险事件模拟真实运营场景</li>
-                      <li>• AI辅助+学生决策，培养核心能力</li>
+                      <li>• AI辅助+学生决策，培养核心决策能力</li>
                     </ul>
                   </div>
 
@@ -459,11 +535,51 @@ export default function ComprehensivePracticePage() {
                   <CardDescription>选择目标市场，分配虚拟运营预算</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {/* 目标市场选择 */}
+                  {/* 国内市场 */}
                   <div>
-                    <label className="text-sm font-medium text-slate-700 mb-3 block">目标市场</label>
+                    <label className="text-sm font-medium text-slate-700 mb-3 block flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                      国内市场
+                    </label>
+                    <div className="grid grid-cols-1 gap-3 mb-6">
+                      {targetMarkets.filter(m => m.type === 'domestic').map((market) => (
+                        <button
+                          key={market.id}
+                          onClick={() => setSelectedMarket(market.id)}
+                          className={`p-4 rounded-xl border-2 text-left transition-all ${
+                            selectedMarket === market.id
+                              ? 'border-blue-500 bg-blue-50'
+                              : 'border-slate-200 hover:border-slate-300'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="flex items-center gap-2">
+                                <MapPin className={`h-5 w-5 ${selectedMarket === market.id ? 'text-blue-500' : 'text-slate-400'}`} />
+                                <span className="font-semibold text-lg text-slate-800">{market.name}</span>
+                                <Badge className="bg-red-100 text-red-700">国内</Badge>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              {market.features.map((f, i) => (
+                                <Badge key={i} variant="outline" className="text-xs">{f}</Badge>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="mt-2 text-sm text-slate-600">
+                            模拟淘宝/天猫/拼多多/抖音等国内电商平台运营，熟悉国内电商环境
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* 跨境市场 */}
+                    <label className="text-sm font-medium text-slate-700 mb-3 block flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                      跨境市场
+                    </label>
                     <div className="grid grid-cols-5 gap-3">
-                      {targetMarkets.map((market) => (
+                      {targetMarkets.filter(m => m.type === 'cross-border').map((market) => (
                         <button
                           key={market.id}
                           onClick={() => setSelectedMarket(market.id)}
@@ -493,9 +609,12 @@ export default function ComprehensivePracticePage() {
 
                   {/* 预算模板 */}
                   <div>
-                    <label className="text-sm font-medium text-slate-700 mb-3 block">预算模板</label>
+                    <label className="text-sm font-medium text-slate-700 mb-3 block">
+                      预算模板 {isDomesticMarket && <span className="text-red-500">（人民币）</span>}
+                      {!isDomesticMarket && <span className="text-blue-500">（美元）</span>}
+                    </label>
                     <div className="grid grid-cols-3 gap-3">
-                      {budgetTemplates.map((budget) => (
+                      {currentBudgetTemplates.map((budget) => (
                         <button
                           key={budget.level}
                           onClick={() => {
@@ -515,21 +634,21 @@ export default function ComprehensivePracticePage() {
                         >
                           <div className="flex items-center justify-between mb-2">
                             <span className="font-semibold text-slate-800">{budget.level}</span>
-                            <span className="text-xl font-bold text-green-600">${budget.total}</span>
+                            <span className="text-xl font-bold text-green-600">{currencySymbol}{budget.total}</span>
                           </div>
                           <p className="text-xs text-slate-500 mb-2">{budget.description}</p>
                           <div className="space-y-1 text-xs">
                             <div className="flex justify-between">
                               <span className="text-slate-500">广告预算</span>
-                              <span className="font-medium">${budget.ad}</span>
+                              <span className="font-medium">{currencySymbol}{budget.ad}</span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-slate-500">运营费用</span>
-                              <span className="font-medium">${budget.operation}</span>
+                              <span className="font-medium">{currencySymbol}{budget.operation}</span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-slate-500">储备金</span>
-                              <span className="font-medium">${budget.reserve}</span>
+                              <span className="font-medium">{currencySymbol}{budget.reserve}</span>
                             </div>
                           </div>
                         </button>
@@ -539,7 +658,10 @@ export default function ComprehensivePracticePage() {
 
                   {/* 自定义预算 */}
                   <div>
-                    <label className="text-sm font-medium text-slate-700 mb-2 block">自定义预算分配</label>
+                    <label className="text-sm font-medium text-slate-700 mb-2 block">
+                      自定义预算分配 {isDomesticMarket && <span className="text-xs text-red-500">（人民币）</span>}
+                      {!isDomesticMarket && <span className="text-xs text-blue-500">（美元）</span>}
+                    </label>
                     <div className="grid grid-cols-4 gap-4">
                       <div>
                         <label className="text-xs text-slate-500 mb-1 block">总预算</label>
@@ -580,8 +702,8 @@ export default function ComprehensivePracticePage() {
                     <Button variant="outline" onClick={() => setCurrentStep(1)}>
                       上一步
                     </Button>
-                    <Button onClick={() => setCurrentStep(3)}>
-                      下一步：小组配置
+                    <Button onClick={() => setCurrentStep(projectMode === 'solo' ? 4 : 3)}>
+                      下一步：{projectMode === 'solo' ? '阶段设置' : '小组配置'}
                       <ChevronRight className="h-4 w-4 ml-2" />
                     </Button>
                   </div>
@@ -589,8 +711,8 @@ export default function ComprehensivePracticePage() {
               </Card>
             )}
 
-            {/* 步骤3：小组配置 */}
-            {currentStep === 3 && (
+            {/* 步骤3：小组配置（仅小组模式） */}
+            {currentStep === 3 && projectMode === 'team' && (
               <Card className="border-0 shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -731,8 +853,8 @@ export default function ComprehensivePracticePage() {
               </Card>
             )}
 
-            {/* 步骤4：阶段设置 */}
-            {currentStep === 4 && (
+            {/* 步骤4（小组模式）/ 步骤3（单人模式）：阶段设置 */}
+            {(currentStep === 4 && projectMode === 'team') || (currentStep === 3 && projectMode === 'solo') ? (
               <Card className="border-0 shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -831,20 +953,20 @@ export default function ComprehensivePracticePage() {
                   </div>
 
                   <div className="flex justify-between">
-                    <Button variant="outline" onClick={() => setCurrentStep(3)}>
+                    <Button variant="outline" onClick={() => setCurrentStep(projectMode === 'solo' ? 2 : 3)}>
                       上一步
                     </Button>
-                    <Button onClick={() => setCurrentStep(5)}>
+                    <Button onClick={() => setCurrentStep(projectMode === 'solo' ? 4 : 5)}>
                       下一步：风险配置
                       <ChevronRight className="h-4 w-4 ml-2" />
                     </Button>
                   </div>
                 </CardContent>
               </Card>
-            )}
+            ) : null}
 
-            {/* 步骤5：风险配置 */}
-            {currentStep === 5 && (
+            {/* 步骤5（小组模式）/ 步骤4（单人模式）：风险配置 */}
+            {(currentStep === 5 && projectMode === 'team') || (currentStep === 4 && projectMode === 'solo') ? (
               <Card className="border-0 shadow-lg">
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -935,10 +1057,10 @@ export default function ComprehensivePracticePage() {
                     </div>
 
                     <div className="flex justify-between">
-                      <Button variant="outline" onClick={() => setCurrentStep(4)}>
+                      <Button variant="outline" onClick={() => setCurrentStep(projectMode === 'solo' ? 3 : 4)}>
                         上一步
                       </Button>
-                      <Button onClick={() => setCurrentStep(6)}>
+                      <Button onClick={() => setCurrentStep(projectMode === 'solo' ? 5 : 6)}>
                         下一步：AI设置
                         <ChevronRight className="h-4 w-4 ml-2" />
                       </Button>
@@ -946,10 +1068,10 @@ export default function ComprehensivePracticePage() {
                   </CardContent>
                 )}
               </Card>
-            )}
+            ) : null}
 
-            {/* 步骤6：AI设置 */}
-            {currentStep === 6 && (
+            {/* 步骤6（小组模式）/ 步骤5（单人模式）：AI设置 */}
+            {(currentStep === 6 && projectMode === 'team') || (currentStep === 5 && projectMode === 'solo') ? (
               <Card className="border-0 shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -1034,17 +1156,25 @@ export default function ComprehensivePracticePage() {
                     </h4>
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div className="flex justify-between">
+                        <span className="text-slate-600">项目模式</span>
+                        <span className="font-medium text-slate-800">
+                          {projectMode === 'solo' ? '单人独立完成' : '小组协作'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
                         <span className="text-slate-600">目标市场</span>
                         <span className="font-medium text-slate-800">{targetMarkets.find(m => m.id === selectedMarket)?.name}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-slate-600">虚拟预算</span>
-                        <span className="font-medium text-slate-800">${customBudget.total}</span>
+                        <span className="font-medium text-slate-800">{currencySymbol}{customBudget.total}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-600">小组规模</span>
-                        <span className="font-medium text-slate-800">{groupSize}人/组</span>
-                      </div>
+                      {projectMode === 'team' && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-600">小组规模</span>
+                          <span className="font-medium text-slate-800">{groupSize}人/组</span>
+                        </div>
+                      )}
                       <div className="flex justify-between">
                         <span className="text-slate-600">实训阶段</span>
                         <span className="font-medium text-slate-800">{enabledPhases.length}个阶段</span>
@@ -1063,7 +1193,7 @@ export default function ComprehensivePracticePage() {
                   </div>
 
                   <div className="flex justify-between">
-                    <Button variant="outline" onClick={() => setCurrentStep(5)}>
+                    <Button variant="outline" onClick={() => setCurrentStep(projectMode === 'solo' ? 4 : 5)}>
                       上一步
                     </Button>
                     <Button onClick={handleGenerateProject} disabled={isGenerating}>
@@ -1082,7 +1212,7 @@ export default function ComprehensivePracticePage() {
                   </div>
                 </CardContent>
               </Card>
-            )}
+            ) : null}
           </div>
 
           {/* 右侧：配置预览 */}
@@ -1095,6 +1225,12 @@ export default function ComprehensivePracticePage() {
                 <div className="p-3 rounded-lg bg-slate-50">
                   <p className="text-xs text-slate-500 mb-1">项目名称</p>
                   <p className="font-medium text-slate-800">{projectName || '未设置'}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-slate-50">
+                  <p className="text-xs text-slate-500 mb-1">项目模式</p>
+                  <p className="font-medium text-slate-800">
+                    {projectMode === 'solo' ? '单人独立完成' : '小组协作'}
+                  </p>
                 </div>
                 <div className="p-3 rounded-lg bg-slate-50">
                   <p className="text-xs text-slate-500 mb-1">目标班级</p>
@@ -1111,7 +1247,7 @@ export default function ComprehensivePracticePage() {
                 </div>
                 <div className="p-3 rounded-lg bg-green-50 border border-green-200">
                   <p className="text-xs text-green-600 mb-1">虚拟预算</p>
-                  <p className="text-xl font-bold text-green-700">${customBudget.total}</p>
+                  <p className="text-xl font-bold text-green-700">{currencySymbol}{customBudget.total}</p>
                 </div>
                 <div className="p-3 rounded-lg bg-purple-50 border border-purple-200">
                   <p className="text-xs text-purple-600 mb-1">分组配置</p>
