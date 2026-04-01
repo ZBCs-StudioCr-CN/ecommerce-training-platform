@@ -208,6 +208,12 @@ A: 确保使用localStorage持久化数据，避免将数据仅保存在React状
 ### Q: 店铺后台样式不正确？
 A: 检查`platformConfig`配置，确保使用了正确的平台标识符。
 
+### Q: 预览前台显示错误的店铺或平台？
+A: 确保三个页面使用相同的localStorage存储键名 `ecommerce_practice_stores`：
+- 店铺管理页面 (`src/app/student/practice/page.tsx`)
+- 店铺后台页面 (`src/app/student/practice/store/[id]/page.tsx`)
+- 店铺预览页面 (`src/app/student/practice/preview/[id]/page.tsx`)
+
 ### Q: TypeScript类型错误？
 A: 运行`npx tsc --noEmit`检查类型，确保所有Props都有正确的类型定义。
 
@@ -220,3 +226,5 @@ A: 运行`npx tsc --noEmit`检查类型，确保所有Props都有正确的类型
 - ✅ 实现localStorage数据持久化
 - ✅ 修复首页样式问题（深色风格统一）
 - ✅ 修复新建店铺跳转问题
+- ✅ 修复预览页面localStorage键名不一致问题（统一为 `ecommerce_practice_stores`）
+- ✅ 修复预览页面抖音/Shopee/Lazada平台渲染错误（更新renderHeader逻辑）

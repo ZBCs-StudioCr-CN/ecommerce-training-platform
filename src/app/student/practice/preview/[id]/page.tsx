@@ -211,8 +211,8 @@ const platformThemes = {
   },
 };
 
-// localStorage存储Key
-const STORES_STORAGE_KEY = 'practice_stores';
+// localStorage存储Key - 必须与店铺管理页面保持一致
+const STORES_STORAGE_KEY = 'ecommerce_practice_stores';
 
 // 默认店铺模板数据（用于新创建的店铺）
 const defaultStoreTemplates: Record<string, any> = {
@@ -607,12 +607,19 @@ export default function StorePreviewPage() {
   // 渲染头部（根据平台选择）
   // ============================================
   const renderHeader = () => {
-    if (store.platform === 'taobao' || store.platform === 'pdd') {
+    // 国内电商平台（淘宝、拼多多、抖音）
+    if (store.platform === 'taobao' || store.platform === 'pdd' || store.platform === 'douyin') {
       return renderTaobaoHeader();
     }
+    // Amazon
     if (store.platform === 'amazon') {
       return renderAmazonHeader();
     }
+    // 东南亚平台（Shopee、Lazada）- 使用类似淘宝的风格
+    if (store.platform === 'shopee' || store.platform === 'lazada') {
+      return renderTaobaoHeader();
+    }
+    // 独立站
     if (isIndependentSite) {
       return renderShopifyHeader();
     }
