@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
+  Bell,
+  LogOut,
+  Globe,
+  Search,
   FileText,
   Plus,
-  Search,
-  Filter,
   Edit,
   Trash2,
   Eye,
@@ -27,7 +29,6 @@ import {
   Award,
   ChevronRight,
   MoreHorizontal,
-  Copy,
   RefreshCw,
   BookOpen,
   Layers,
@@ -47,15 +48,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { TeacherSidebar, TeacherHeader } from '@/components/teacher-layout';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
+import { teacherMenuItems } from '@/config/menu';
 
 // 五维能力分类
 const abilityDimensions = [
@@ -151,7 +151,7 @@ const mockQuestions = [
     type: 'case',
     ability: 'risk',
     content: '某独立站收到客户投诉称产品与描述严重不符，客户要求退款并威胁向消费者协会投诉。作为运营人员，请分析处理步骤。',
-    options: [],
+    options: [] as string[],
     correctAnswer: '需要人工评分',
     difficulty: 'hard',
     source: '实战案例改编',
@@ -182,31 +182,31 @@ const mockExams = [
   {
     id: 'E001',
     name: '电商运营能力期末考试',
-    class: '电商2201班',
+    className: '电商2201班',
     status: 'scheduled',
     scheduledTime: '2024-02-20 09:00',
     duration: 120,
     totalScore: 100,
     participantCount: 50,
     submittedCount: 0,
-    avgScore: null,
+    avgScore: null as number | null,
   },
   {
     id: 'E002',
     name: '风险应对能力测试',
-    class: '跨境电商2203班',
+    className: '跨境电商2203班',
     status: 'ongoing',
     scheduledTime: '2024-02-18 14:00',
     duration: 90,
     totalScore: 100,
     participantCount: 45,
     submittedCount: 32,
-    avgScore: null,
+    avgScore: null as number | null,
   },
   {
     id: 'E003',
     name: 'AI辅助应用能力测试',
-    class: '电商2201班',
+    className: '电商2201班',
     status: 'completed',
     scheduledTime: '2024-02-15 10:00',
     duration: 60,
@@ -227,7 +227,7 @@ const defaultPaperConfig = {
 };
 
 export default function TeacherExamPage() {
-  const router = useRouter();
+  const [activeMenu, setActiveMenu] = useState('exam');
   const [activeTab, setActiveTab] = useState('questions');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAbility, setSelectedAbility] = useState<string>('all');
@@ -253,21 +253,12 @@ export default function TeacherExamPage() {
   // 处理智能组卷
   const handleGeneratePaper = async () => {
     setIsGenerating(true);
-    // 模拟AI组卷过程
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // 生成模拟试卷
     const paper = {
       name: `智能组卷 - ${new Date().toLocaleDateString()}`,
       totalScore: paperConfig.totalScore,
       duration: paperConfig.duration,
-      questions: [
-        { id: 'Q001', type: 'single', ability: 'decision', score: 2, count: 20 },
-        { id: 'Q002', type: 'multiple', ability: 'ai', score: 3, count: 7 },
-        { id: 'Q003', type: 'judgment', ability: 'compliance', score: 1, count: 15 },
-        { id: 'Q004', type: 'case', ability: 'risk', score: 15, count: 1 },
-        { id: 'Q005', type: 'short', ability: 'analysis', score: 10, count: 1 },
-      ],
       abilityDistribution: [
         { ability: 'decision', score: 30, count: 15 },
         { ability: 'ai', score: 20, count: 10 },
@@ -282,11 +273,76 @@ export default function TeacherExamPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50">
-      <TeacherSidebar />
-      <TeacherHeader title="考试管理" subtitle="题库管理 · 智能组卷 · 考试安排" />
+    <div className="min-h-screen bg-slate-50">
+      {/* 顶部导航 */}
+      <header className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 z-50">
+        <div className="flex items-center justify-between h-full px-6">
+          <div className="flex items-center gap-4">
+            <Link href="/login" className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                <Globe className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-lg font-bold text-slate-800">电商实训平台</h1>
+                <p className="text-xs text-slate-500">教师端</p>
+              </div>
+            </Link>
+          </div>
 
-      <main className="ml-64 pt-16 p-6">
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Input placeholder="搜索..." className="w-64 pl-9 h-9" />
+            </div>
+            <Button variant="ghost" size="icon" className="relative">
+              <Bell className="h-5 w-5 text-slate-600" />
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                5
+              </span>
+            </Button>
+            <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
+              <div className="text-right">
+                <p className="text-sm font-medium text-slate-700">李老师</p>
+                <p className="text-xs text-slate-500">电商学院</p>
+              </div>
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-medium">
+                李
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* 侧边导航 */}
+      <aside className="fixed left-0 top-16 bottom-0 w-60 bg-white border-r border-slate-200 overflow-y-auto">
+        <nav className="p-4 space-y-1">
+          {teacherMenuItems.map((item) => (
+            <Link
+              key={item.id}
+              href={item.href}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                activeMenu === item.id
+                  ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg shadow-blue-500/25'
+                  : 'text-slate-600 hover:bg-slate-100'
+              }`}
+              onClick={() => setActiveMenu(item.id)}
+            >
+              <item.icon className="h-5 w-5" />
+              <span className="font-medium">{item.label}</span>
+            </Link>
+          ))}
+        </nav>
+
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200 bg-white">
+          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors">
+            <LogOut className="h-5 w-5" />
+            <span className="font-medium">退出登录</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* 主内容区 */}
+      <main className="ml-60 pt-16 min-h-screen p-6">
         <div className="max-w-7xl mx-auto">
           {/* 页面头部 */}
           <div className="mb-6">
@@ -448,7 +504,7 @@ export default function TeacherExamPage() {
                                 <span className="text-xs text-slate-400">ID: {question.id}</span>
                               </div>
                               <p className="text-slate-800">{question.content}</p>
-                              {question.type !== 'case' && question.type !== 'short' && (
+                              {question.type !== 'case' && question.type !== 'short' && question.options.length > 0 && (
                                 <div className="mt-2 grid grid-cols-2 gap-2">
                                   {question.options.map((opt, i) => (
                                     <div key={i} className={`text-sm p-2 rounded ${
@@ -585,21 +641,6 @@ export default function TeacherExamPage() {
                       </div>
                     </div>
 
-                    {/* 题型比例 */}
-                    <div>
-                      <label className="text-sm font-medium text-slate-700 mb-3 block">题型比例</label>
-                      <div className="grid grid-cols-5 gap-2">
-                        {questionTypes.map((type) => (
-                          <div key={type.id} className="text-center p-3 rounded-lg bg-slate-50 border">
-                            <p className="text-lg font-bold text-slate-800">
-                              {paperConfig.questionTypeRatio[type.id as keyof typeof paperConfig.questionTypeRatio]}%
-                            </p>
-                            <p className="text-xs text-slate-500">{type.name}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
                     <Button
                       className="w-full"
                       size="lg"
@@ -644,14 +685,6 @@ export default function TeacherExamPage() {
                           <div>
                             <p className="text-sm text-slate-500">考试时长</p>
                             <p className="text-2xl font-bold text-blue-600">{generatedPaper.duration}分钟</p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-slate-500">题目总数</p>
-                            <p className="text-2xl font-bold text-blue-600">50题</p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-slate-500">难度系数</p>
-                            <p className="text-2xl font-bold text-amber-600">0.65</p>
                           </div>
                         </div>
 
@@ -742,7 +775,7 @@ export default function TeacherExamPage() {
                               <div className="flex items-center gap-4 text-sm text-slate-500">
                                 <span className="flex items-center gap-1">
                                   <Users className="h-4 w-4" />
-                                  {exam.class}
+                                  {exam.className}
                                 </span>
                                 <span className="flex items-center gap-1">
                                   <Calendar className="h-4 w-4" />
