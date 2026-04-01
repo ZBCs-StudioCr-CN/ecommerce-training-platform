@@ -541,27 +541,69 @@ export default function Home() {
       </section>
 
       {/* 核心价值总结 */}
-      <section className="py-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          <Card className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 backdrop-blur-md border-purple-500/20">
-            <CardContent className="p-12 text-center">
-              <Brain className="h-16 w-16 text-purple-400 mx-auto mb-6" />
-              <h3 className="text-3xl font-bold text-white mb-4">
-                从"AI使用者"成长为"AI驾驭者"
-              </h3>
-              <p className="text-xl text-blue-100 max-w-3xl mx-auto mb-8">
-                AI可完成建站、文案撰写、客服回复、基础投放等重复性工作，但永远无法替代人的商业判断、市场理解、数据解读、风险决策及迭代优化能力。
-              </p>
-              <div className="flex items-center justify-center gap-4">
-                <Button size="lg" className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 shadow-lg shadow-purple-500/30" asChild>
-                  <Link href="/login">
-                    立即开始
-                    <ArrowRight className="h-5 w-5 ml-2" />
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+      <section className="py-24 px-6 relative overflow-hidden">
+        {/* 背景装饰 */}
+        <div className="absolute inset-0">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-500/20 rounded-full blur-3xl" />
+        </div>
+        
+        <div className="max-w-4xl mx-auto relative z-10">
+          <div className="text-center">
+            {/* 装饰性图标 */}
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500/30 to-pink-500/30 backdrop-blur-sm border border-purple-500/20 mb-8">
+              <Brain className="h-10 w-10 text-purple-300" />
+            </div>
+            
+            {/* 主标题 */}
+            <h3 className="text-4xl font-bold text-white mb-6 leading-tight">
+              从<span className="text-purple-400">"AI使用者"</span>成长为<span className="text-pink-400">"AI驾驭者"</span>
+            </h3>
+            
+            {/* 副标题 */}
+            <p className="text-lg text-blue-200 max-w-3xl mx-auto mb-10 leading-relaxed">
+              AI可完成建站、文案撰写、客服回复、基础投放等重复性工作，<br className="hidden md:block" />
+              但永远无法替代人的<span className="text-white font-medium">商业判断</span>、<span className="text-white font-medium">市场理解</span>、<span className="text-white font-medium">数据解读</span>、<span className="text-white font-medium">风险决策</span>及<span className="text-white font-medium">迭代优化</span>能力。
+            </p>
+            
+            {/* 核心价值点 */}
+            <div className="flex items-center justify-center gap-6 mb-10">
+              {[
+                { label: '商业判断', icon: Target },
+                { label: '市场理解', icon: LineChart },
+                { label: '数据解读', icon: BarChart3 },
+                { label: '风险决策', icon: AlertTriangle },
+              ].map((item, index) => (
+                <div key={index} className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10">
+                  <item.icon className="h-4 w-4 text-purple-400" />
+                  <span className="text-sm text-blue-200">{item.label}</span>
+                </div>
+              ))}
+            </div>
+            
+            {/* CTA按钮 */}
+            <div className="flex items-center justify-center gap-4">
+              <Button 
+                size="lg" 
+                className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 shadow-lg shadow-purple-500/30 text-lg px-8" 
+                asChild
+              >
+                <Link href="/login">
+                  立即开始
+                  <ArrowRight className="h-5 w-5 ml-2" />
+                </Link>
+              </Button>
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="border-white/20 text-white hover:bg-white/5 text-lg px-8"
+                asChild
+              >
+                <Link href="/student/dashboard">
+                  查看演示
+                </Link>
+              </Button>
+            </div>
+          </div>
         </div>
       </section>
 
