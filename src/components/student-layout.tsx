@@ -25,6 +25,7 @@ const menuItems = [
   { id: 'practice', label: '仿真实训', icon: Store, href: '/student/practice' },
   { id: 'ai-assistant', label: 'AI助手', icon: Brain, href: '/student/ai-assistant', highlight: true },
   { id: 'risk-events', label: '风险应对', icon: AlertTriangle, href: '/student/risk-events' },
+  { id: 'assessment', label: '能力评估', icon: Target, href: '/student/assessment' },
   { id: 'exam', label: '考核中心', icon: Award, href: '/student/exam' },
   { id: 'achievement', label: '成果中心', icon: FileText, href: '/student/achievement' },
   { id: 'qa', label: '答疑提问', icon: MessageCircle, href: '/student/qa' },
