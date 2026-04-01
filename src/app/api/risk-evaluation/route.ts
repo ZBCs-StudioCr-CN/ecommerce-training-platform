@@ -118,8 +118,8 @@ ${solution}
       aiDetectionResult.aiCouplingDegree = Math.min(matchCount * 15, 100);
     }
 
-    // 如果AI耦合度超过40%，直接返回0分
-    if (aiDetectionResult.aiCouplingDegree > 40) {
+    // 如果AI耦合度超过60%，直接返回0分
+    if (aiDetectionResult.aiCouplingDegree > 60) {
       return NextResponse.json({
         scores: {
           responseSpeed: 0,
@@ -129,7 +129,7 @@ ${solution}
           riskControl: 0,
           total: 0,
         },
-        feedback: `⚠️ 检测到您的方案AI耦合度过高（${aiDetectionResult.aiCouplingDegree}%），已超过40%的阈值。
+        feedback: `⚠️ 检测到您的方案AI耦合度过高（${aiDetectionResult.aiCouplingDegree}%），已超过60%的阈值。
 
 ${aiDetectionResult.reasons.length > 0 ? '判断依据：\n' + aiDetectionResult.reasons.map((r, i) => `${i + 1}. ${r}`).join('\n') : ''}
 

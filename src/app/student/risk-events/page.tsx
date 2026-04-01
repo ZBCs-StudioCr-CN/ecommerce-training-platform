@@ -873,7 +873,7 @@ export default function RiskEventsPage() {
                               <h4 className="font-semibold text-red-700 mb-1">⚠️ AI内容检测警告</h4>
                               <p className="text-sm text-red-600">
                                 检测到您的方案AI耦合度为 <span className="font-bold">{submittedSolution.aiCouplingDegree}%</span>，
-                                已超过40%的阈值。根据实训规则，此方案判定为0分。
+                                已超过60%的阈值。根据实训规则，此方案判定为0分。
                               </p>
                               <p className="text-xs text-red-500 mt-2">
                                 风险应对实训的目的是培养您的自主决策能力，请独立思考并重新提交方案。
