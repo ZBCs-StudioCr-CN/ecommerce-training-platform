@@ -263,8 +263,22 @@ export default function TeacherPracticePage() {
                           <span className="font-semibold">综合项目实战</span>
                         </div>
                         <p className="text-sm text-slate-500">全流程闭环，支持个人或小组（4-6人）组队</p>
+                        {taskType === 'comprehensive' && (
+                          <Link href="/teacher/practice/comprehensive" className="mt-2 inline-flex items-center text-sm text-blue-600 hover:text-blue-700">
+                            前往详细配置页面
+                            <ChevronRight className="h-4 w-4 ml-1" />
+                          </Link>
+                        )}
                       </button>
                     </div>
+                    {taskType === 'comprehensive' && (
+                      <div className="mt-4 p-4 rounded-lg bg-indigo-50 border border-indigo-200">
+                        <p className="text-sm text-indigo-700">
+                          <strong>综合项目实战</strong>需要配置完整的项目周期、小组分工、风险事件等内容。
+                          点击上方按钮进入详细配置页面，进行完整的实训项目设置。
+                        </p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
