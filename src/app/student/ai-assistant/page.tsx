@@ -216,20 +216,33 @@ export default function AIAssistantPage() {
   const router = useRouter();
   const [activeModule, setActiveModule] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [generalMessages, setGeneralMessages] = useState<Message[]>([]); // 通用对话消息
   const [inputValue, setInputValue] = useState('');
+  const [generalInputValue, setGeneralInputValue] = useState(''); // 通用对话输入
   const [isLoading, setIsLoading] = useState(false);
+  const [isGeneralLoading, setIsGeneralLoading] = useState(false); // 通用对话加载状态
   const [usageHistory, setUsageHistory] = useState<UsageRecord[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const generalMessagesEndRef = useRef<HTMLDivElement>(null); // 通用对话滚动ref
   const inputRef = useRef<HTMLInputElement>(null);
+  const generalInputRef = useRef<HTMLInputElement>(null); // 通用对话输入ref
 
   // 滚动到底部
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const scrollToGeneralBottom = () => {
+    generalMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    scrollToGeneralBottom();
+  }, [generalMessages]);
 
   // 获取当前模块配置
   const currentModule = aiModules.find(m => m.id === activeModule);
@@ -337,6 +350,101 @@ export default function AIAssistantPage() {
   // 复制内容
   const handleCopy = (content: string) => {
     navigator.clipboard.writeText(content);
+  };
+
+  // 通用对话发送消息
+  const sendGeneralMessage = async (content: string) => {
+    if (!content.trim()) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: content.trim(),
+      timestamp: new Date(),
+    };
+
+    setGeneralMessages(prev => [...prev, userMessage]);
+    setGeneralInputValue('');
+    setIsGeneralLoading(true);
+
+    try {
+      // 调用AI API（使用 general 模块）
+      const response = await fetch('/api/ai-assistant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: content.trim(),
+          module: 'general',
+          history: generalMessages.slice(-10),
+        }),
+      });
+
+      if (!response.ok) throw new Error('AI response failed');
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+
+      let assistantContent = '';
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: '',
+        timestamp: new Date(),
+      };
+
+      setGeneralMessages(prev => [...prev, assistantMessage]);
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          assistantContent += chunk;
+
+          setGeneralMessages(prev =>
+            prev.map(m =>
+              m.id === assistantMessage.id
+                ? { ...m, content: assistantContent }
+                : m
+            )
+          );
+        }
+      }
+
+      // 记录使用历史
+      setUsageHistory(prev => [
+        {
+          id: Date.now().toString(),
+          module: 'general',
+          query: content.trim(),
+          timestamp: new Date(),
+        },
+        ...prev.slice(0, 19),
+      ]);
+    } catch (error) {
+      console.error('General AI Assistant error:', error);
+      setGeneralMessages(prev => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: '抱歉，AI助手暂时无法响应，请稍后再试。',
+          timestamp: new Date(),
+        },
+      ]);
+    } finally {
+      setIsGeneralLoading(false);
+    }
+  };
+
+  // 通用对话反馈
+  const handleGeneralFeedback = (messageId: string, feedback: 'like' | 'dislike') => {
+    setGeneralMessages(prev =>
+      prev.map(m =>
+        m.id === messageId ? { ...m, feedback } : m
+      )
+    );
   };
 
   // 渲染模块选择界面
@@ -449,6 +557,170 @@ export default function AIAssistantPage() {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* 通用对话区域 */}
+      <div className="mt-8">
+        <Card className="border-2 border-purple-100 bg-white shadow-lg">
+          <CardHeader className="pb-3 border-b border-slate-100">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-md">
+                  <MessageSquare className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">自由问答</CardTitle>
+                  <CardDescription>直接向AI助手提问，获取电商运营建议</CardDescription>
+                </div>
+              </div>
+              <Badge variant="secondary" className="bg-purple-50 text-purple-600 border-purple-200">
+                对话: {generalMessages.filter(m => m.role === 'assistant').length}次
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            {/* 消息列表 */}
+            <div className="h-80 overflow-y-auto p-4 bg-slate-50/50">
+              {generalMessages.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-center">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center mb-4">
+                    <Brain className="h-8 w-8 text-purple-500" />
+                  </div>
+                  <p className="text-slate-600 font-medium mb-2">开始与AI助手对话</p>
+                  <p className="text-sm text-slate-400 max-w-md">
+                    您可以问任何关于电商运营的问题，AI助手会为您提供专业建议
+                  </p>
+                  <div className="flex flex-wrap gap-2 mt-4 justify-center">
+                    {[
+                      '如何提升店铺转化率？',
+                      '新品上架如何推广？',
+                      '怎么优化产品标题？',
+                    ].map((prompt, index) => (
+                      <Button
+                        key={index}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => sendGeneralMessage(prompt)}
+                        className="text-xs bg-white hover:bg-purple-50 hover:border-purple-200"
+                      >
+                        {prompt}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {generalMessages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div
+                        className={`max-w-[85%] rounded-2xl px-4 py-3 ${
+                          message.role === 'user'
+                            ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                            : 'bg-white border border-slate-200 shadow-sm'
+                        }`}
+                      >
+                        <div className="whitespace-pre-wrap text-sm">{message.content}</div>
+                        <div
+                          className={`text-xs mt-2 ${
+                            message.role === 'user' ? 'text-white/70' : 'text-slate-400'
+                          }`}
+                        >
+                          {message.timestamp.toLocaleTimeString('zh-CN', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </div>
+                        {message.role === 'assistant' && (
+                          <div className="flex items-center gap-2 mt-2 pt-2 border-t border-slate-100">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleCopy(message.content)}
+                              className="h-6 px-2 text-xs text-slate-500 hover:text-slate-700"
+                            >
+                              <Copy className="h-3 w-3 mr-1" />
+                              复制
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleGeneralFeedback(message.id, 'like')}
+                              className={`h-6 px-2 ${
+                                message.feedback === 'like'
+                                  ? 'text-emerald-600 bg-emerald-50'
+                                  : 'text-slate-500 hover:text-emerald-600'
+                              }`}
+                            >
+                              <ThumbsUp className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleGeneralFeedback(message.id, 'dislike')}
+                              className={`h-6 px-2 ${
+                                message.feedback === 'dislike'
+                                  ? 'text-red-600 bg-red-50'
+                                  : 'text-slate-500 hover:text-red-600'
+                              }`}
+                            >
+                              <ThumbsDown className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  {isGeneralLoading && generalMessages[generalMessages.length - 1]?.role !== 'assistant' && (
+                    <div className="flex justify-start">
+                      <div className="bg-white border border-slate-200 rounded-2xl px-4 py-3 shadow-sm">
+                        <div className="flex items-center gap-2">
+                          <RefreshCw className="h-4 w-4 animate-spin text-purple-500" />
+                          <span className="text-sm text-slate-500">AI正在思考...</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  <div ref={generalMessagesEndRef} />
+                </div>
+              )}
+            </div>
+            {/* 输入区域 */}
+            <div className="p-4 border-t border-slate-100 bg-white">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  sendGeneralMessage(generalInputValue);
+                }}
+                className="flex items-center gap-3"
+              >
+                <div className="flex-1 relative">
+                  <Input
+                    ref={generalInputRef}
+                    value={generalInputValue}
+                    onChange={(e) => setGeneralInputValue(e.target.value)}
+                    placeholder="输入您的电商运营问题..."
+                    className="h-11 rounded-xl border-slate-200 focus:border-purple-300 focus:ring-purple-200"
+                    disabled={isGeneralLoading}
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  disabled={!generalInputValue.trim() || isGeneralLoading}
+                  className="h-11 px-5 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md hover:shadow-lg transition-shadow"
+                >
+                  <Send className="h-4 w-4 mr-1" />
+                  发送
+                </Button>
+              </form>
+              <p className="text-xs text-center text-slate-400 mt-2">
+                AI建议仅供参考，请结合实际情况做出最终决策
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

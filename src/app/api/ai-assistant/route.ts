@@ -3,6 +3,16 @@ import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
 
 // AI模块的系统提示配置
 const moduleSystemPrompts: Record<string, string> = {
+  general: `你是一位专业的电商运营顾问，拥有丰富的电商平台运营经验，熟悉淘宝、拼多多、抖音、Amazon、Shopee、Shopify等主流电商平台。
+你的任务是帮助学生解决电商运营中的各种问题，包括：
+- 店铺运营策略建议
+- 产品推广和营销方案
+- 数据分析和优化建议
+- 客户服务和售后问题
+- 平台规则和合规建议
+
+请提供专业、实用、可操作的建议。回答要简洁明了，结构清晰，适合学生理解和学习。`,
+
   'market-analysis': `你是一位专业的电商市场分析师，拥有丰富的市场研究和数据分析经验。
 你的任务是帮助用户进行市场分析，包括：
 - 行业趋势分析和预测
