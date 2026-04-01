@@ -595,10 +595,11 @@ export default function Home() {
               <Button 
                 size="lg" 
                 variant="outline" 
-                className="border-white/20 text-white hover:bg-white/5 text-lg px-8"
+                className="border-white/30 text-white bg-white/5 hover:bg-white/10 hover:border-white/50 text-lg px-8"
                 asChild
               >
                 <Link href="/student/dashboard">
+                  <Play className="h-5 w-5 mr-2" />
                   查看演示
                 </Link>
               </Button>
