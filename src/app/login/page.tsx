@@ -11,6 +11,7 @@ import {
   EyeOff,
   ArrowRight,
   Building2,
+  BookOpen,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -77,87 +78,83 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* 背景装饰 */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-violet-500/10 rounded-full blur-3xl" />
-      </div>
-
+    <div className="min-h-screen bg-gradient-to-br from-slate-800 via-blue-900 to-slate-900 flex items-center justify-center relative overflow-hidden">
       {/* 左侧品牌区 */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col justify-center items-center relative z-10 px-12">
-        <div className="max-w-lg">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-2xl shadow-blue-500/30">
-              <Globe className="h-9 w-9 text-white" />
+      <div className="hidden lg:flex lg:w-[55%] flex-col justify-center relative z-10 px-16 py-12 h-full">
+        <div className="max-w-xl">
+          {/* Logo和名称 */}
+          <div className="flex items-center gap-4 mb-12">
+            <div className="w-14 h-14 rounded-xl bg-blue-900 flex items-center justify-center">
+              <Globe className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white">电商实训平台</h1>
-              <p className="text-blue-200">E-commerce Training Platform</p>
+              <h1 className="text-2xl font-bold text-white">电商实训平台</h1>
+              <p className="text-sm text-slate-400">E-commerce Training Platform</p>
             </div>
           </div>
 
-          <div className="space-y-6 text-white/80">
+          {/* 功能模块 */}
+          <div className="space-y-8">
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
-                <Building2 className="h-5 w-5 text-blue-300" />
+              <div className="w-12 h-12 rounded-xl bg-slate-700/50 flex items-center justify-center flex-shrink-0">
+                <BookOpen className="h-6 w-6 text-slate-400" />
               </div>
               <div>
-                <h3 className="font-semibold text-white mb-1">产教融合</h3>
-                <p className="text-sm text-white/60">面向中高职、本科院校电商/跨境电商专业，打造"教学-实训-考核-就业"全闭环</p>
+                <h3 className="font-semibold text-white text-lg mb-1">产教融合</h3>
+                <p className="text-sm text-slate-400 leading-relaxed">面向中高职、本科院校电商/跨境电商专业，打造"教学-实训-考核-就业"全闭环</p>
               </div>
             </div>
 
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
-                <Globe className="h-5 w-5 text-blue-300" />
+              <div className="w-12 h-12 rounded-xl bg-slate-700/50 flex items-center justify-center flex-shrink-0">
+                <Globe className="h-6 w-6 text-slate-400" />
               </div>
               <div>
-                <h3 className="font-semibold text-white mb-1">仿真引擎</h3>
-                <p className="text-sm text-white/60">1:1复刻Shopify建站平台，虚拟域名、资金、流量，零风险全流程模拟</p>
+                <h3 className="font-semibold text-white text-lg mb-1">仿真引擎</h3>
+                <p className="text-sm text-slate-400 leading-relaxed">1:1复刻Shopify建站平台，虚拟域名、资金、流量，零风险全流程模拟</p>
               </div>
             </div>
 
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
-                <GraduationCap className="h-5 w-5 text-blue-300" />
+              <div className="w-12 h-12 rounded-xl bg-slate-700/50 flex items-center justify-center flex-shrink-0">
+                <GraduationCap className="h-6 w-6 text-slate-400" />
               </div>
               <div>
-                <h3 className="font-semibold text-white mb-1">实战技能</h3>
-                <p className="text-sm text-white/60">6大核心技能模块，从0到1搭建独立站，掌握建站、推广、运营全链路技能</p>
+                <h3 className="font-semibold text-white text-lg mb-1">实战技能</h3>
+                <p className="text-sm text-slate-400 leading-relaxed">6大核心技能模块，从0到1搭建独立站，掌握建站、推广、运营全链路技能</p>
               </div>
             </div>
           </div>
 
-          <div className="mt-12 flex items-center gap-6">
+          {/* 数据展示 */}
+          <div className="mt-12 flex items-center gap-8">
             <div className="text-center">
               <p className="text-3xl font-bold text-white">50+</p>
-              <p className="text-sm text-white/60">合作院校</p>
+              <p className="text-sm text-slate-400">合作院校</p>
             </div>
-            <div className="w-px h-12 bg-white/20" />
+            <div className="w-px h-12 bg-slate-700" />
             <div className="text-center">
               <p className="text-3xl font-bold text-white">10,000+</p>
-              <p className="text-sm text-white/60">实训学生</p>
+              <p className="text-sm text-slate-400">实训学生</p>
             </div>
-            <div className="w-px h-12 bg-white/20" />
+            <div className="w-px h-12 bg-slate-700" />
             <div className="text-center">
               <p className="text-3xl font-bold text-white">98%</p>
-              <p className="text-sm text-white/60">满意度</p>
+              <p className="text-sm text-slate-400">满意度</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* 右侧登录区 */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center relative z-10 p-4">
-        <Card className="w-full max-w-md bg-white/95 backdrop-blur-xl border-0 shadow-2xl">
-          <CardHeader className="text-center pb-2">
-            <CardTitle className="text-2xl">欢迎登录</CardTitle>
-            <CardDescription>选择身份后输入账号密码登录</CardDescription>
+      <div className="w-full lg:w-[45%] flex items-center justify-center relative z-10 p-6">
+        <Card className="w-full max-w-md bg-white rounded-2xl shadow-2xl border-0">
+          <CardHeader className="text-center pt-8 pb-4">
+            <CardTitle className="text-2xl text-slate-800">欢迎登录</CardTitle>
+            <CardDescription className="text-slate-500">选择身份后输入账号密码登录</CardDescription>
           </CardHeader>
 
-          <CardContent className="space-y-6">
+          <CardContent className="px-8 pb-8 space-y-6">
             {/* 角色选择 */}
             <div className="grid grid-cols-3 gap-3">
               {roles.map((role) => (
@@ -166,8 +163,8 @@ export default function LoginPage() {
                   onClick={() => setSelectedRole(role.id)}
                   className={`p-4 rounded-xl border-2 transition-all duration-200 ${
                     selectedRole === role.id
-                      ? 'border-blue-500 bg-blue-50 shadow-lg shadow-blue-100'
-                      : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                      ? 'border-blue-400 bg-teal-50 shadow-sm'
+                      : 'border-slate-200 bg-slate-50 hover:border-slate-300'
                   }`}
                 >
                   <div className={`w-10 h-10 rounded-lg ${role.bgColor} flex items-center justify-center mx-auto mb-2`}>
@@ -188,7 +185,7 @@ export default function LoginPage() {
                   placeholder={`请输入${currentRole.title}账号`}
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="h-12"
+                  className="h-11 border-slate-200 focus:border-blue-400 focus:ring-blue-400"
                 />
               </div>
 
@@ -200,7 +197,7 @@ export default function LoginPage() {
                     placeholder="请输入密码"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="h-12 pr-12"
+                    className="h-11 pr-12 border-slate-200 focus:border-blue-400 focus:ring-blue-400"
                   />
                   <button
                     type="button"
@@ -214,14 +211,14 @@ export default function LoginPage() {
 
               <div className="flex items-center justify-between text-sm">
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" className="rounded border-slate-300" />
+                  <input type="checkbox" className="rounded border-slate-300 w-4 h-4" />
                   <span className="text-slate-600">记住账号</span>
                 </label>
-                <button className="text-blue-600 hover:underline">忘记密码？</button>
+                <button className="text-blue-500 hover:text-blue-600 hover:underline">忘记密码?</button>
               </div>
 
               <Button
-                className="w-full h-12 text-base"
+                className="w-full h-11 text-base bg-slate-900 hover:bg-slate-800 text-white"
                 onClick={handleLogin}
                 disabled={isLoading}
               >
@@ -244,18 +241,25 @@ export default function LoginPage() {
                   <div className="w-full border-t border-slate-200" />
                 </div>
                 <div className="relative flex justify-center text-xs">
-                  <span className="bg-white px-2 text-slate-500">或</span>
+                  <span className="bg-white px-3 text-slate-400">或</span>
                 </div>
               </div>
 
-              <Button variant="outline" className="w-full h-12" onClick={() => alert('单点登录功能')}>
+              <Button 
+                variant="outline" 
+                className="w-full h-11 border-slate-200 text-slate-700 hover:bg-slate-50" 
+                onClick={() => alert('单点登录功能')}
+              >
                 <Building2 className="h-4 w-4 mr-2" />
                 院校单点登录
               </Button>
             </div>
 
             <p className="text-xs text-center text-slate-400">
-              登录即表示您同意《用户协议》和《隐私政策》
+              登录即表示您同意
+              <button className="text-blue-500 hover:underline mx-1">《用户协议》</button>
+              和
+              <button className="text-blue-500 hover:underline mx-1">《隐私政策》</button>
             </p>
           </CardContent>
         </Card>
