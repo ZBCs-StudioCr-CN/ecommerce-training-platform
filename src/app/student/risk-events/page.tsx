@@ -382,6 +382,8 @@ interface Solution {
   };
   feedback: string;
   aiEvaluation: string;
+  aiDetected?: boolean;
+  aiCouplingDegree?: number;
 }
 
 export default function RiskEventsPage() {
@@ -795,6 +797,9 @@ export default function RiskEventsPage() {
                     <CardTitle className="text-base">提交您的应对方案</CardTitle>
                     <CardDescription>
                       请根据事件详情，制定详细的应对方案。AI将根据评分标准对您的方案进行评分。
+                      <span className="block mt-2 text-red-600 font-medium">
+                        ⚠️ 重要提示：系统会自动检测AI生成内容，AI耦合度高于40%将直接判0分！
+                      </span>
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -856,8 +861,50 @@ export default function RiskEventsPage() {
                   </Card>
                 ) : (
                   <div className="space-y-4">
+                    {/* AI检测结果提示 */}
+                    {submittedSolution.aiDetected ? (
+                      <Card className="bg-gradient-to-br from-red-50 to-orange-50 border-red-200 border-2">
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                              <AlertTriangle className="h-5 w-5 text-red-600" />
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-red-700 mb-1">⚠️ AI内容检测警告</h4>
+                              <p className="text-sm text-red-600">
+                                检测到您的方案AI耦合度为 <span className="font-bold">{submittedSolution.aiCouplingDegree}%</span>，
+                                已超过40%的阈值。根据实训规则，此方案判定为0分。
+                              </p>
+                              <p className="text-xs text-red-500 mt-2">
+                                风险应对实训的目的是培养您的自主决策能力，请独立思考并重新提交方案。
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ) : (
+                      <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200">
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                                <CheckCircle className="h-4 w-4 text-emerald-600" />
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-emerald-700">AI内容检测通过</p>
+                                <p className="text-xs text-emerald-600">方案体现了您的自主思考能力</p>
+                              </div>
+                            </div>
+                            <Badge variant="outline" className="bg-emerald-100 text-emerald-700 border-emerald-200">
+                              耦合度: {submittedSolution.aiCouplingDegree || 0}%
+                            </Badge>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
                     {/* 总分卡片 */}
-                    <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
+                    <Card className={`bg-gradient-to-br ${submittedSolution.aiDetected ? 'from-red-50 to-orange-50 border-red-200' : 'from-purple-50 to-pink-50 border-purple-200'}`}>
                       <CardContent className="p-6">
                         <div className="flex items-center justify-between mb-4">
                           <div>
@@ -865,7 +912,7 @@ export default function RiskEventsPage() {
                             <p className="text-sm text-slate-500">基于5个评分维度的综合评价</p>
                           </div>
                           <div className="text-right">
-                            <div className="text-4xl font-bold text-purple-600">
+                            <div className={`text-4xl font-bold ${submittedSolution.aiDetected ? 'text-red-600' : 'text-purple-600'}`}>
                               {submittedSolution.scores.total}
                             </div>
                             <div className="text-sm text-slate-500">/ 100分</div>
