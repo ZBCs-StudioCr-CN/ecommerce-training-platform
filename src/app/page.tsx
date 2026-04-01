@@ -152,10 +152,6 @@ export default function Home() {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <Badge className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-200 border-purple-500/30">
-              <Sparkles className="h-3 w-3 mr-1" />
-              AI融合版 V2.0
-            </Badge>
             <Button variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10" asChild>
               <Link href="/login">
                 登录系统
@@ -610,16 +606,13 @@ export default function Home() {
 
       {/* 页脚 */}
       <footer className="py-8 px-6 border-t border-white/10">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+        <div className="max-w-7xl mx-auto flex items-center justify-center">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
               <Globe className="h-4 w-4 text-white" />
             </div>
             <span className="text-sm text-blue-200">电商实训平台 · AI时代能力培养平台</span>
           </div>
-          <p className="text-sm text-blue-300">
-            V2.0 AI融合增强版
-          </p>
         </div>
       </footer>
     </div>
