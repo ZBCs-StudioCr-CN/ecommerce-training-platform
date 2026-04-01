@@ -219,28 +219,27 @@ export default function PracticePage() {
   return (
     <div className="min-h-screen bg-slate-50">
       <StudentHeader />
-      <div className="flex">
-        <StudentSidebar />
-        
-        <main className="flex-1 p-6">
-          {/* 页面标题 */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-slate-800">仿真实训</h1>
-            <p className="text-slate-500 mt-1">创建和管理您的电商店铺，进行全流程实训操作</p>
-          </div>
+      <StudentSidebar />
+      
+      <main className="ml-60 pt-16 p-6 min-h-screen">
+        {/* 页面标题 */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-slate-800">仿真实训</h1>
+          <p className="text-slate-500 mt-1">创建和管理您的电商店铺，进行全流程实训操作</p>
+        </div>
 
           {/* 场景切换 */}
           <div className="mb-6">
             <Tabs value={activeScene} onValueChange={setActiveScene}>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <TabsList className="bg-white border border-slate-200">
-                  <TabsTrigger value="all" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">
-                    全部店铺
+                  <TabsTrigger value="all" className="data-[state=active]:bg-slate-900 data-[state=active]:text-white text-xs sm:text-sm">
+                    全部
                   </TabsTrigger>
                   {Object.entries(sceneConfigs).map(([key, config]) => (
-                    <TabsTrigger key={key} value={key} className="data-[state=active]:bg-slate-900 data-[state=active]:text-white">
-                      <config.icon className="h-4 w-4 mr-2" />
-                      {config.name}
+                    <TabsTrigger key={key} value={key} className="data-[state=active]:bg-slate-900 data-[state=active]:text-white text-xs sm:text-sm">
+                      <config.icon className="h-4 w-4 sm:mr-2" />
+                      <span className="hidden sm:inline">{config.name}</span>
                     </TabsTrigger>
                   ))}
                 </TabsList>
@@ -543,7 +542,6 @@ export default function PracticePage() {
             </CardContent>
           </Card>
         </main>
-      </div>
     </div>
   );
 }
