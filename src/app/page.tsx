@@ -91,7 +91,7 @@ export default function Home() {
             </div>
             <div>
               <h1 className="text-lg font-bold text-white">电商实训平台</h1>
-              <p className="text-xs text-blue-200">Cross-border E-commerce Training Platform</p>
+              <p className="text-xs text-blue-200">E-commerce Training Platform</p>
             </div>
           </div>
           <div className="flex items-center gap-4">

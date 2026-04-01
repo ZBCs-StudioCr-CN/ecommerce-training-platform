@@ -94,7 +94,7 @@ export default function LoginPage() {
             </div>
             <div>
               <h1 className="text-3xl font-bold text-white">电商实训平台</h1>
-              <p className="text-blue-200">Cross-border E-commerce Training Platform</p>
+              <p className="text-blue-200">E-commerce Training Platform</p>
             </div>
           </div>
 
