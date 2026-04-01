@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -31,10 +31,24 @@ import {
   Clock,
   Eye,
   Settings,
-  ExternalLink,
   Monitor,
   Smartphone,
   Tablet,
+  ChevronDown,
+  Bell,
+  MapPinned,
+  Play,
+  Grid3X3,
+  MessageCircle,
+  Share2,
+  Minus,
+  Plus,
+  Zap,
+  Gift,
+  Crown,
+  Percent,
+  Flame,
+  Timer,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -46,127 +60,204 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-// 平台前台样式配置
+// ============================================
+// 平台前台风格配置
+// ============================================
 const platformThemes = {
-  // 国内电商
+  // 淘宝/天猫
   taobao: {
     name: '淘宝/天猫',
     theme: 'orange',
     headerBg: 'bg-gradient-to-r from-orange-500 to-red-500',
     accentColor: 'text-orange-500',
-    buttonBg: 'bg-orange-500 hover:bg-orange-600',
+    buttonBg: 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600',
+    priceColor: 'text-red-500',
     features: ['直播', '短视频', '优惠券', '积分'],
+    currency: '¥',
+    showOriginalPrice: true,
+    showSales: true,
+    showRating: true,
+    layout: 'grid',
   },
+  
+  // 拼多多
   pdd: {
     name: '拼多多',
     theme: 'red',
     headerBg: 'bg-gradient-to-r from-red-500 to-pink-500',
     accentColor: 'text-red-500',
-    buttonBg: 'bg-red-500 hover:bg-red-600',
+    buttonBg: 'bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600',
+    priceColor: 'text-red-500',
     features: ['拼团', '百亿补贴', '砍价', '秒杀'],
+    currency: '¥',
+    showOriginalPrice: true,
+    showSales: true,
+    showRating: true,
+    layout: 'grid',
   },
+  
+  // 抖音电商
   douyin: {
     name: '抖音电商',
     theme: 'pink',
     headerBg: 'bg-gradient-to-r from-pink-500 to-purple-500',
     accentColor: 'text-pink-500',
-    buttonBg: 'bg-pink-500 hover:bg-pink-600',
+    buttonBg: 'bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600',
+    priceColor: 'text-pink-500',
     features: ['直播', '短视频', '达人推荐', '品牌号'],
+    currency: '¥',
+    showOriginalPrice: true,
+    showSales: true,
+    showRating: true,
+    layout: 'video',
   },
-  // 跨境电商
+  
+  // Amazon
   amazon: {
     name: 'Amazon',
     theme: 'amber',
-    headerBg: 'bg-gradient-to-r from-amber-500 to-orange-500',
+    headerBg: 'bg-slate-900',
     accentColor: 'text-amber-600',
     buttonBg: 'bg-amber-500 hover:bg-amber-600',
+    priceColor: 'text-slate-900',
     features: ['Prime', 'Best Sellers', 'Deals', 'Subscribe & Save'],
+    currency: '$',
+    showOriginalPrice: false,
+    showSales: false,
+    showRating: true,
+    layout: 'list',
   },
+  
+  // Shopee
   shopee: {
     name: 'Shopee',
     theme: 'orange',
-    headerBg: 'bg-gradient-to-r from-orange-500 to-red-500',
+    headerBg: 'bg-gradient-to-r from-orange-500 to-orange-600',
     accentColor: 'text-orange-500',
     buttonBg: 'bg-orange-500 hover:bg-orange-600',
+    priceColor: 'text-orange-500',
     features: ['Flash Sale', 'Mall', 'Live', 'Games'],
+    currency: 'Rp',
+    showOriginalPrice: true,
+    showSales: true,
+    showRating: true,
+    layout: 'grid',
   },
+  
+  // Lazada
   lazada: {
     name: 'Lazada',
     theme: 'blue',
-    headerBg: 'bg-gradient-to-r from-blue-600 to-indigo-600',
+    headerBg: 'bg-gradient-to-r from-blue-600 to-blue-700',
     accentColor: 'text-blue-600',
     buttonBg: 'bg-blue-600 hover:bg-blue-700',
+    priceColor: 'text-blue-600',
     features: ['Flash Sale', 'Mall', 'Vouchers', 'Collect'],
+    currency: 'RM',
+    showOriginalPrice: true,
+    showSales: true,
+    showRating: true,
+    layout: 'grid',
   },
-  // 外贸独立站
+  
+  // Shopify
   shopify: {
     name: 'Shopify',
     theme: 'emerald',
     headerBg: 'bg-white border-b border-slate-200',
     accentColor: 'text-emerald-600',
     buttonBg: 'bg-emerald-600 hover:bg-emerald-700',
+    priceColor: 'text-slate-900',
     features: ['Free Shipping', 'Secure Payment', 'Easy Returns', '24/7 Support'],
+    currency: '$',
+    showOriginalPrice: true,
+    showSales: false,
+    showRating: true,
+    layout: 'modern',
   },
+  
+  // Shoplazza
   shoplazza: {
     name: 'Shoplazza',
     theme: 'blue',
     headerBg: 'bg-white border-b border-slate-200',
     accentColor: 'text-blue-600',
     buttonBg: 'bg-blue-600 hover:bg-blue-700',
+    priceColor: 'text-slate-900',
     features: ['全球配送', '安全支付', '无忧退换', '专属客服'],
+    currency: '$',
+    showOriginalPrice: true,
+    showSales: false,
+    showRating: true,
+    layout: 'modern',
   },
+  
+  // WooCommerce
   woocommerce: {
     name: 'WooCommerce',
     theme: 'purple',
     headerBg: 'bg-white border-b border-slate-200',
     accentColor: 'text-purple-600',
     buttonBg: 'bg-purple-600 hover:bg-purple-700',
+    priceColor: 'text-slate-900',
     features: ['Free Shipping', 'Money Back', 'Secure Checkout', 'Support'],
+    currency: '$',
+    showOriginalPrice: true,
+    showSales: false,
+    showRating: true,
+    layout: 'modern',
   },
 };
 
 // 模拟店铺数据
-const mockStoreData = {
+const mockStoreData: Record<string, any> = {
   'store-1': {
     name: '潮流服饰旗舰店',
     platform: 'taobao',
     slogan: '时尚前沿，品质生活',
     products: [
-      { id: '1', title: '2024夏季新款连衣裙 优雅气质修身', price: 299, originalPrice: 599, sales: 1280, rating: 4.8, image: null },
-      { id: '2', title: '纯棉休闲T恤 简约百搭款', price: 99, originalPrice: 199, sales: 2560, rating: 4.9, image: null },
-      { id: '3', title: '高腰牛仔裤 显瘦修身', price: 199, originalPrice: 399, sales: 890, rating: 4.7, image: null },
-      { id: '4', title: '针织开衫外套 春秋薄款', price: 159, originalPrice: 299, sales: 678, rating: 4.8, image: null },
-      { id: '5', title: '西装裤直筒 职场通勤', price: 179, originalPrice: 359, sales: 456, rating: 4.6, image: null },
-      { id: '6', title: '雪纺衬衫女 气质优雅', price: 139, originalPrice: 279, sales: 890, rating: 4.7, image: null },
+      { id: '1', title: '2024夏季新款连衣裙 优雅气质修身显瘦中长款', price: 299, originalPrice: 599, sales: 1280, rating: 4.8, reviews: 256, stock: 50, tags: ['新品', '热销'] },
+      { id: '2', title: '纯棉休闲T恤 简约百搭款 纯色短袖上衣', price: 99, originalPrice: 199, sales: 2560, rating: 4.9, reviews: 512, stock: 100, tags: ['热销'] },
+      { id: '3', title: '高腰牛仔裤 显瘦修身 直筒长裤女', price: 199, originalPrice: 399, sales: 890, rating: 4.7, reviews: 178, stock: 30, tags: [] },
+      { id: '4', title: '针织开衫外套 春秋薄款 V领修身', price: 159, originalPrice: 299, sales: 678, rating: 4.8, reviews: 136, stock: 45, tags: ['新品'] },
+      { id: '5', title: '西装裤直筒 职场通勤 高腰显瘦', price: 179, originalPrice: 359, sales: 456, rating: 4.6, reviews: 91, stock: 60, tags: [] },
+      { id: '6', title: '雪纺衬衫女 气质优雅 宽松显瘦', price: 139, originalPrice: 279, sales: 890, rating: 4.7, reviews: 178, stock: 80, tags: ['热销'] },
+      { id: '7', title: '网纱半身裙 夏季新款 A字裙显瘦', price: 129, originalPrice: 259, sales: 567, rating: 4.5, reviews: 113, stock: 55, tags: [] },
+      { id: '8', title: '休闲运动裤 宽松显瘦 束脚长裤', price: 149, originalPrice: 299, sales: 789, rating: 4.8, reviews: 158, stock: 70, tags: [] },
     ],
-    categories: ['连衣裙', 'T恤', '裤装', '外套', '衬衫', '套装'],
+    categories: ['连衣裙', 'T恤', '裤装', '外套', '衬衫', '套装', '半身裙', '运动装'],
   },
   'store-2': {
     name: 'TechGadget Store',
     platform: 'amazon',
     slogan: 'Quality Tech, Better Life',
     products: [
-      { id: '1', title: 'Wireless Bluetooth Earbuds Pro', price: 29.99, originalPrice: 49.99, sales: 4560, rating: 4.5, image: null },
-      { id: '2', title: 'Silicone Phone Case for iPhone 15', price: 9.99, originalPrice: 19.99, sales: 8920, rating: 4.3, image: null },
-      { id: '3', title: 'USB-C Fast Charging Cable 3-Pack', price: 14.99, originalPrice: 24.99, sales: 6780, rating: 4.4, image: null },
-      { id: '4', title: 'Portable Power Bank 20000mAh', price: 39.99, originalPrice: 59.99, sales: 2340, rating: 4.6, image: null },
+      { id: '1', title: 'Wireless Bluetooth Earbuds Pro with Active Noise Cancelling', price: 29.99, originalPrice: 49.99, sales: 4560, rating: 4.5, reviews: 892, stock: 200, tags: ['Best Seller'] },
+      { id: '2', title: 'Silicone Phone Case for iPhone 15 Pro Max - Shockproof', price: 9.99, originalPrice: 19.99, sales: 8920, rating: 4.3, reviews: 1784, stock: 500, tags: ['Best Seller'] },
+      { id: '3', title: 'USB-C Fast Charging Cable 3-Pack - 6ft Nylon Braided', price: 14.99, originalPrice: 24.99, sales: 6780, rating: 4.4, reviews: 1356, stock: 300, tags: [] },
+      { id: '4', title: 'Portable Power Bank 20000mAh - Fast Charging', price: 39.99, originalPrice: 59.99, sales: 2340, rating: 4.6, reviews: 468, stock: 150, tags: ['Prime'] },
+      { id: '5', title: 'Wireless Charging Pad - Compatible with All Qi Devices', price: 19.99, originalPrice: 34.99, sales: 3450, rating: 4.4, reviews: 690, stock: 180, tags: [] },
+      { id: '6', title: 'Bluetooth Speaker Portable - Waterproof IPX7', price: 24.99, originalPrice: 44.99, sales: 2180, rating: 4.7, reviews: 436, stock: 120, tags: ['Prime'] },
     ],
-    categories: ['Audio', 'Phone Accessories', 'Chargers', 'Power Banks', 'Smart Home'],
+    categories: ['Audio', 'Phone Accessories', 'Chargers', 'Power Banks', 'Smart Home', 'Speakers'],
   },
   'store-3': {
     name: 'Fashion Plus',
     platform: 'shopify',
     slogan: 'Express Your Style',
     products: [
-      { id: '1', title: 'Summer Floral Dress', price: 49.99, originalPrice: 79.99, sales: 2340, rating: 4.8, image: null },
-      { id: '2', title: 'Casual Cotton Top', price: 29.99, originalPrice: 49.99, sales: 4560, rating: 4.7, image: null },
-      { id: '3', title: 'Classic Denim Jeans', price: 59.99, originalPrice: 89.99, sales: 1780, rating: 4.6, image: null },
-      { id: '4', title: 'Elegant Blouse', price: 39.99, originalPrice: 69.99, sales: 1230, rating: 4.8, image: null },
-      { id: '5', title: 'Cozy Cardigan', price: 44.99, originalPrice: 74.99, sales: 890, rating: 4.5, image: null },
-      { id: '6', title: 'Stylish Skirt', price: 34.99, originalPrice: 59.99, sales: 1560, rating: 4.7, image: null },
+      { id: '1', title: 'Summer Floral Dress', price: 49.99, originalPrice: 79.99, sales: 2340, rating: 4.8, reviews: 468, stock: 80, tags: ['New'] },
+      { id: '2', title: 'Casual Cotton Top', price: 29.99, originalPrice: 49.99, sales: 4560, rating: 4.7, reviews: 912, stock: 150, tags: ['Best Seller'] },
+      { id: '3', title: 'Classic Denim Jeans', price: 59.99, originalPrice: 89.99, sales: 1780, rating: 4.6, reviews: 356, stock: 60, tags: [] },
+      { id: '4', title: 'Elegant Blouse', price: 39.99, originalPrice: 69.99, sales: 1230, rating: 4.8, reviews: 246, stock: 90, tags: ['New'] },
+      { id: '5', title: 'Cozy Cardigan', price: 44.99, originalPrice: 74.99, sales: 890, rating: 4.5, reviews: 178, stock: 70, tags: [] },
+      { id: '6', title: 'Stylish Skirt', price: 34.99, originalPrice: 59.99, sales: 1560, rating: 4.7, reviews: 312, stock: 85, tags: ['Best Seller'] },
+      { id: '7', title: 'Silk Scarf', price: 24.99, originalPrice: 44.99, sales: 890, rating: 4.6, reviews: 178, stock: 100, tags: [] },
+      { id: '8', title: 'Leather Belt', price: 19.99, originalPrice: 39.99, sales: 1120, rating: 4.4, reviews: 224, stock: 120, tags: [] },
     ],
-    categories: ['Dresses', 'Tops', 'Pants', 'Skirts', 'Outerwear', 'Accessories'],
+    categories: ['Dresses', 'Tops', 'Pants', 'Skirts', 'Outerwear', 'Accessories', 'New Arrivals', 'Sale'],
   },
 };
 
@@ -175,121 +266,482 @@ export default function StorePreviewPage() {
   const router = useRouter();
   const storeId = params.id as string;
   
-  const [store, setStore] = useState(mockStoreData[storeId as keyof typeof mockStoreData] || mockStoreData['store-3']);
+  const [store] = useState(mockStoreData[storeId as keyof typeof mockStoreData] || mockStoreData['store-3']);
   const [viewMode, setViewMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [cartCount, setCartCount] = useState(0);
-  const [showCart, setShowCart] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   
   const theme = platformThemes[store.platform as keyof typeof platformThemes] || platformThemes.shopify;
-
+  
   // 判断是否为独立站
   const isIndependentSite = ['shopify', 'shoplazza', 'woocommerce'].includes(store.platform);
+  const isChinese = ['taobao', 'pdd', 'douyin', 'shoplazza'].includes(store.platform);
 
   // 添加到购物车
   const addToCart = () => {
     setCartCount(prev => prev + 1);
   };
 
-  // 渲染平台特定的头部
-  const renderHeader = () => {
-    if (isIndependentSite) {
-      // 独立站风格头部
-      return (
-        <header className={`${theme.headerBg} sticky top-0 z-50`}>
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="flex items-center justify-between h-16">
-              {/* Logo */}
-              <div className="flex items-center gap-2">
-                <div className={`w-10 h-10 rounded-lg ${theme.buttonBg} flex items-center justify-center`}>
-                  <Store className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <h1 className="font-bold text-slate-800">{store.name}</h1>
-                  <p className="text-xs text-slate-500">{store.slogan}</p>
-                </div>
+  // ============================================
+  // 渲染淘宝风格头部
+  // ============================================
+  const renderTaobaoHeader = () => (
+    <header className={`${theme.headerBg} sticky top-0 z-50`}>
+      <div className="max-w-7xl mx-auto px-4">
+        {/* 顶部条 */}
+        <div className="flex items-center justify-between h-10 text-white text-xs border-b border-white/10">
+          <div className="flex items-center gap-4">
+            <span>欢迎来到{store.name}！</span>
+            <span className="text-white/70">|</span>
+            <button className="flex items-center gap-1 hover:underline">
+              <User className="h-3 w-3" />
+              登录
+            </button>
+            <button className="hover:underline">注册</button>
+          </div>
+          <div className="flex items-center gap-4">
+            <button className="flex items-center gap-1 hover:underline">
+              <ShoppingCart className="h-3 w-3" />
+              购物车 ({cartCount})
+            </button>
+            <button className="hover:underline">收藏夹</button>
+            <button className="hover:underline">我的订单</button>
+          </div>
+        </div>
+        
+        {/* 主导航 */}
+        <div className="flex items-center justify-between h-14">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                <Store className="h-5 w-5 text-white" />
               </div>
+              <span className="font-bold text-white text-lg">{store.name}</span>
+            </div>
+          </div>
+          
+          {/* 搜索框 */}
+          <div className="flex-1 max-w-xl mx-8">
+            <div className="flex">
+              <input
+                type="text"
+                placeholder="搜索店铺内商品"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="flex-1 px-4 py-2 rounded-l-lg text-sm focus:outline-none"
+              />
+              <button className={`px-6 py-2 ${theme.buttonBg} text-white rounded-r-lg text-sm font-medium`}>
+                搜索
+              </button>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm" className="text-white hover:bg-white/10">
+              <Bell className="h-4 w-4 mr-1" />
+              消息
+            </Button>
+          </div>
+        </div>
+        
+        {/* 分类导航 */}
+        <div className="flex items-center gap-4 h-10 overflow-x-auto">
+          <button 
+            onClick={() => setSelectedCategory('all')}
+            className={`text-sm font-medium whitespace-nowrap ${
+              selectedCategory === 'all' ? 'text-white' : 'text-white/70 hover:text-white'
+            }`}
+          >
+            全部商品
+          </button>
+          {store.categories.map((cat: string) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`text-sm font-medium whitespace-nowrap ${
+                selectedCategory === cat ? 'text-white' : 'text-white/70 hover:text-white'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
+    </header>
+  );
 
-              {/* Navigation */}
-              <nav className="hidden md:flex items-center gap-6">
-                <Link href="#" className="text-sm font-medium text-slate-600 hover:text-slate-900">首页</Link>
-                <Link href="#" className="text-sm font-medium text-slate-600 hover:text-slate-900">新品</Link>
-                <Link href="#" className="text-sm font-medium text-slate-600 hover:text-slate-900">热销</Link>
-                <Link href="#" className="text-sm font-medium text-slate-600 hover:text-slate-900">关于我们</Link>
-              </nav>
+  // ============================================
+  // 渲染Amazon风格头部
+  // ============================================
+  const renderAmazonHeader = () => (
+    <header className="bg-slate-900 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4">
+        {/* 主导航 */}
+        <div className="flex items-center gap-4 h-16">
+          {/* Logo */}
+          <Link href="#" className="flex items-center gap-1">
+            <div className="w-8 h-8 rounded bg-amber-500 flex items-center justify-center">
+              <Store className="h-4 w-4 text-white" />
+            </div>
+            <span className="text-white font-bold text-xl">{store.name}</span>
+          </Link>
+          
+          {/* 配送地址 */}
+          <button className="flex items-center gap-1 text-white hover:text-amber-400">
+            <MapPinned className="h-5 w-5" />
+            <div className="text-left">
+              <div className="text-xs text-slate-400">Deliver to</div>
+              <div className="text-sm font-medium">United States</div>
+            </div>
+          </button>
+          
+          {/* 搜索框 */}
+          <div className="flex-1 flex">
+            <select className="px-3 py-2 bg-slate-100 text-sm rounded-l-lg border-r border-slate-300 focus:outline-none">
+              <option>All</option>
+              {store.categories.map((cat: string) => (
+                <option key={cat}>{cat}</option>
+              ))}
+            </select>
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-1 px-4 py-2 text-sm focus:outline-none"
+            />
+            <button className={`px-4 py-2 ${theme.buttonBg} rounded-r-lg`}>
+              <Search className="h-5 w-5 text-white" />
+            </button>
+          </div>
+          
+          {/* 右侧菜单 */}
+          <button className="text-white hover:text-amber-400 text-left">
+            <div className="text-xs">Hello, Sign in</div>
+            <div className="text-sm font-medium flex items-center gap-1">
+              Account & Lists <ChevronDown className="h-3 w-3" />
+            </div>
+          </button>
+          
+          <button className="text-white hover:text-amber-400 text-left">
+            <div className="text-xs">Returns</div>
+            <div className="text-sm font-medium">& Orders</div>
+          </button>
+          
+          <button className="flex items-center gap-1 text-white hover:text-amber-400 relative">
+            <ShoppingCart className="h-6 w-6" />
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 text-slate-900 text-xs rounded-full flex items-center justify-center font-bold">
+              {cartCount}
+            </span>
+          </button>
+        </div>
+      </div>
+      
+      {/* 子导航 */}
+      <div className="bg-slate-800">
+        <div className="max-w-7xl mx-auto px-4 flex items-center gap-4 h-10 overflow-x-auto">
+          <button className="text-white text-sm font-medium hover:text-amber-400 flex items-center gap-1">
+            <Menu className="h-4 w-4" />
+            All
+          </button>
+          {['Best Sellers', 'Today\'s Deals', 'Prime', 'Customer Service', 'New Releases', 'Books'].map((item) => (
+            <button key={item} className="text-white text-sm hover:text-amber-400 whitespace-nowrap">
+              {item}
+            </button>
+          ))}
+        </div>
+      </div>
+    </header>
+  );
 
-              {/* Actions */}
-              <div className="flex items-center gap-4">
-                <button className="text-slate-600 hover:text-slate-900">
-                  <Search className="h-5 w-5" />
-                </button>
-                <button className="text-slate-600 hover:text-slate-900">
-                  <User className="h-5 w-5" />
-                </button>
-                <button className="text-slate-600 hover:text-slate-900 relative" onClick={() => setShowCart(!showCart)}>
-                  <ShoppingCart className="h-5 w-5" />
-                  {cartCount > 0 && (
-                    <span className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                      {cartCount}
-                    </span>
-                  )}
-                </button>
+  // ============================================
+  // 渲染Shopify风格头部
+  // ============================================
+  const renderShopifyHeader = () => (
+    <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+      {/* 公告栏 */}
+      <div className={`${theme.buttonBg} text-white text-center py-2 text-sm`}>
+        Free shipping on orders over $50 | Use code WELCOME15 for 15% off
+      </div>
+      
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <Link href="#" className="flex items-center gap-2">
+            <div className={`w-10 h-10 rounded-lg ${theme.buttonBg} flex items-center justify-center`}>
+              <Store className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h1 className="font-bold text-slate-900">{store.name}</h1>
+              <p className="text-xs text-slate-500">{store.slogan}</p>
+            </div>
+          </Link>
+          
+          {/* Navigation */}
+          <nav className="hidden md:flex items-center gap-8">
+            {['Shop', 'New Arrivals', 'Best Sellers', 'Sale', 'About'].map((item) => (
+              <Link key={item} href="#" className="text-sm font-medium text-slate-600 hover:text-slate-900">
+                {item}
+              </Link>
+            ))}
+          </nav>
+          
+          {/* Actions */}
+          <div className="flex items-center gap-4">
+            <button className="text-slate-600 hover:text-slate-900">
+              <Search className="h-5 w-5" />
+            </button>
+            <button className="text-slate-600 hover:text-slate-900">
+              <User className="h-5 w-5" />
+            </button>
+            <button className="text-slate-600 hover:text-slate-900 relative" onClick={addToCart}>
+              <ShoppingCart className="h-5 w-5" />
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 w-5 h-5 bg-slate-900 text-white text-xs rounded-full flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+
+  // ============================================
+  // 渲染头部（根据平台选择）
+  // ============================================
+  const renderHeader = () => {
+    if (store.platform === 'taobao' || store.platform === 'pdd') {
+      return renderTaobaoHeader();
+    }
+    if (store.platform === 'amazon') {
+      return renderAmazonHeader();
+    }
+    if (isIndependentSite) {
+      return renderShopifyHeader();
+    }
+    // 默认风格
+    return (
+      <header className={`${theme.headerBg} sticky top-0 z-50`}>
+        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-14">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Store className="h-5 w-5 text-white" />
+              <span className="font-bold text-white">{store.name}</span>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="搜索..."
+                className="px-4 py-1.5 rounded-lg text-sm bg-white/20 text-white placeholder-white/70 focus:outline-none focus:bg-white/30 w-64"
+              />
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/70" />
+            </div>
+            <button className="text-white relative" onClick={addToCart}>
+              <ShoppingCart className="h-5 w-5" />
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 w-5 h-5 bg-yellow-400 text-slate-900 text-xs rounded-full flex items-center justify-center font-bold">
+                  {cartCount}
+                </span>
+              )}
+            </button>
+            <button className="text-white">
+              <User className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      </header>
+    );
+  };
+
+  // ============================================
+  // 渲染淘宝风格Banner
+  // ============================================
+  const renderTaobaoBanner = () => (
+    <div className="relative bg-gradient-to-r from-orange-100 to-pink-100">
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="grid grid-cols-4 gap-4">
+          {/* 主Banner */}
+          <div className="col-span-3 aspect-[3/1] rounded-lg bg-gradient-to-r from-orange-400 to-pink-400 flex items-center justify-center relative overflow-hidden">
+            <div className="absolute inset-0 bg-black/10" />
+            <div className="relative text-center text-white">
+              <Sparkles className="h-10 w-10 mx-auto mb-2" />
+              <p className="text-2xl font-bold">618年中大促</p>
+              <p className="text-sm mt-1">全场低至5折起</p>
+              <button className={`mt-4 px-6 py-2 ${theme.buttonBg} rounded-lg text-sm font-medium`}>
+                立即抢购
+              </button>
+            </div>
+          </div>
+          
+          {/* 侧边活动 */}
+          <div className="space-y-4">
+            <div className="aspect-square rounded-lg bg-gradient-to-br from-red-500 to-pink-500 flex flex-col items-center justify-center text-white p-4">
+              <Timer className="h-8 w-8 mb-2" />
+              <p className="font-bold">限时秒杀</p>
+              <p className="text-xs mt-1">距结束 02:35:18</p>
+            </div>
+            <div className="aspect-square rounded-lg bg-gradient-to-br from-orange-500 to-yellow-500 flex flex-col items-center justify-center text-white p-4">
+              <Gift className="h-8 w-8 mb-2" />
+              <p className="font-bold">领券中心</p>
+              <p className="text-xs mt-1">满199减50</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // ============================================
+  // 渲染Shopify风格Hero
+  // ============================================
+  const renderShopifyHero = () => (
+    <div className="relative bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 py-16 md:py-24">
+        <div className="grid md:grid-cols-2 gap-8 items-center">
+          <div>
+            <Badge className="mb-4">{store.slogan}</Badge>
+            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+              Discover Your Perfect Style
+            </h2>
+            <p className="text-slate-600 mb-6 text-lg">
+              Curated collection of premium products designed for modern living.
+              Quality meets style in every piece.
+            </p>
+            <div className="flex gap-3">
+              <Button className={`${theme.buttonBg} text-white px-8 py-6 text-lg`}>
+                Shop Collection
+                <ChevronRight className="h-5 w-5 ml-2" />
+              </Button>
+              <Button variant="outline" className="px-8 py-6 text-lg">
+                View Lookbook
+              </Button>
+            </div>
+          </div>
+          <div className="relative aspect-square rounded-2xl bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center">
+            <Package className="h-32 w-32 text-slate-400" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // ============================================
+  // 渲染Banner/Hero区域
+  // ============================================
+  const renderHero = () => {
+    if (isIndependentSite) {
+      return renderShopifyHero();
+    }
+    if (store.platform === 'amazon') {
+      return (
+        <div className="relative bg-gradient-to-r from-slate-100 to-slate-200">
+          <div className="max-w-7xl mx-auto px-4 py-8">
+            <div className="aspect-[4/1] rounded-lg bg-gradient-to-r from-slate-700 to-slate-800 flex items-center justify-center text-white">
+              <div className="text-center">
+                <Crown className="h-10 w-10 mx-auto mb-2 text-amber-400" />
+                <p className="text-2xl font-bold">Prime Day Deals</p>
+                <p className="text-sm mt-1 text-slate-300">Exclusive savings for Prime members</p>
               </div>
             </div>
           </div>
-        </header>
+        </div>
       );
-    } else {
-      // 平台电商风格头部
-      return (
-        <header className={`${theme.headerBg} sticky top-0 z-50`}>
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="flex items-center justify-between h-14">
-              <div className="flex items-center gap-4">
-                <h1 className="font-bold text-white text-lg">{store.name}</h1>
-                <div className="hidden md:flex items-center gap-2 text-white/80 text-sm">
-                  {theme.features.slice(0, 3).map((feature, i) => (
-                    <Badge key={i} variant="secondary" className="bg-white/20 text-white border-0">
-                      {feature}
-                    </Badge>
+    }
+    return renderTaobaoBanner();
+  };
+
+  // ============================================
+  // 渲染淘宝风格商品网格
+  // ============================================
+  const renderTaobaoProducts = () => (
+    <div className="max-w-7xl mx-auto px-4 py-6">
+      {/* 排序和筛选 */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-slate-500">排序：</span>
+          <button className="px-3 py-1 text-sm bg-orange-50 text-orange-600 rounded">综合</button>
+          <button className="px-3 py-1 text-sm text-slate-600 hover:bg-slate-50 rounded">销量</button>
+          <button className="px-3 py-1 text-sm text-slate-600 hover:bg-slate-50 rounded">新品</button>
+          <button className="px-3 py-1 text-sm text-slate-600 hover:bg-slate-50 rounded">价格</button>
+        </div>
+        <div className="text-sm text-slate-500">共 {store.products.length} 件商品</div>
+      </div>
+      
+      {/* 商品网格 */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        {store.products.map((product: any) => (
+          <div 
+            key={product.id} 
+            className="bg-white rounded-lg overflow-hidden border border-slate-100 hover:shadow-lg transition-all cursor-pointer group"
+          >
+            <div className="aspect-square bg-slate-100 relative">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Package className="h-12 w-12 text-slate-300" />
+              </div>
+              {product.tags && product.tags.length > 0 && (
+                <div className="absolute top-2 left-2">
+                  {product.tags.map((tag: string) => (
+                    <Badge key={tag} className="bg-red-500 text-white text-xs mr-1">{tag}</Badge>
                   ))}
                 </div>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <button className="text-white">
-                  <Search className="h-5 w-5" />
-                </button>
-                <button className="text-white relative" onClick={() => setShowCart(!showCart)}>
-                  <ShoppingCart className="h-5 w-5" />
-                  {cartCount > 0 && (
-                    <span className="absolute -top-2 -right-2 w-5 h-5 bg-yellow-400 text-slate-900 text-xs rounded-full flex items-center justify-center font-bold">
-                      {cartCount}
-                    </span>
-                  )}
-                </button>
-                <button className="text-white">
-                  <User className="h-5 w-5" />
-                </button>
+              )}
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-3 translate-y-full group-hover:translate-y-0 transition-transform">
+                <Button size="sm" className={`w-full ${theme.buttonBg} text-white`} onClick={(e) => { e.stopPropagation(); addToCart(); }}>
+                  <ShoppingCart className="h-3 w-3 mr-1" /> 加入购物车
+                </Button>
               </div>
             </div>
-            
-            {/* 分类导航 */}
-            <div className="flex items-center gap-4 py-2 overflow-x-auto">
-              <button 
-                onClick={() => setSelectedCategory('all')}
-                className={`text-sm font-medium whitespace-nowrap ${
-                  selectedCategory === 'all' ? 'text-white' : 'text-white/70 hover:text-white'
-                }`}
-              >
-                全部
-              </button>
-              {store.categories.map((cat) => (
-                <button
+            <div className="p-3">
+              <h3 className="text-sm text-slate-700 line-clamp-2 h-10 group-hover:text-orange-600 transition-colors">
+                {product.title}
+              </h3>
+              <div className="flex items-center gap-1 mt-2">
+                <Star className={`h-3 w-3 ${theme.accentColor} fill-current`} />
+                <span className="text-xs text-slate-500">{product.rating}</span>
+                {theme.showSales && (
+                  <span className="text-xs text-slate-400 ml-auto">已售 {product.sales}</span>
+                )}
+              </div>
+              <div className="flex items-baseline gap-2 mt-2">
+                <span className={`text-lg font-bold ${theme.priceColor}`}>
+                  {theme.currency}{product.price}
+                </span>
+                {theme.showOriginalPrice && product.originalPrice && (
+                  <span className="text-xs text-slate-400 line-through">
+                    {theme.currency}{product.originalPrice}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  // ============================================
+  // 渲染Amazon风格商品列表
+  // ============================================
+  const renderAmazonProducts = () => (
+    <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="flex gap-6">
+        {/* 左侧筛选 */}
+        <div className="w-48 flex-shrink-0">
+          <div className="bg-white rounded-lg border border-slate-200 p-4">
+            <h3 className="font-medium text-slate-800 mb-3">Department</h3>
+            <div className="space-y-2">
+              {store.categories.map((cat: string) => (
+                <button 
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
-                  className={`text-sm font-medium whitespace-nowrap ${
-                    selectedCategory === cat ? 'text-white' : 'text-white/70 hover:text-white'
+                  className={`block text-sm text-left w-full ${
+                    selectedCategory === cat ? 'text-amber-600 font-medium' : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   {cat}
@@ -297,178 +749,136 @@ export default function StorePreviewPage() {
               ))}
             </div>
           </div>
-        </header>
-      );
-    }
-  };
-
-  // 渲染Hero区域
-  const renderHero = () => {
-    if (isIndependentSite) {
-      return (
-        <div className="relative bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 py-16 md:py-24">
-            <div className="grid md:grid-cols-2 gap-8 items-center">
-              <div>
-                <Badge className="mb-4">{store.slogan}</Badge>
-                <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-                  发现您的专属风格
-                </h2>
-                <p className="text-slate-600 mb-6">
-                  精选优质商品，为您提供极致购物体验
-                </p>
-                <div className="flex gap-3">
-                  <Button className={`${theme.buttonBg}`}>
-                    立即选购
-                    <ChevronRight className="h-4 w-4 ml-2" />
-                  </Button>
-                  <Button variant="outline">了解更多</Button>
-                </div>
-              </div>
-              <div className="relative aspect-square rounded-2xl bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center">
-                <Package className="h-32 w-32 text-slate-400" />
-              </div>
-            </div>
-          </div>
         </div>
-      );
-    } else {
-      return (
-        <div className="relative bg-gradient-to-r from-slate-100 to-slate-200 overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 py-8">
-            <div className="grid grid-cols-4 gap-4">
-              {/* 主Banner */}
-              <div className="col-span-4 md:col-span-3 aspect-[3/1] rounded-lg bg-gradient-to-r from-slate-300 to-slate-400 flex items-center justify-center">
-                <div className="text-center">
-                  <Sparkles className="h-12 w-12 text-white mx-auto mb-2" />
-                  <p className="text-white text-xl font-bold">限时特惠 全场低至5折</p>
-                </div>
-              </div>
-              
-              {/* 侧边活动 */}
-              <div className="col-span-4 md:col-span-1 space-y-4">
-                <div className="aspect-square rounded-lg bg-gradient-to-br from-red-400 to-pink-500 flex items-center justify-center">
-                  <div className="text-center text-white">
-                    <Clock className="h-8 w-8 mx-auto mb-2" />
-                    <p className="font-bold">限时秒杀</p>
-                  </div>
-                </div>
-                <div className="aspect-square rounded-lg bg-gradient-to-br from-orange-400 to-yellow-500 flex items-center justify-center">
-                  <div className="text-center text-white">
-                    <Tag className="h-8 w-8 mx-auto mb-2" />
-                    <p className="font-bold">领券中心</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+        
+        {/* 商品列表 */}
+        <div className="flex-1">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm text-slate-500">Results</span>
+            <select className="text-sm border border-slate-200 rounded px-3 py-1.5">
+              <option>Sort by: Featured</option>
+              <option>Price: Low to High</option>
+              <option>Price: High to Low</option>
+              <option>Avg. Customer Review</option>
+            </select>
           </div>
-        </div>
-      );
-    }
-  };
-
-  // 渲染产品网格
-  const renderProducts = () => (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-slate-800">
-          {isIndependentSite ? '精选商品' : '热销商品'}
-        </h2>
-        <div className="flex items-center gap-2 text-sm text-slate-500">
-          <span>排序：</span>
-          <Select defaultValue="sales">
-            <SelectTrigger className="w-32 h-8">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="sales">销量优先</SelectItem>
-              <SelectItem value="price-asc">价格升序</SelectItem>
-              <SelectItem value="price-desc">价格降序</SelectItem>
-              <SelectItem value="rating">好评优先</SelectItem>
-            </SelectContent>
-          </Select>
+          
+          <div className="space-y-4">
+            {store.products.map((product: any) => (
+              <div 
+                key={product.id}
+                className="bg-white rounded-lg border border-slate-200 p-4 flex gap-4 hover:shadow-md transition-shadow cursor-pointer"
+              >
+                <div className="w-40 h-40 bg-slate-100 rounded flex items-center justify-center flex-shrink-0">
+                  <Package className="h-12 w-12 text-slate-300" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-base text-slate-800 hover:text-amber-600 line-clamp-2">
+                    {product.title}
+                  </h3>
+                  <div className="flex items-center gap-1 mt-1">
+                    <div className="flex">
+                      {[1,2,3,4,5].map((i) => (
+                        <Star key={i} className={`h-4 w-4 ${i <= Math.floor(product.rating) ? 'text-amber-400 fill-current' : 'text-slate-300'}`} />
+                      ))}
+                    </div>
+                    <span className="text-sm text-blue-600 hover:underline cursor-pointer">{product.reviews}</span>
+                  </div>
+                  <div className="mt-2">
+                    <span className="text-xl font-bold text-slate-900">{theme.currency}{product.price}</span>
+                    {product.tags?.includes('Prime') && (
+                      <Badge className="ml-2 bg-blue-600 text-white text-xs">Prime</Badge>
+                    )}
+                  </div>
+                  <p className="text-sm text-slate-500 mt-1">FREE delivery Tomorrow, Mar 15</p>
+                </div>
+                <div className="flex flex-col items-end justify-between">
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); addToCart(); }}
+                    className={`px-4 py-1.5 rounded-lg text-sm ${theme.buttonBg} text-white`}
+                  >
+                    Add to Cart
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
+    </div>
+  );
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {store.products.map((product) => (
-          <Card 
-            key={product.id} 
-            className="border-0 shadow-sm hover:shadow-md transition-all cursor-pointer group overflow-hidden"
+  // ============================================
+  // 渲染Shopify风格商品网格
+  // ============================================
+  const renderShopifyProducts = () => (
+    <div className="max-w-7xl mx-auto px-4 py-12">
+      {/* 标题 */}
+      <div className="text-center mb-10">
+        <h2 className="text-3xl font-bold text-slate-900">Featured Collection</h2>
+        <p className="text-slate-500 mt-2">Discover our most loved pieces</p>
+      </div>
+      
+      {/* 商品网格 */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {store.products.map((product: any) => (
+          <div 
+            key={product.id}
+            className="group cursor-pointer"
           >
-            <div className="aspect-square bg-slate-100 relative overflow-hidden">
+            <div className="aspect-[3/4] bg-slate-100 rounded-xl relative overflow-hidden mb-4">
               <div className="absolute inset-0 flex items-center justify-center">
                 <Package className="h-16 w-16 text-slate-300" />
               </div>
-              {/* 折扣标签 */}
-              {product.originalPrice > product.price && (
-                <div className={`absolute top-2 left-2 ${theme.buttonBg} text-white text-xs px-2 py-1 rounded`}>
-                  -{Math.round((1 - product.price / product.originalPrice) * 100)}%
+              {product.tags && product.tags.length > 0 && (
+                <div className="absolute top-3 left-3">
+                  {product.tags.map((tag: string) => (
+                    <Badge key={tag} className="bg-slate-900 text-white text-xs mr-1">{tag}</Badge>
+                  ))}
                 </div>
               )}
-              {/* 快速操作 */}
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-3 translate-y-full group-hover:translate-y-0 transition-transform">
-                <Button size="sm" className={`w-full ${theme.buttonBg}`} onClick={(e) => {
-                  e.stopPropagation();
-                  addToCart();
-                }}>
+              <div className="absolute inset-x-0 bottom-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button className={`w-full ${theme.buttonBg} text-white`} onClick={(e) => { e.stopPropagation(); addToCart(); }}>
                   <ShoppingCart className="h-4 w-4 mr-2" />
-                  加入购物车
+                  Add to Cart
                 </Button>
               </div>
             </div>
-            <CardContent className="p-3">
-              <h3 className="text-sm font-medium text-slate-800 line-clamp-2 mb-2 group-hover:text-orange-500 transition-colors">
-                {product.title}
-              </h3>
-              <div className="flex items-center gap-1 mb-2">
-                <Star className={`h-3 w-3 ${theme.accentColor} fill-current`} />
-                <span className="text-xs text-slate-600">{product.rating}</span>
-                <span className="text-xs text-slate-400">| 已售 {product.sales}</span>
-              </div>
-              <div className="flex items-baseline gap-2">
-                <span className={`${theme.accentColor} font-bold`}>
-                  {store.platform === 'taobao' || store.platform === 'pdd' || store.platform === 'douyin' ? '¥' : '$'}
-                  {product.price}
-                </span>
-                {product.originalPrice > product.price && (
-                  <span className="text-xs text-slate-400 line-through">
-                    {store.platform === 'taobao' || store.platform === 'pdd' || store.platform === 'douyin' ? '¥' : '$'}
-                    {product.originalPrice}
-                  </span>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+            <h3 className="text-sm font-medium text-slate-800 group-hover:text-slate-600 transition-colors">
+              {product.title}
+            </h3>
+            <div className="flex items-center gap-1 mt-1">
+              <Star className={`h-3 w-3 ${theme.accentColor} fill-current`} />
+              <span className="text-xs text-slate-500">{product.rating} ({product.reviews})</span>
+            </div>
+            <div className="mt-2 flex items-baseline gap-2">
+              <span className="text-base font-semibold text-slate-900">{theme.currency}{product.price}</span>
+              {product.originalPrice && (
+                <span className="text-sm text-slate-400 line-through">{theme.currency}{product.originalPrice}</span>
+              )}
+            </div>
+          </div>
         ))}
       </div>
     </div>
   );
 
-  // 渲染特色服务
-  const renderFeatures = () => (
-    <div className="max-w-7xl mx-auto px-4 py-8 border-t border-slate-200">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-        {theme.features.map((feature, index) => {
-          const icons = [Truck, Shield, RefreshCw, CreditCard];
-          const Icon = icons[index % icons.length];
-          return (
-            <div key={index} className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-lg ${theme.buttonBg} bg-opacity-10 flex items-center justify-center`}>
-                <Icon className={`h-5 w-5 ${theme.accentColor}`} />
-              </div>
-              <div>
-                <p className="font-medium text-slate-800">{feature}</p>
-                <p className="text-xs text-slate-500">优质服务保障</p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
+  // ============================================
+  // 渲染商品区域
+  // ============================================
+  const renderProducts = () => {
+    if (isIndependentSite) {
+      return renderShopifyProducts();
+    }
+    if (store.platform === 'amazon') {
+      return renderAmazonProducts();
+    }
+    return renderTaobaoProducts();
+  };
 
+  // ============================================
   // 渲染底部
+  // ============================================
   const renderFooter = () => {
     if (isIndependentSite) {
       return (
@@ -483,45 +893,39 @@ export default function StorePreviewPage() {
                   <span className="font-bold">{store.name}</span>
                 </div>
                 <p className="text-sm text-slate-400">{store.slogan}</p>
-              </div>
-              
-              <div>
-                <h4 className="font-semibold mb-3">快速链接</h4>
-                <ul className="space-y-2 text-sm text-slate-400">
-                  <li><Link href="#">关于我们</Link></li>
-                  <li><Link href="#">新品上市</Link></li>
-                  <li><Link href="#">热销商品</Link></li>
-                  <li><Link href="#">联系我们</Link></li>
-                </ul>
-              </div>
-              
-              <div>
-                <h4 className="font-semibold mb-3">客户服务</h4>
-                <ul className="space-y-2 text-sm text-slate-400">
-                  <li><Link href="#">配送说明</Link></li>
-                  <li><Link href="#">退换政策</Link></li>
-                  <li><Link href="#">常见问题</Link></li>
-                  <li><Link href="#">隐私政策</Link></li>
-                </ul>
-              </div>
-              
-              <div>
-                <h4 className="font-semibold mb-3">联系方式</h4>
-                <ul className="space-y-2 text-sm text-slate-400">
-                  <li className="flex items-center gap-2">
-                    <Mail className="h-4 w-4" />
-                    support@example.com
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Phone className="h-4 w-4" />
-                    400-888-8888
-                  </li>
-                </ul>
                 <div className="flex gap-3 mt-4">
                   <Facebook className="h-5 w-5 text-slate-400 hover:text-white cursor-pointer" />
                   <Twitter className="h-5 w-5 text-slate-400 hover:text-white cursor-pointer" />
                   <Instagram className="h-5 w-5 text-slate-400 hover:text-white cursor-pointer" />
-                  <Youtube className="h-5 w-5 text-slate-400 hover:text-white cursor-pointer" />
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold mb-3">Shop</h4>
+                <ul className="space-y-2 text-sm text-slate-400">
+                  <li><Link href="#">New Arrivals</Link></li>
+                  <li><Link href="#">Best Sellers</Link></li>
+                  <li><Link href="#">Sale</Link></li>
+                  <li><Link href="#">All Products</Link></li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold mb-3">Help</h4>
+                <ul className="space-y-2 text-sm text-slate-400">
+                  <li><Link href="#">Shipping & Returns</Link></li>
+                  <li><Link href="#">FAQ</Link></li>
+                  <li><Link href="#">Contact Us</Link></li>
+                  <li><Link href="#">Size Guide</Link></li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold mb-3">Newsletter</h4>
+                <p className="text-sm text-slate-400 mb-3">Subscribe to get special offers.</p>
+                <div className="flex">
+                  <input type="email" placeholder="Your email" className="flex-1 px-3 py-2 rounded-l-lg text-sm bg-slate-800 border border-slate-700 focus:outline-none" />
+                  <button className={`px-4 py-2 ${theme.buttonBg} rounded-r-lg text-sm`}>Join</button>
                 </div>
               </div>
             </div>
@@ -532,17 +936,18 @@ export default function StorePreviewPage() {
           </div>
         </footer>
       );
-    } else {
-      return (
-        <footer className="bg-slate-800 text-white py-8">
-          <div className="max-w-7xl mx-auto px-4 text-center">
-            <p className="text-sm text-slate-400">
-              © 2024 {store.name} | 模拟店铺仅供实训使用
-            </p>
-          </div>
-        </footer>
-      );
     }
+    
+    // 平台电商底部
+    return (
+      <footer className="bg-slate-800 text-white py-6">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <p className="text-sm text-slate-400">
+            © 2024 {store.name} | 模拟店铺仅供实训使用
+          </p>
+        </div>
+      </footer>
+    );
   };
 
   // 获取预览容器样式
@@ -631,7 +1036,6 @@ export default function StorePreviewPage() {
             {renderHeader()}
             {renderHero()}
             {renderProducts()}
-            {renderFeatures()}
             {renderFooter()}
           </div>
         </div>
