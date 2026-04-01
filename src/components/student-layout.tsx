@@ -12,13 +12,19 @@ import {
   Bell,
   LogOut,
   Globe,
+  Brain,
+  AlertTriangle,
+  Target,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 const menuItems = [
   { id: 'dashboard', label: '实训控制台', icon: LayoutDashboard, href: '/student/dashboard' },
   { id: 'learning', label: '学习中心', icon: BookOpen, href: '/student/learning' },
   { id: 'practice', label: '仿真实训', icon: Store, href: '/student/practice' },
+  { id: 'ai-assistant', label: 'AI助手', icon: Brain, href: '/student/ai-assistant', highlight: true },
+  { id: 'risk-events', label: '风险应对', icon: AlertTriangle, href: '/student/risk-events' },
   { id: 'exam', label: '考核中心', icon: Award, href: '/student/exam' },
   { id: 'achievement', label: '成果中心', icon: FileText, href: '/student/achievement' },
   { id: 'qa', label: '答疑提问', icon: MessageCircle, href: '/student/qa' },
@@ -85,14 +91,37 @@ export function StudentLayout({ children, activeMenu }: StudentLayoutProps) {
               className={`flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${
                 currentMenu === item.id
                   ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25'
-                  : 'text-slate-600 hover:bg-slate-100'
+                  : item.highlight 
+                    ? 'text-purple-600 bg-purple-50 hover:bg-purple-100 border border-purple-200'
+                    : 'text-slate-600 hover:bg-slate-100'
               }`}
             >
               <item.icon className="h-5 w-5" />
               <span className="font-medium">{item.label}</span>
+              {item.highlight && currentMenu !== item.id && (
+                <Badge className="ml-auto bg-purple-500 text-white text-xs">AI</Badge>
+              )}
             </Link>
           ))}
         </nav>
+
+        {/* AI能力统计 */}
+        <div className="mx-4 mt-4 p-4 rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100">
+          <div className="flex items-center gap-2 mb-2">
+            <Brain className="h-4 w-4 text-purple-600" />
+            <span className="text-sm font-medium text-purple-700">AI辅助统计</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="text-center p-2 bg-white rounded-lg">
+              <p className="text-lg font-bold text-purple-600">23</p>
+              <p className="text-slate-500">AI调用</p>
+            </div>
+            <div className="text-center p-2 bg-white rounded-lg">
+              <p className="text-lg font-bold text-emerald-600">78%</p>
+              <p className="text-slate-500">自主决策</p>
+            </div>
+          </div>
+        </div>
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200 bg-white">
           <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors">
@@ -125,14 +154,37 @@ export function StudentSidebar({ activeMenu }: { activeMenu?: string }) {
             className={`flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${
               currentMenu === item.id
                 ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25'
-                : 'text-slate-600 hover:bg-slate-100'
+                : item.highlight 
+                  ? 'text-purple-600 bg-purple-50 hover:bg-purple-100 border border-purple-200'
+                  : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
             <item.icon className="h-5 w-5" />
             <span className="font-medium">{item.label}</span>
+            {item.highlight && currentMenu !== item.id && (
+              <Badge className="ml-auto bg-purple-500 text-white text-xs">AI</Badge>
+            )}
           </Link>
         ))}
       </nav>
+
+      {/* AI能力统计 */}
+      <div className="mx-4 mt-4 p-4 rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100">
+        <div className="flex items-center gap-2 mb-2">
+          <Brain className="h-4 w-4 text-purple-600" />
+          <span className="text-sm font-medium text-purple-700">AI辅助统计</span>
+        </div>
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          <div className="text-center p-2 bg-white rounded-lg">
+            <p className="text-lg font-bold text-purple-600">23</p>
+            <p className="text-slate-500">AI调用</p>
+          </div>
+          <div className="text-center p-2 bg-white rounded-lg">
+            <p className="text-lg font-bold text-emerald-600">78%</p>
+            <p className="text-slate-500">自主决策</p>
+          </div>
+        </div>
+      </div>
 
       <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200 bg-white">
         <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors">
