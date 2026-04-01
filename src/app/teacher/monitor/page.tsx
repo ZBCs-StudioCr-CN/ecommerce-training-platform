@@ -57,7 +57,7 @@ export default function TeacherMonitorPage() {
               <Globe className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-slate-800">外贸独立站实训平台</h1>
+              <h1 className="text-lg font-bold text-slate-800">电商实训平台</h1>
               <p className="text-xs text-slate-500">教师端</p>
             </div>
           </Link>

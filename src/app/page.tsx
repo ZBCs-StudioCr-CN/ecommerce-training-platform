@@ -90,7 +90,7 @@ export default function Home() {
               <Globe className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-white">外贸独立站实训平台</h1>
+              <h1 className="text-lg font-bold text-white">电商实训平台</h1>
               <p className="text-xs text-blue-200">Cross-border E-commerce Training Platform</p>
             </div>
           </div>
@@ -114,13 +114,13 @@ export default function Home() {
 
         <div className="max-w-7xl mx-auto text-center relative z-10">
           <h2 className="text-5xl font-bold text-white mb-6 leading-tight">
-            外贸独立站实战模拟<br />
+            电商实战模拟<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">
               教学实训平台
             </span>
           </h2>
           <p className="text-xl text-blue-100 mb-10 max-w-3xl mx-auto">
-            面向中高职、本科院校电商/跨境电商专业，打造"教学-实训-考核-就业"全闭环的云端SaaS外贸独立站实战模拟平台
+            面向中高职、本科院校电商/跨境电商专业，打造"教学-实训-考核-就业"全闭环的云端SaaS电商实战模拟平台
           </p>
 
           <div className="flex items-center justify-center gap-4 mb-16">
@@ -239,7 +239,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h3 className="text-3xl font-bold text-white mb-4">平台核心特性</h3>
-            <p className="text-blue-200">专为产教融合场景打造的外贸独立站仿真实训平台</p>
+            <p className="text-blue-200">专为产教融合场景打造的电商仿真实训平台</p>
           </div>
 
           <div className="grid grid-cols-4 gap-6">
@@ -296,10 +296,10 @@ export default function Home() {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
               <Globe className="h-4 w-4 text-white" />
             </div>
-            <span className="text-sm text-blue-200">外贸独立站实训平台</span>
+            <span className="text-sm text-blue-200">电商实训平台</span>
           </div>
           <p className="text-sm text-blue-300">
-            外贸独立站实战模拟教学实训平台
+            电商实战模拟教学实训平台
           </p>
         </div>
       </footer>

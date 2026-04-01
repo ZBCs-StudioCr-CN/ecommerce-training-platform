@@ -93,7 +93,7 @@ export default function LoginPage() {
               <Globe className="h-9 w-9 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white">外贸独立站实训平台</h1>
+              <h1 className="text-3xl font-bold text-white">电商实训平台</h1>
               <p className="text-blue-200">Cross-border E-commerce Training Platform</p>
             </div>
           </div>

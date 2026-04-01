@@ -124,7 +124,7 @@ export default function StudentDashboardPage() {
         {/* 页面标题 */}
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-slate-800">实训控制台</h2>
-          <p className="text-slate-500">全链路外贸独立站实战模拟</p>
+          <p className="text-slate-500">全链路电商实战模拟</p>
         </div>
 
         {/* 概览卡片 */}
