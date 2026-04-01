@@ -129,6 +129,23 @@
   - 消息反馈机制（点赞/点踩）
   - 使用统计记录
 
+### 6. 风险应对实训 (`src/app/student/risk-events/page.tsx`)
+- **6大风险类型**：
+  1. 客户投诉 - 产品质量、物流延迟、服务态度等
+  2. 差评处理 - 恶意差评、真实差评的识别与应对
+  3. 平台处罚 - 违规处罚、侵权投诉、售后纠纷
+  4. 舆情危机 - 负面传播、品牌形象危机
+  5. 运营风险 - 库存积压、价格错误、活动异常
+  6. 合规风险 - 广告法违规、知识产权、数据合规
+- **风险等级**：低风险、中风险、高风险、紧急
+- **评分维度**（总分100分）：
+  - 响应速度（20%）- 处理时效是否合理
+  - 方案合理性（30%）- 解决方案是否可执行
+  - 沟通技巧（20%）- 沟通是否专业、有同理心
+  - 合规意识（15%）- 是否考虑法规和平台规则
+  - 风险控制（15%）- 是否有效降低事态升级风险
+- **实训流程**：查看风险详情 → 分析问题 → 提交应对方案 → AI评分点评
+
 ## 数据持久化策略
 
 ### localStorage使用规范
@@ -160,7 +177,33 @@ const stores = JSON.parse(localStorage.getItem(STORES_KEY) || '[]');
   }
   ```
 - **响应格式**：SSE流式响应（text/event-stream）
-- **支持模块**：9个功能模块，每个模块有独立的系统提示词
+- **支持模块**：9个功能模块 + general通用对话
+
+### 风险应对评分API (`src/app/api/risk-evaluation/route.ts`)
+- **请求方式**：POST
+- **请求参数**：
+  ```typescript
+  {
+    riskId: string;      // 风险事件ID
+    solution: string;    // 学生应对方案
+    riskDetails: object; // 风险事件详情
+  }
+  ```
+- **响应格式**：JSON
+  ```typescript
+  {
+    scores: {
+      responseSpeed: number;    // 0-20
+      reasonability: number;    // 0-30
+      communication: number;    // 0-20
+      compliance: number;       // 0-15
+      riskControl: number;      // 0-15
+      total: number;            // 0-100
+    },
+    feedback: string;           // 具体反馈
+    aiEvaluation: string;       // 能力评估建议
+  }
+  ```
 
 ## 开发规范
 
@@ -263,3 +306,5 @@ A: 运行`npx tsc --noEmit`检查类型，确保所有Props都有正确的类型
 - ✅ 完成AI智能助手页面开发（9大核心功能模块）
 - ✅ 集成LLM实现流式AI对话功能
 - ✅ 添加通用对话区域，支持主页底部自由问答
+- ✅ 完成风险应对实训页面开发（6大风险类型、5维评分体系）
+- ✅ 实现AI自动评分和点评功能
