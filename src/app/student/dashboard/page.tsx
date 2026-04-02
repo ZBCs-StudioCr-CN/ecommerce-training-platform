@@ -26,15 +26,26 @@ import {
   ShoppingBag,
   Sparkles,
   Shield,
+  Eye,
+  Info,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { StudentLayout } from '@/components/student-layout';
 import { AIAssistantButton } from '@/components/ai-assistant';
 import { RiskEventButton } from '@/components/risk-event-simulator';
 import { PRACTICE_STAGES, FIVE_DIMENSIONS, type PracticeStage, type StageConfig } from '@/data/ability-practice';
+import { generateMockStats, generateScoreBreakdown } from '@/lib/autonomous-decision-calculator';
 
 // 阶段图标映射
 const stageIcons: Record<string, React.ElementType> = {
@@ -128,6 +139,96 @@ const calculateRiskLevel = (handledCount: number): number => {
   if (handledCount < 19) return 4;   // Lv.4: 9-18起
   return 5 + Math.floor((handledCount - 19) / 10); // Lv.5+: 19起后每10起升一级
 };
+
+// 独立决策详情组件
+function IndependentDecisionDetail() {
+  const stats = generateMockStats('student-001');
+  const breakdown = generateScoreBreakdown(stats);
+
+  return (
+    <div className="space-y-6 mt-4">
+      {/* 总分展示 */}
+      <div className="p-4 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm text-slate-600">独立决策比例</p>
+            <p className="text-3xl font-bold text-amber-600">{breakdown.autonomousDecisionRatio}%</p>
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-slate-500">计算公式</p>
+            <p className="text-sm text-slate-700">决策行为 × 40% + AI健康度 × 35% + 原创度 × 25%</p>
+          </div>
+        </div>
+      </div>
+
+      {/* 三大维度详情 */}
+      {breakdown.components.map((component, index) => (
+        <div key={index} className="border rounded-lg overflow-hidden">
+          <div className="p-4 bg-slate-50 border-b">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-slate-800">{component.name}</span>
+                <Badge variant="outline" className="text-xs">权重 {component.weight}%</Badge>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-slate-500">得分: {component.score}</span>
+                <span className="text-lg font-bold text-amber-600">加权: {component.weightedScore}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="p-4">
+            {component.note && (
+              <div className="mb-3 p-2 rounded bg-blue-50 text-blue-700 text-xs flex items-center gap-1">
+                <Info className="h-3 w-3" />
+                {component.note}
+              </div>
+            )}
+            
+            <div className="grid grid-cols-2 gap-2">
+              {component.details.map((detail, i) => (
+                <div key={i} className="flex items-center justify-between p-2 rounded bg-slate-50">
+                  <span className="text-sm text-slate-600">{detail.label}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-slate-800">{detail.value}{detail.unit}</span>
+                    {'score' in detail && typeof detail.score === 'number' && (
+                      <Badge 
+                        variant={detail.score >= 70 ? 'default' : detail.score >= 30 ? 'secondary' : 'destructive'}
+                        className="text-xs"
+                      >
+                        {detail.score}分
+                      </Badge>
+                    )}
+                    {'score' in detail && typeof detail.score === 'string' && (
+                      <Badge variant="outline" className="text-xs">
+                        {detail.score}
+                      </Badge>
+                    )}
+                    {'weight' in detail && (
+                      <Badge variant="outline" className="text-xs">
+                        权重{detail.weight}%
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      ))}
+
+      {/* 计算说明 */}
+      <div className="p-4 rounded-lg bg-slate-100 text-sm text-slate-600">
+        <p className="font-medium mb-2">计算说明：</p>
+        <ul className="list-disc list-inside space-y-1 text-xs">
+          <li><strong>决策行为得分</strong>：根据每次决策的独立程度评分，完全独立100分，复制粘贴0分</li>
+          <li><strong>AI交互健康度</strong>：只考核交互质量，不考核交互数量。调用AI多但修改多是好事</li>
+          <li><strong>内容原创度</strong>：原创输入占比、编辑修改程度、思考时长综合计算</li>
+        </ul>
+      </div>
+    </div>
+  );
+}
 
 // 模拟店铺数据
 const mockStore = {
@@ -256,11 +357,42 @@ export default function StudentDashboardPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-amber-100 text-sm">自主决策</p>
-                  <p className="text-3xl font-bold mt-1">{progress.aiStats.autonomousDecisions}%</p>
+                  <p className="text-3xl font-bold mt-1">
+                    {(() => {
+                      const stats = generateMockStats('student-001');
+                      return stats.autonomousDecisionRatio;
+                    })()}%
+                  </p>
                   <p className="text-amber-200 text-sm mt-1">独立决策比例</p>
                 </div>
-                <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center">
-                  <Zap className="h-7 w-7" />
+                <div className="flex items-center gap-2">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 w-8 p-0 text-white/80 hover:text-white hover:bg-white/20"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                          <Zap className="h-5 w-5 text-amber-500" />
+                          独立决策比例计算详情
+                        </DialogTitle>
+                        <DialogDescription>
+                          独立决策比例 = 决策行为得分 × 40% + AI交互健康度 × 35% + 内容原创度 × 25%
+                        </DialogDescription>
+                      </DialogHeader>
+                      
+                      <IndependentDecisionDetail />
+                    </DialogContent>
+                  </Dialog>
+                  <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center">
+                    <Zap className="h-7 w-7" />
+                  </div>
                 </div>
               </div>
             </CardContent>

@@ -390,6 +390,11 @@ A: 运行`npx tsc --noEmit`检查类型，确保所有Props都有正确的类型
 - ✅ 新增五维能力实训配置文件（src/data/ability-practice.ts）
 - ✅ 更新学生端dashboard：五维能力雷达图、实训阶段关联能力标签
 - ✅ 实训阶段重新设计为9个阶段，每个阶段对应具体能力培养
+- ✅ 独立决策比例计算方案设计完成（docs/autonomous-decision-calculation.md）
+- ✅ 数据埋点类型定义（src/types/decision-tracking.ts）
+- ✅ 后端计算工具函数（src/lib/autonomous-decision-calculator.ts）
+- ✅ 前端展示更新：添加独立决策详情弹窗，展示三大维度得分来源
+- ✅ 危机处理能力卡片改造：等级根据处理的风险事件数量计算
 
 ### 2026-04-01
 - ✅ 完成店铺管理主页面开发
