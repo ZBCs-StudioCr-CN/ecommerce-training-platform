@@ -116,6 +116,17 @@ const mockProgress = {
     autonomousDecisions: 78,
     lastWeekCalls: 8,
   },
+  riskEventsHandled: 7, // 处理的风险事件数量
+};
+
+// 根据处理的风险事件数量计算危机处理能力等级
+// 规则：1升2需1起，2升3需3起，3升4需5起，4升5需10起，后续每10起升一级
+const calculateRiskLevel = (handledCount: number): number => {
+  if (handledCount < 1) return 1;    // Lv.1: 0起
+  if (handledCount < 4) return 2;    // Lv.2: 1-3起
+  if (handledCount < 9) return 3;    // Lv.3: 4-8起
+  if (handledCount < 19) return 4;   // Lv.4: 9-18起
+  return 5 + Math.floor((handledCount - 19) / 10); // Lv.5+: 19起后每10起升一级
 };
 
 // 模拟店铺数据
@@ -259,12 +270,12 @@ export default function StudentDashboardPage() {
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-green-100 text-sm">当前等级</p>
-                  <p className="text-3xl font-bold mt-1">Lv.{progress.level}</p>
-                  <p className="text-green-200 text-sm mt-1">{progress.experience} 经验值</p>
+                  <p className="text-green-100 text-sm">危机处理能力</p>
+                  <p className="text-3xl font-bold mt-1">Lv.{calculateRiskLevel(progress.riskEventsHandled)}</p>
+                  <p className="text-green-200 text-sm mt-1">已处理 {progress.riskEventsHandled} 起风险事件</p>
                 </div>
                 <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center">
-                  <Star className="h-7 w-7" />
+                  <Shield className="h-7 w-7" />
                 </div>
               </div>
             </CardContent>
