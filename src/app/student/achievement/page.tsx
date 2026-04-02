@@ -47,12 +47,13 @@ const iconMap: Record<string, React.ElementType> = {
   Shield,
 };
 
-// 五维能力雷达图数据
+// 五维能力雷达图数据 - 使用固定值避免hydration错误
 const abilityRadar = {
-  dimensions: FIVE_DIMENSIONS.map(dim => ({
+  dimensions: FIVE_DIMENSIONS.map((dim, index) => ({
     id: dim.id,
     name: dim.name,
-    value: Math.round(65 + Math.random() * 30), // 模拟得分
+    // 使用固定值替代随机数
+    value: [78, 85, 72, 65, 90][index],
     weight: dim.weight,
     color: dim.color,
     icon: iconMap[dim.icon] || Target,
@@ -65,15 +66,6 @@ abilityRadar.overall = Math.round(
   abilityRadar.dimensions.reduce((sum, d) => sum + d.value * d.weight, 0) / 
   abilityRadar.dimensions.reduce((sum, d) => sum + d.weight, 0)
 );
-
-// 五大评分维度得分
-const scoringDimensions = [
-  { name: '自主决策能力', score: 78, weight: 30, color: 'from-blue-500 to-indigo-500' },
-  { name: 'AI辅助应用', score: 85, weight: 20, color: 'from-purple-500 to-pink-500' },
-  { name: '数据复盘优化', score: 72, weight: 25, color: 'from-amber-500 to-orange-500' },
-  { name: '风险应对能力', score: 65, weight: 15, color: 'from-red-500 to-rose-500' },
-  { name: '合规规则意识', score: 90, weight: 10, color: 'from-emerald-500 to-teal-500' },
-];
 
 const portfolio = {
   totalPractices: 12,
@@ -149,34 +141,143 @@ export default function AchievementPage() {
                 <CardDescription>五维能力评估</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {radar.dimensions.map((dim, index) => (
-                    <div key={index}>
-                      <div className="flex items-center justify-between mb-1">
-                        <div className="flex items-center gap-2">
-                          <dim.icon className="h-4 w-4" style={{ color: dim.color }} />
-                          <span className="text-sm font-medium text-slate-700">{dim.name}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-bold" style={{ color: dim.color }}>{dim.value}%</span>
-                          <span className="text-xs text-slate-400">权重{dim.weight}%</span>
-                        </div>
-                      </div>
-                      <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full rounded-full transition-all duration-500"
-                          style={{ 
-                            width: `${dim.value}%`, 
-                            backgroundColor: dim.color 
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ))}
+                {/* 雷达图 SVG */}
+                <div className="flex justify-center mb-4">
+                  <svg width="280" height="280" viewBox="0 0 280 280">
+                    {(() => {
+                      const centerX = 140;
+                      const centerY = 140;
+                      const maxRadius = 100;
+                      const levels = 5;
+                      const dimensions = radar.dimensions;
+                      const numDimensions = dimensions.length;
+                      
+                      // 计算每个维度的角度
+                      const angleStep = (2 * Math.PI) / numDimensions;
+                      const startAngle = -Math.PI / 2; // 从顶部开始
+                      
+                      // 计算顶点位置
+                      const getPoint = (index: number, radius: number) => {
+                        const angle = startAngle + index * angleStep;
+                        return {
+                          x: centerX + radius * Math.cos(angle),
+                          y: centerY + radius * Math.sin(angle)
+                        };
+                      };
+                      
+                      // 绘制网格线
+                      const gridLines = [];
+                      for (let level = 1; level <= levels; level++) {
+                        const radius = (maxRadius / levels) * level;
+                        const points = dimensions.map((_, i) => {
+                          const p = getPoint(i, radius);
+                          return `${p.x},${p.y}`;
+                        }).join(' ');
+                        gridLines.push(
+                          <polygon
+                            key={`grid-${level}`}
+                            points={points}
+                            fill="none"
+                            stroke="#e2e8f0"
+                            strokeWidth="1"
+                          />
+                        );
+                      }
+                      
+                      // 绘制轴线
+                      const axisLines = dimensions.map((_, i) => {
+                        const p = getPoint(i, maxRadius);
+                        return (
+                          <line
+                            key={`axis-${i}`}
+                            x1={centerX}
+                            y1={centerY}
+                            x2={p.x}
+                            y2={p.y}
+                            stroke="#cbd5e1"
+                            strokeWidth="1"
+                          />
+                        );
+                      });
+                      
+                      // 绘制数据多边形
+                      const dataPoints = dimensions.map((dim, i) => {
+                        const radius = (dim.value / 100) * maxRadius;
+                        return getPoint(i, radius);
+                      });
+                      const dataPolygonPoints = dataPoints.map(p => `${p.x},${p.y}`).join(' ');
+                      
+                      // 绘制数据点和标签
+                      const dataPointsElements = dimensions.map((dim, i) => {
+                        const radius = (dim.value / 100) * maxRadius;
+                        const p = getPoint(i, radius);
+                        const labelP = getPoint(i, maxRadius + 25);
+                        
+                        return (
+                          <g key={`data-${i}`}>
+                            <circle
+                              cx={p.x}
+                              cy={p.y}
+                              r="5"
+                              fill={dim.color}
+                              stroke="white"
+                              strokeWidth="2"
+                            />
+                            <text
+                              x={labelP.x}
+                              y={labelP.y}
+                              textAnchor="middle"
+                              dominantBaseline="middle"
+                              className="text-xs font-medium"
+                              fill="#475569"
+                            >
+                              {dim.name}
+                            </text>
+                            <text
+                              x={labelP.x}
+                              y={labelP.y + 14}
+                              textAnchor="middle"
+                              dominantBaseline="middle"
+                              className="text-xs font-bold"
+                              fill={dim.color}
+                            >
+                              {dim.value}%
+                            </text>
+                          </g>
+                        );
+                      });
+                      
+                      return (
+                        <>
+                          {/* 网格 */}
+                          {gridLines}
+                          {/* 轴线 */}
+                          {axisLines}
+                          {/* 数据区域 */}
+                          <polygon
+                            points={dataPolygonPoints}
+                            fill="url(#radarGradient)"
+                            fillOpacity="0.3"
+                            stroke="#8b5cf6"
+                            strokeWidth="2"
+                          />
+                          {/* 数据点 */}
+                          {dataPointsElements}
+                          {/* 渐变定义 */}
+                          <defs>
+                            <linearGradient id="radarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                              <stop offset="0%" stopColor="#8b5cf6" />
+                              <stop offset="100%" stopColor="#ec4899" />
+                            </linearGradient>
+                          </defs>
+                        </>
+                      );
+                    })()}
+                  </svg>
                 </div>
 
                 {/* 综合得分 */}
-                <div className="mt-6 p-4 rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100">
+                <div className="p-4 rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-slate-600">综合能力得分</p>
@@ -201,20 +302,23 @@ export default function AchievementPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {scoringDimensions.map((dim, index) => (
+                  {radar.dimensions.map((dim, index) => (
                     <div key={index} className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${dim.color} flex items-center justify-center`}>
+                      <div 
+                        className="w-8 h-8 rounded-lg flex items-center justify-center"
+                        style={{ backgroundColor: dim.color }}
+                      >
                         <span className="text-white text-xs font-bold">{dim.weight}</span>
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-sm text-slate-700">{dim.name}</span>
-                          <span className="text-sm font-bold text-slate-800">{dim.score}</span>
+                          <span className="text-sm font-bold" style={{ color: dim.color }}>{dim.value}%</span>
                         </div>
                         <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                           <div 
-                            className={`h-full bg-gradient-to-r ${dim.color} rounded-full`}
-                            style={{ width: `${dim.score}%` }}
+                            className="h-full rounded-full"
+                            style={{ width: `${dim.value}%`, backgroundColor: dim.color }}
                           />
                         </div>
                       </div>
