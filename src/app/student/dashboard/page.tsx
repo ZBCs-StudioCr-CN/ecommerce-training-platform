@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Store,
   ChevronRight,
+  ChevronDown,
   CheckCircle2,
   Clock,
   Target,
@@ -33,7 +34,7 @@ import { Progress } from '@/components/ui/progress';
 import { StudentLayout } from '@/components/student-layout';
 import { AIAssistantButton } from '@/components/ai-assistant';
 import { RiskEventButton } from '@/components/risk-event-simulator';
-import { PRACTICE_STAGES, type PracticeStage, type StageConfig } from '@/data/ability-practice';
+import { PRACTICE_STAGES, FIVE_DIMENSIONS, type PracticeStage, type StageConfig } from '@/data/ability-practice';
 
 // 阶段图标映射
 const stageIcons: Record<string, React.ElementType> = {
@@ -48,56 +49,48 @@ const stageIcons: Record<string, React.ElementType> = {
   final_assessment: Trophy,
 };
 
-// 五维能力雷达图数据（方案二：考试评估维度，实训评估具体能力）
-const abilityRadar = {
-  dimensions: [
-    { 
-      id: 'decision',
-      name: '自主决策能力', 
-      examScore: 82,
-      practiceScore: 78,
-      value: 80, // 考试50% + 实训50%
-      weight: 35, 
-      color: '#3b82f6' 
-    },
-    { 
-      id: 'ai',
-      name: 'AI辅助应用', 
-      examScore: 75,
-      practiceScore: 72,
-      value: 74,
-      weight: 20, 
-      color: '#8b5cf6' 
-    },
-    { 
-      id: 'analysis',
-      name: '数据复盘与优化', 
-      examScore: 85,
-      practiceScore: 82,
-      value: 84,
-      weight: 20, 
-      color: '#22c55e' 
-    },
-    { 
-      id: 'risk',
-      name: '风险应对', 
-      examScore: 78,
-      practiceScore: 75,
-      value: 77,
-      weight: 15, 
-      color: '#f59e0b' 
-    },
-    { 
-      id: 'compliance',
-      name: '合规与规则意识', 
-      examScore: 88,
-      practiceScore: 84,
-      value: 86,
-      weight: 10, 
-      color: '#ef4444' 
-    },
-  ],
-  overall: 80,
+// 五维能力数据类型
+interface AbilityData {
+  dimensions: Array<{
+    id: string;
+    name: string;
+    practiceScore: number;
+    weight: number;
+    color: string;
+    subAbilities: Array<{
+      id: string;
+      name: string;
+      score: number;
+      evaluationType: string;
+      evaluationSource: string;
+    }>;
+  }>;
+  overall: number;
+}
+
+// 生成五维能力数据（客户端）
+const generateAbilityData = (): AbilityData => {
+  const dimensions = FIVE_DIMENSIONS.map(dim => ({
+    id: dim.id,
+    name: dim.name,
+    practiceScore: Math.round(70 + Math.random() * 20), // 实训得分
+    weight: dim.weight,
+    color: dim.color,
+    subAbilities: dim.subAbilities.map(sub => ({
+      id: sub.id,
+      name: sub.name,
+      score: Math.round(65 + Math.random() * 25),
+      evaluationType: sub.evaluationType,
+      evaluationSource: sub.evaluationSource,
+    })),
+  }));
+  
+  // 综合能力 = 各维度实训得分的加权平均
+  const totalWeight = dimensions.reduce((sum, d) => sum + d.weight, 0);
+  const weightedSum = dimensions.reduce((sum, d) => sum + d.practiceScore * d.weight, 0);
+  const overall = Math.round(weightedSum / totalWeight);
+  
+  return { dimensions, overall };
 };
 
 // 模拟实训进度数据
@@ -146,7 +139,13 @@ const scenarios = [
 export default function StudentDashboardPage() {
   const [progress] = useState(mockProgress);
   const [store] = useState(mockStore);
-  const [radar] = useState(abilityRadar);
+  const [abilityRadar, setAbilityRadar] = useState<AbilityData | null>(null);
+  const [expandedDimensions, setExpandedDimensions] = useState<Set<string>>(new Set());
+
+  // 客户端初始化能力数据
+  useEffect(() => {
+    setAbilityRadar(generateAbilityData());
+  }, []);
 
   // 计算统计数据
   const completedStages = Object.values(progress.stages).filter(s => s.completed).length;
@@ -206,7 +205,7 @@ export default function StudentDashboardPage() {
               AI融合版
             </Badge>
           </div>
-          <p className="text-slate-500">驾驭AI，培养四大核心能力，成为不被替代的电商人才</p>
+          <p className="text-slate-500">驾驭AI，培养五维核心能力，成为不被替代的电商人才</p>
         </div>
 
         {/* 概览卡片 */}
@@ -215,9 +214,9 @@ export default function StudentDashboardPage() {
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-emerald-100 text-sm">综合能力</p>
-                  <p className="text-3xl font-bold mt-1">{radar.overall}%</p>
-                  <p className="text-emerald-200 text-sm mt-1">四大核心能力</p>
+                  <p className="text-emerald-100 text-sm">实训进度</p>
+                  <p className="text-3xl font-bold mt-1">{progress.overallProgress}%</p>
+                  <p className="text-emerald-200 text-sm mt-1">{completedStages}/{totalStages} 阶段</p>
                 </div>
                 <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center">
                   <Target className="h-7 w-7" />
@@ -271,13 +270,13 @@ export default function StudentDashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-amber-500 to-orange-600 text-white">
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-amber-100 text-sm">综合能力</p>
-                  <p className="text-3xl font-bold mt-1">{radar.overall}%</p>
-                  <p className="text-amber-200 text-sm mt-1">优秀</p>
+                  <p className="text-blue-100 text-sm">综合能力</p>
+                  <p className="text-3xl font-bold mt-1">{abilityRadar?.overall || '--'}%</p>
+                  <p className="text-blue-200 text-sm mt-1">五维核心能力</p>
                 </div>
                 <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center">
                   <Trophy className="h-7 w-7" />
@@ -297,58 +296,89 @@ export default function StudentDashboardPage() {
                   <LineChart className="h-5 w-5 text-purple-600" />
                   五维能力评估
                 </CardTitle>
-                <CardDescription>考试得分 × 50% + 实训得分 × 50%</CardDescription>
+                <CardDescription>实训板块展示实训得分，综合评定 = 考试50% + 实训50%</CardDescription>
               </CardHeader>
               <CardContent>
-                {/* 五维能力展示 */}
-                <div className="space-y-4">
-                  {radar.dimensions.map((dim, index) => (
-                    <div key={index}>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-medium text-slate-700">{dim.name}</span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-bold" style={{ color: dim.color }}>{dim.value}%</span>
-                          <span className="text-xs text-slate-400">权重{dim.weight}%</span>
-                        </div>
-                      </div>
-                      {/* 考试vs实训双进度条 */}
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-slate-400 w-10">考试</span>
-                          <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                {abilityRadar ? (
+                  <>
+                    {/* 五维能力展示 - 只显示实训得分 */}
+                    <div className="space-y-3">
+                      {abilityRadar.dimensions.map((dim) => {
+                        const isExpanded = expandedDimensions.has(dim.id);
+                        return (
+                          <div key={dim.id}>
                             <div 
-                              className="h-full rounded-full bg-blue-500"
-                              style={{ width: `${dim.examScore}%` }}
-                            />
+                              className="flex items-center justify-between mb-1 cursor-pointer"
+                              onClick={() => {
+                                const newSet = new Set(expandedDimensions);
+                                if (isExpanded) {
+                                  newSet.delete(dim.id);
+                                } else {
+                                  newSet.add(dim.id);
+                                }
+                                setExpandedDimensions(newSet);
+                              }}
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium text-slate-700">{dim.name}</span>
+                                <Badge variant="outline" className="text-xs h-5">权重{dim.weight}%</Badge>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-bold text-green-600">{dim.practiceScore}</span>
+                                <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                              </div>
+                            </div>
+                            
+                            {/* 实训得分进度条 */}
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-xs text-slate-400 w-10">实训</span>
+                              <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                                <div 
+                                  className="h-full rounded-full bg-gradient-to-r from-green-400 to-emerald-500"
+                                  style={{ width: `${dim.practiceScore}%` }}
+                                />
+                              </div>
+                              <span className="text-xs font-medium text-green-600 w-8">{dim.practiceScore}</span>
+                            </div>
+                            
+                            {/* 具体能力标签（折叠展开） */}
+                            {isExpanded && (
+                              <div className="flex flex-wrap gap-1.5 ml-12 mb-2">
+                                {dim.subAbilities.map((sub) => (
+                                  <Badge 
+                                    key={sub.id} 
+                                    variant="secondary" 
+                                    className="text-xs px-2 py-0.5 h-5"
+                                    title={`${sub.name}: ${sub.score}分\n评估方式: ${sub.evaluationType === 'practice' ? '实训任务' : sub.evaluationType === 'exam' ? '专项测试' : '系统计算'}\n来源: ${sub.evaluationSource}`}
+                                  >
+                                    {sub.name} {sub.score}分
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                          <span className="text-xs font-medium text-blue-600 w-8">{dim.examScore}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-slate-400 w-10">实训</span>
-                          <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
-                            <div 
-                              className="h-full rounded-full bg-green-500"
-                              style={{ width: `${dim.practiceScore}%` }}
-                            />
-                          </div>
-                          <span className="text-xs font-medium text-green-600 w-8">{dim.practiceScore}</span>
-                        </div>
-                      </div>
+                        );
+                      })}
                     </div>
-                  ))}
-                </div>
 
-                <div className="mt-6 p-4 rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-slate-600">综合能力得分</p>
-                      <p className="text-2xl font-bold text-purple-600">{radar.overall}%</p>
+                    <div className="mt-6 p-4 rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm text-slate-600">实训综合得分</p>
+                          <p className="text-2xl font-bold text-purple-600">{abilityRadar.overall}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-slate-500">综合评定</p>
+                          <p className="text-sm text-slate-600">考试50% + 实训50%</p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="w-16 h-16 rounded-full border-4 border-purple-200 flex items-center justify-center">
-                      <span className="text-xl font-bold text-purple-600">{radar.overall}</span>
-                    </div>
+                  </>
+                ) : (
+                  <div className="flex items-center justify-center h-32 text-slate-400">
+                    加载中...
                   </div>
-                </div>
+                )}
               </CardContent>
             </Card>
 
@@ -524,7 +554,7 @@ export default function StudentDashboardPage() {
                           {stage.abilities && stage.abilities.length > 0 && (
                             <div className="flex flex-wrap gap-1 mt-2">
                               {stage.abilities.map((ability, idx) => {
-                                const dim = radar.dimensions.find(d => d.id === ability.dimension);
+                                const dim = abilityRadar?.dimensions.find((d) => d.id === ability.dimension);
                                 return (
                                   <Badge 
                                     key={idx}
