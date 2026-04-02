@@ -1261,16 +1261,16 @@ export default function TeacherExamPage() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                     <Input placeholder="搜索题目..." className="pl-10" />
                   </div>
-                  <Select defaultValue="all">
+                  <Select value={selectedAbility} onValueChange={setSelectedAbility}>
                     <SelectTrigger className="w-36"><SelectValue placeholder="能力维度" /></SelectTrigger>
-                    <SelectContent>
+                    <SelectContent position="popper" className="z-[200]">
                       <SelectItem value="all">全部维度</SelectItem>
                       {abilityDimensions.map((dim) => (<SelectItem key={dim.id} value={dim.id}>{dim.name}</SelectItem>))}
                     </SelectContent>
                   </Select>
-                  <Select defaultValue="all">
+                  <Select value={selectedType} onValueChange={setSelectedType}>
                     <SelectTrigger className="w-28"><SelectValue placeholder="题型" /></SelectTrigger>
-                    <SelectContent>
+                    <SelectContent position="popper" className="z-[200]">
                       <SelectItem value="all">全部类型</SelectItem>
                       {questionTypes.map((type) => (<SelectItem key={type.id} value={type.id}>{type.name}</SelectItem>))}
                     </SelectContent>
@@ -1278,14 +1278,38 @@ export default function TeacherExamPage() {
                   <Button variant="outline"><Download className="h-4 w-4 mr-2" />导出</Button>
                 </div>
 
-                <div className="space-y-3">
-                  {analyzedQuestions.filter(q => q.analysisStatus === 'completed').map((question) => {
-                    const ability = abilityDimensions.find(a => a.id === question.ability)!;
-                    const AbilityIcon = ability.icon;
-                    const type = questionTypes.find(t => t.id === question.type)!;
-                    const difficulty = difficultyLevels.find(d => d.id === question.difficulty)!;
+                {/* 筛选结果提示 */}
+                {(selectedAbility !== 'all' || selectedType !== 'all') && (
+                  <div className="flex items-center justify-between px-4 py-2 bg-blue-50 rounded-lg border border-blue-200">
+                    <span className="text-sm text-blue-700">
+                      当前筛选：{selectedAbility !== 'all' && <strong>{abilityDimensions.find(d => d.id === selectedAbility)?.name}</strong>}
+                      {selectedAbility !== 'all' && selectedType !== 'all' && ' · '}
+                      {selectedType !== 'all' && <strong>{questionTypes.find(t => t.id === selectedType)?.name}</strong>}
+                      {' · 共 '}<strong>{analyzedQuestions.filter(q => q.analysisStatus === 'completed').filter(q => selectedAbility === 'all' || q.ability === selectedAbility).filter(q => selectedType === 'all' || q.type === selectedType).length}</strong> 道题目
+                    </span>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => { setSelectedAbility('all'); setSelectedType('all'); }}
+                      className="text-blue-600 hover:text-blue-700"
+                    >
+                      <X className="h-4 w-4 mr-1" />清除筛选
+                    </Button>
+                  </div>
+                )}
 
-                    return (
+                <div className="space-y-3">
+                  {analyzedQuestions
+                    .filter(q => q.analysisStatus === 'completed')
+                    .filter(q => selectedAbility === 'all' || q.ability === selectedAbility)
+                    .filter(q => selectedType === 'all' || q.type === selectedType)
+                    .map((question) => {
+                      const ability = abilityDimensions.find(a => a.id === question.ability)!;
+                      const AbilityIcon = ability.icon;
+                      const type = questionTypes.find(t => t.id === question.type)!;
+                      const difficulty = difficultyLevels.find(d => d.id === question.difficulty)!;
+
+                      return (
                       <div key={question.id} className="p-4 rounded-xl border border-slate-200 hover:border-blue-300 transition-all">
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex-1">
