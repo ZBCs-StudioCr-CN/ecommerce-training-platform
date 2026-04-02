@@ -132,6 +132,11 @@
   }
 }
 
+/* 防止下拉框打开时滚动条闪烁 */
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   @apply font-sans;
 }
