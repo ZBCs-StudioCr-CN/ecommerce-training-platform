@@ -136,14 +136,35 @@ body {
   @apply font-sans;
 }
 
-/* 修复下拉框/弹窗打开时滚动条闪烁导致的布局抖动 */
+/* 滚动条优化 - 防止布局抖动且深色背景页面无留白 */
 html {
   overflow-y: scroll;
+  scrollbar-gutter: stable;
 }
 
-/* 强制保留滚动条槽位 */
-body {
-  overflow-y: scroll;
+/* 全局滚动条样式 - 适配深色背景页面 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Firefox 滚动条样式 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
 }
 
 /* Radix UI 组件打开时防止布局偏移 */
