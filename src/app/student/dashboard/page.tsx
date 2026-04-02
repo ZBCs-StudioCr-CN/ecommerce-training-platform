@@ -24,6 +24,7 @@ import {
   ShoppingCart,
   ShoppingBag,
   Sparkles,
+  Shield,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,29 +33,71 @@ import { Progress } from '@/components/ui/progress';
 import { StudentLayout } from '@/components/student-layout';
 import { AIAssistantButton } from '@/components/ai-assistant';
 import { RiskEventButton } from '@/components/risk-event-simulator';
-import { PRACTICE_STAGES, type PracticeStage, type StageConfig } from '@/data/practice';
+import { PRACTICE_STAGES, type PracticeStage, type StageConfig } from '@/data/ability-practice';
 
 // 阶段图标映射
 const stageIcons: Record<string, React.ElementType> = {
   market_research: Target,
   store_setup: Store,
   product_listing: BarChart3,
-  payment_logistics: DollarSign,
-  traffic_promotion: TrendingUp,
-  operation_service: Users,
+  logistics_config: DollarSign,
+  marketing_promotion: TrendingUp,
+  risk_management: AlertTriangle,
   data_analysis: BarChart3,
+  compliance_training: Shield,
   final_assessment: Trophy,
 };
 
-// 能力雷达图数据
+// 五维能力雷达图数据（方案二：考试评估维度，实训评估具体能力）
 const abilityRadar = {
   dimensions: [
-    { name: '商业决策', value: 75, weight: 30, color: '#3b82f6' },
-    { name: '流量逻辑', value: 60, weight: 25, color: '#8b5cf6' },
-    { name: '数据复盘', value: 80, weight: 25, color: '#f59e0b' },
-    { name: '风险应对', value: 45, weight: 20, color: '#ef4444' },
+    { 
+      id: 'decision',
+      name: '自主决策能力', 
+      examScore: 82,
+      practiceScore: 78,
+      value: 80, // 考试50% + 实训50%
+      weight: 35, 
+      color: '#3b82f6' 
+    },
+    { 
+      id: 'ai',
+      name: 'AI辅助应用', 
+      examScore: 75,
+      practiceScore: 72,
+      value: 74,
+      weight: 20, 
+      color: '#8b5cf6' 
+    },
+    { 
+      id: 'analysis',
+      name: '数据复盘与优化', 
+      examScore: 85,
+      practiceScore: 82,
+      value: 84,
+      weight: 20, 
+      color: '#22c55e' 
+    },
+    { 
+      id: 'risk',
+      name: '风险应对', 
+      examScore: 78,
+      practiceScore: 75,
+      value: 77,
+      weight: 15, 
+      color: '#f59e0b' 
+    },
+    { 
+      id: 'compliance',
+      name: '合规与规则意识', 
+      examScore: 88,
+      practiceScore: 84,
+      value: 86,
+      weight: 10, 
+      color: '#ef4444' 
+    },
   ],
-  overall: 68,
+  overall: 80,
 };
 
 // 模拟实训进度数据
@@ -63,13 +106,14 @@ const mockProgress = {
     market_research: { started: true, completed: true, score: 85, startedAt: '2024-01-15', completedAt: '2024-01-18' },
     store_setup: { started: true, completed: true, score: 92, startedAt: '2024-01-19', completedAt: '2024-01-25' },
     product_listing: { started: true, completed: false, score: 70, startedAt: '2024-01-26' },
-    payment_logistics: { started: false, completed: false },
-    traffic_promotion: { started: false, completed: false },
-    operation_service: { started: false, completed: false },
+    logistics_config: { started: false, completed: false },
+    marketing_promotion: { started: false, completed: false },
+    risk_management: { started: false, completed: false },
     data_analysis: { started: false, completed: false },
+    compliance_training: { started: false, completed: false },
     final_assessment: { started: false, completed: false },
   },
-  overallProgress: 35,
+  overallProgress: 28,
   experience: 450,
   level: 3,
   achievements: ['market_analyst', 'store_builder', 'first_product'],
@@ -227,16 +271,16 @@ export default function StudentDashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-red-500 to-rose-600 text-white">
+          <Card className="border-0 shadow-lg bg-gradient-to-br from-amber-500 to-orange-600 text-white">
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-red-100 text-sm">风险应对</p>
-                  <p className="text-3xl font-bold mt-1">{radar.dimensions.find(d => d.name === '风险应对')?.value}%</p>
-                  <p className="text-red-200 text-sm mt-1">待提升</p>
+                  <p className="text-amber-100 text-sm">综合能力</p>
+                  <p className="text-3xl font-bold mt-1">{radar.overall}%</p>
+                  <p className="text-amber-200 text-sm mt-1">优秀</p>
                 </div>
                 <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center">
-                  <AlertTriangle className="h-7 w-7" />
+                  <Trophy className="h-7 w-7" />
                 </div>
               </div>
             </CardContent>
@@ -244,19 +288,19 @@ export default function StudentDashboardPage() {
         </div>
 
         <div className="grid grid-cols-3 gap-6">
-          {/* 左侧：能力雷达图 + 三大场景 */}
+          {/* 左侧：五维能力雷达图 + 三大场景 */}
           <div className="col-span-1 space-y-6">
-            {/* 能力雷达图 */}
+            {/* 五维能力雷达图 */}
             <Card className="border-0 shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <LineChart className="h-5 w-5 text-purple-600" />
-                  能力雷达图
+                  五维能力评估
                 </CardTitle>
-                <CardDescription>四大核心能力评估</CardDescription>
+                <CardDescription>考试得分 × 50% + 实训得分 × 50%</CardDescription>
               </CardHeader>
               <CardContent>
-                {/* 简化的雷达图展示 */}
+                {/* 五维能力展示 */}
                 <div className="space-y-4">
                   {radar.dimensions.map((dim, index) => (
                     <div key={index}>
@@ -267,14 +311,28 @@ export default function StudentDashboardPage() {
                           <span className="text-xs text-slate-400">权重{dim.weight}%</span>
                         </div>
                       </div>
-                      <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full rounded-full transition-all duration-500"
-                          style={{ 
-                            width: `${dim.value}%`, 
-                            backgroundColor: dim.color 
-                          }}
-                        />
+                      {/* 考试vs实训双进度条 */}
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-slate-400 w-10">考试</span>
+                          <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full rounded-full bg-blue-500"
+                              style={{ width: `${dim.examScore}%` }}
+                            />
+                          </div>
+                          <span className="text-xs font-medium text-blue-600 w-8">{dim.examScore}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-slate-400 w-10">实训</span>
+                          <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full rounded-full bg-green-500"
+                              style={{ width: `${dim.practiceScore}%` }}
+                            />
+                          </div>
+                          <span className="text-xs font-medium text-green-600 w-8">{dim.practiceScore}</span>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -462,6 +520,24 @@ export default function StudentDashboardPage() {
                             <span>{stage.duration}</span>
                             {stage.rewards.badge && <span>🎖️ {stage.rewards.badge}</span>}
                           </div>
+                          {/* 显示关联的五维能力 */}
+                          {stage.abilities && stage.abilities.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {stage.abilities.map((ability, idx) => {
+                                const dim = radar.dimensions.find(d => d.id === ability.dimension);
+                                return (
+                                  <Badge 
+                                    key={idx}
+                                    variant="outline" 
+                                    className="text-xs"
+                                    style={{ borderColor: dim?.color, color: dim?.color }}
+                                  >
+                                    {dim?.name || ability.dimension}
+                                  </Badge>
+                                );
+                              })}
+                            </div>
+                          )}
                         </div>
                         <div className="flex items-center gap-2">
                           {status === 'completed' && (
