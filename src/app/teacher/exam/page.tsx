@@ -33,6 +33,9 @@ import {
   BookOpen,
   Layers,
   Timer,
+  ArrowLeft,
+  Filter,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -132,14 +135,15 @@ const difficultyLevels = [
   { id: 'hard', name: '困难', color: 'bg-red-100 text-red-700' },
 ];
 
-// 模拟题库数据
+// 模拟题库数据 - 按能力维度分类
 const mockQuestions = [
+  // 自主决策能力题目
   {
     id: 'Q001',
     type: 'single',
     ability: 'decision',
     content: '在选择跨境电商目标市场时，以下哪个因素应该优先考虑？',
-    options: ['市场规模', '竞争程度', '物流成本', '消费者购买力'],
+    options: ['市场规模和增长潜力', '竞争程度', '物流成本', '消费者购买力'],
     correctAnswer: 0,
     difficulty: 'medium',
     source: '平台官方题库',
@@ -148,18 +152,56 @@ const mockQuestions = [
   },
   {
     id: 'Q002',
-    type: 'case',
-    ability: 'risk',
-    content: '某独立站收到客户投诉称产品与描述严重不符，客户要求退款并威胁向消费者协会投诉。作为运营人员，请分析处理步骤。',
-    options: [] as string[],
-    correctAnswer: '需要人工评分',
+    type: 'single',
+    ability: 'decision',
+    content: '在制定产品定价策略时，以下哪种方法最适合初创独立站？',
+    options: ['成本加成定价法', '竞争对手定价法', '价值定价法', '撇脂定价法'],
+    correctAnswer: 2,
     difficulty: 'hard',
-    source: '实战案例改编',
-    usageCount: 89,
+    source: '自建题库',
+    usageCount: 189,
     accuracy: 0.65,
   },
   {
     id: 'Q003',
+    type: 'multiple',
+    ability: 'decision',
+    content: '选择供应商时，应该考虑哪些关键因素？（多选）',
+    options: ['产品质量', '价格竞争力', '交货周期', '售后服务', '以上都是'],
+    correctAnswer: [0, 1, 2, 3],
+    difficulty: 'easy',
+    source: '平台官方题库',
+    usageCount: 312,
+    accuracy: 0.85,
+  },
+  {
+    id: 'Q004',
+    type: 'case',
+    ability: 'decision',
+    content: '某跨境电商店铺主要销售家居用品，近期发现某款产品销量持续下滑。数据分析显示：流量正常但转化率下降15%，竞争对手新增3家价格低10%，客户评价中出现"质量不如以前"的反馈。请制定综合优化方案。',
+    options: [],
+    correctAnswer: '需要人工评分',
+    difficulty: 'hard',
+    source: '实战案例改编',
+    usageCount: 89,
+    accuracy: 0.72,
+  },
+  {
+    id: 'Q005',
+    type: 'judgment',
+    ability: 'decision',
+    content: '在选品时，利润率应该作为唯一考量标准。',
+    options: ['正确', '错误'],
+    correctAnswer: 1,
+    difficulty: 'easy',
+    source: '自建题库',
+    usageCount: 456,
+    accuracy: 0.92,
+  },
+  
+  // AI辅助应用题目
+  {
+    id: 'Q006',
     type: 'multiple',
     ability: 'ai',
     content: '使用AI工具生成产品描述时，以下哪些做法是正确的？（多选）',
@@ -174,6 +216,214 @@ const mockQuestions = [
     source: '自建题库',
     usageCount: 156,
     accuracy: 0.82,
+  },
+  {
+    id: 'Q007',
+    type: 'single',
+    ability: 'ai',
+    content: '以下哪个场景最适合使用AI工具辅助运营？',
+    options: ['批量生成产品基础描述', '制定核心定价策略', '处理客户投诉', '签订供应商合同'],
+    correctAnswer: 0,
+    difficulty: 'medium',
+    source: '平台官方题库',
+    usageCount: 278,
+    accuracy: 0.75,
+  },
+  {
+    id: 'Q008',
+    type: 'judgment',
+    ability: 'ai',
+    content: 'AI生成的内容可以直接用于产品页面，无需人工审核。',
+    options: ['正确', '错误'],
+    correctAnswer: 1,
+    difficulty: 'easy',
+    source: '自建题库',
+    usageCount: 534,
+    accuracy: 0.95,
+  },
+  {
+    id: 'Q009',
+    type: 'case',
+    ability: 'ai',
+    content: '某商家使用AI工具生成了100个产品描述，但发现其中部分内容存在夸大宣传的问题。请分析如何建立AI内容审核机制，确保合规使用AI工具。',
+    options: [],
+    correctAnswer: '需要人工评分',
+    difficulty: 'hard',
+    source: '实战案例改编',
+    usageCount: 67,
+    accuracy: 0.68,
+  },
+  
+  // 数据复盘与优化题目
+  {
+    id: 'Q010',
+    type: 'single',
+    ability: 'analysis',
+    content: '当独立站转化率突然下降20%时，首先应该分析哪个数据指标？',
+    options: ['流量来源变化', '页面加载速度', '商品价格调整', '促销活动结束时间'],
+    correctAnswer: 0,
+    difficulty: 'medium',
+    source: '平台官方题库',
+    usageCount: 345,
+    accuracy: 0.71,
+  },
+  {
+    id: 'Q011',
+    type: 'single',
+    ability: 'analysis',
+    content: '以下哪个指标最能反映独立站的用户粘性？',
+    options: ['日访问量', '跳出率', '回访率', '页面浏览量'],
+    correctAnswer: 2,
+    difficulty: 'medium',
+    source: '自建题库',
+    usageCount: 234,
+    accuracy: 0.78,
+  },
+  {
+    id: 'Q012',
+    type: 'multiple',
+    ability: 'analysis',
+    content: '分析店铺数据时，以下哪些指标需要重点关注？（多选）',
+    options: ['转化率', '客单价', '复购率', '退货率', '广告ROI'],
+    correctAnswer: [0, 1, 2, 3, 4],
+    difficulty: 'easy',
+    source: '平台官方题库',
+    usageCount: 456,
+    accuracy: 0.88,
+  },
+  {
+    id: 'Q013',
+    type: 'case',
+    ability: 'analysis',
+    content: '某店铺月销售额为10万元，但广告支出达到3万元，ROI仅为1.2。请分析问题原因并提出优化方案，包括广告投放策略调整和自然流量提升建议。',
+    options: [],
+    correctAnswer: '需要人工评分',
+    difficulty: 'hard',
+    source: '实战案例改编',
+    usageCount: 89,
+    accuracy: 0.62,
+  },
+  {
+    id: 'Q014',
+    type: 'judgment',
+    ability: 'analysis',
+    content: '数据分析只需要关注销售额这一个核心指标。',
+    options: ['正确', '错误'],
+    correctAnswer: 1,
+    difficulty: 'easy',
+    source: '自建题库',
+    usageCount: 678,
+    accuracy: 0.94,
+  },
+  
+  // 风险应对题目
+  {
+    id: 'Q015',
+    type: 'case',
+    ability: 'risk',
+    content: '某独立站收到客户投诉称产品与描述严重不符，客户要求退款并威胁向消费者协会投诉。作为运营人员，请分析处理步骤。',
+    options: [],
+    correctAnswer: '需要人工评分',
+    difficulty: 'hard',
+    source: '实战案例改编',
+    usageCount: 89,
+    accuracy: 0.65,
+  },
+  {
+    id: 'Q016',
+    type: 'single',
+    ability: 'risk',
+    content: '收到客户投诉后，首先应该采取的措施是？',
+    options: ['立即退款', '了解投诉详情', '拉黑客户', '忽略投诉'],
+    correctAnswer: 1,
+    difficulty: 'easy',
+    source: '平台官方题库',
+    usageCount: 567,
+    accuracy: 0.89,
+  },
+  {
+    id: 'Q017',
+    type: 'multiple',
+    ability: 'risk',
+    content: '处理客户投诉时，以下哪些做法是正确的？（多选）',
+    options: [
+      '保持冷静，耐心倾听',
+      '承认错误并道歉',
+      '提出合理的解决方案',
+      '推卸责任给物流公司',
+    ],
+    correctAnswer: [0, 1, 2],
+    difficulty: 'medium',
+    source: '自建题库',
+    usageCount: 345,
+    accuracy: 0.82,
+  },
+  {
+    id: 'Q018',
+    type: 'judgment',
+    ability: 'risk',
+    content: '收到客户投诉后，为避免差评应无条件满足客户所有要求。',
+    options: ['正确', '错误'],
+    correctAnswer: 1,
+    difficulty: 'medium',
+    source: '自建题库',
+    usageCount: 456,
+    accuracy: 0.85,
+  },
+  
+  // 合规与规则意识题目
+  {
+    id: 'Q019',
+    type: 'judgment',
+    ability: 'compliance',
+    content: '在商品详情页中使用"世界最好"、"第一"等极限词汇是合规的。',
+    options: ['正确', '错误'],
+    correctAnswer: 1,
+    difficulty: 'easy',
+    source: '平台官方题库',
+    usageCount: 789,
+    accuracy: 0.96,
+  },
+  {
+    id: 'Q020',
+    type: 'single',
+    ability: 'compliance',
+    content: '以下哪种行为属于侵犯知识产权？',
+    options: ['使用自己拍摄的图片', '复制竞争对手的产品描述', '销售自有品牌产品', '提供真实的客户评价'],
+    correctAnswer: 1,
+    difficulty: 'easy',
+    source: '平台官方题库',
+    usageCount: 456,
+    accuracy: 0.91,
+  },
+  {
+    id: 'Q021',
+    type: 'multiple',
+    ability: 'compliance',
+    content: '电商运营中需要注意哪些合规事项？（多选）',
+    options: [
+      '广告法合规',
+      '消费者权益保护',
+      '个人信息保护',
+      '知识产权保护',
+    ],
+    correctAnswer: [0, 1, 2, 3],
+    difficulty: 'medium',
+    source: '平台官方题库',
+    usageCount: 345,
+    accuracy: 0.87,
+  },
+  {
+    id: 'Q022',
+    type: 'case',
+    ability: 'compliance',
+    content: '某商家在产品描述中使用了"国家级"、"顶级"等词汇，收到平台违规通知。请分析违规原因，并说明如何修改产品描述使其合规。',
+    options: [],
+    correctAnswer: '需要人工评分',
+    difficulty: 'medium',
+    source: '实战案例改编',
+    usageCount: 123,
+    accuracy: 0.75,
   },
 ];
 
@@ -250,6 +500,29 @@ export default function TeacherExamPage() {
     difficulty: 'medium',
   });
 
+  // 点击能力维度卡片
+  const handleAbilityClick = (abilityId: string) => {
+    setSelectedAbility(abilityId);
+    setActiveTab('questions');
+  };
+
+  // 清除筛选
+  const clearFilters = () => {
+    setSelectedAbility('all');
+    setSelectedType('all');
+    setSelectedDifficulty('all');
+    setSearchQuery('');
+  };
+
+  // 筛选题目
+  const filteredQuestions = mockQuestions.filter((q) => {
+    if (selectedAbility !== 'all' && q.ability !== selectedAbility) return false;
+    if (selectedType !== 'all' && q.type !== selectedType) return false;
+    if (selectedDifficulty !== 'all' && q.difficulty !== selectedDifficulty) return false;
+    if (searchQuery && !q.content.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    return true;
+  });
+
   // 处理智能组卷
   const handleGeneratePaper = async () => {
     setIsGenerating(true);
@@ -271,6 +544,11 @@ export default function TeacherExamPage() {
     setGeneratedPaper(paper);
     setIsGenerating(false);
   };
+
+  // 获取当前筛选的能力维度名称
+  const selectedAbilityName = selectedAbility !== 'all' 
+    ? abilityDimensions.find(d => d.id === selectedAbility)?.name 
+    : null;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -364,12 +642,21 @@ export default function TeacherExamPage() {
             </div>
           </div>
 
-          {/* 五维能力概览 */}
+          {/* 五维能力概览 - 可点击 */}
           <div className="grid grid-cols-5 gap-4 mb-6">
             {abilityDimensions.map((dim) => {
               const Icon = dim.icon;
+              const isSelected = selectedAbility === dim.id;
               return (
-                <Card key={dim.id} className={`border-0 shadow-md ${dim.bgColor} ${dim.borderColor} border cursor-pointer hover:shadow-lg transition-shadow`}>
+                <Card 
+                  key={dim.id} 
+                  className={`border-0 shadow-md cursor-pointer transition-all duration-200 ${
+                    isSelected 
+                      ? 'ring-2 ring-blue-500 shadow-lg scale-105' 
+                      : 'hover:shadow-lg'
+                  } ${dim.bgColor} ${dim.borderColor} border`}
+                  onClick={() => handleAbilityClick(dim.id)}
+                >
                   <CardContent className="p-4">
                     <div className="flex items-center gap-3 mb-2">
                       <div className={`w-10 h-10 rounded-lg ${dim.color} flex items-center justify-center`}>
@@ -381,6 +668,12 @@ export default function TeacherExamPage() {
                       </div>
                     </div>
                     <p className="text-xs text-slate-500 truncate">{dim.description}</p>
+                    {isSelected && (
+                      <div className="mt-2 pt-2 border-t border-slate-200 flex items-center justify-center gap-1 text-xs text-blue-600">
+                        <Filter className="h-3 w-3" />
+                        <span>已筛选</span>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               );
@@ -410,6 +703,26 @@ export default function TeacherExamPage() {
 
             {/* 题库管理 */}
             <TabsContent value="questions" className="space-y-4">
+              {/* 当前筛选状态提示 */}
+              {selectedAbilityName && (
+                <Card className="border-0 shadow-sm bg-blue-50 border border-blue-200">
+                  <CardContent className="p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Filter className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm text-blue-700">
+                          当前筛选：<strong>{selectedAbilityName}</strong>，共 <strong>{filteredQuestions.length}</strong> 道题目
+                        </span>
+                      </div>
+                      <Button variant="ghost" size="sm" onClick={clearFilters} className="text-blue-600 hover:text-blue-700">
+                        <X className="h-4 w-4 mr-1" />
+                        清除筛选
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
               {/* 筛选工具栏 */}
               <Card className="border-0 shadow-md">
                 <CardContent className="p-4">
@@ -466,81 +779,104 @@ export default function TeacherExamPage() {
 
               {/* 题目统计 */}
               <div className="grid grid-cols-5 gap-4">
-                {questionTypes.map((type) => (
-                  <Card key={type.id} className="border-0 shadow-sm">
-                    <CardContent className="p-4 text-center">
-                      <p className="text-2xl font-bold text-slate-800">{type.count}</p>
-                      <p className="text-sm text-slate-500">{type.name}</p>
-                    </CardContent>
-                  </Card>
-                ))}
+                {questionTypes.map((type) => {
+                  const count = filteredQuestions.filter(q => q.type === type.id).length;
+                  return (
+                    <Card key={type.id} className="border-0 shadow-sm">
+                      <CardContent className="p-4 text-center">
+                        <p className="text-2xl font-bold text-slate-800">{count}</p>
+                        <p className="text-sm text-slate-500">{type.name}</p>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
 
               {/* 题目列表 */}
               <Card className="border-0 shadow-md">
                 <CardHeader>
-                  <CardTitle>题目列表</CardTitle>
-                  <CardDescription>共 603 道题目</CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>题目列表</CardTitle>
+                      <CardDescription>共 {filteredQuestions.length} 道题目</CardDescription>
+                    </div>
+                    {filteredQuestions.length > 0 && (
+                      <Button variant="outline" size="sm">
+                        <Download className="h-4 w-4 mr-2" />
+                        导出题目
+                      </Button>
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
-                    {mockQuestions.map((question) => {
-                      const ability = abilityDimensions.find(a => a.id === question.ability)!;
-                      const Icon = ability.icon;
-                      const type = questionTypes.find(t => t.id === question.type)!;
-                      const difficulty = difficultyLevels.find(d => d.id === question.difficulty)!;
+                  {filteredQuestions.length > 0 ? (
+                    <div className="space-y-3">
+                      {filteredQuestions.map((question) => {
+                        const ability = abilityDimensions.find(a => a.id === question.ability)!;
+                        const Icon = ability.icon;
+                        const type = questionTypes.find(t => t.id === question.type)!;
+                        const difficulty = difficultyLevels.find(d => d.id === question.difficulty)!;
 
-                      return (
-                        <div key={question.id} className="p-4 rounded-xl border border-slate-200 hover:border-blue-300 hover:shadow-md transition-all">
-                          <div className="flex items-start justify-between mb-3">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <Badge className={`${ability.bgColor} ${ability.textColor} border ${ability.borderColor}`}>
-                                  <Icon className="h-3 w-3 mr-1" />
-                                  {ability.name}
-                                </Badge>
-                                <Badge variant="outline">{type.name}</Badge>
-                                <Badge className={difficulty.color}>{difficulty.name}</Badge>
-                                <span className="text-xs text-slate-400">ID: {question.id}</span>
-                              </div>
-                              <p className="text-slate-800">{question.content}</p>
-                              {question.type !== 'case' && question.type !== 'short' && question.options.length > 0 && (
-                                <div className="mt-2 grid grid-cols-2 gap-2">
-                                  {question.options.map((opt, i) => (
-                                    <div key={i} className={`text-sm p-2 rounded ${
-                                      question.correctAnswer === i || (Array.isArray(question.correctAnswer) && question.correctAnswer.includes(i))
-                                        ? 'bg-green-50 text-green-700 border border-green-200'
-                                        : 'bg-slate-50 text-slate-600'
-                                    }`}>
-                                      {String.fromCharCode(65 + i)}. {opt}
-                                    </div>
-                                  ))}
+                        return (
+                          <div key={question.id} className="p-4 rounded-xl border border-slate-200 hover:border-blue-300 hover:shadow-md transition-all">
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Badge className={`${ability.bgColor} ${ability.textColor} border ${ability.borderColor}`}>
+                                    <Icon className="h-3 w-3 mr-1" />
+                                    {ability.name}
+                                  </Badge>
+                                  <Badge variant="outline">{type.name}</Badge>
+                                  <Badge className={difficulty.color}>{difficulty.name}</Badge>
+                                  <span className="text-xs text-slate-400">ID: {question.id}</span>
                                 </div>
-                              )}
+                                <p className="text-slate-800">{question.content}</p>
+                                {question.type !== 'case' && question.type !== 'short' && question.options.length > 0 && (
+                                  <div className="mt-2 grid grid-cols-2 gap-2">
+                                    {question.options.map((opt, i) => (
+                                      <div key={i} className={`text-sm p-2 rounded ${
+                                        question.correctAnswer === i || (Array.isArray(question.correctAnswer) && question.correctAnswer.includes(i))
+                                          ? 'bg-green-50 text-green-700 border border-green-200'
+                                          : 'bg-slate-50 text-slate-600'
+                                      }`}>
+                                        {String.fromCharCode(65 + i)}. {opt}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2 ml-4">
+                                <Button variant="ghost" size="sm">
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button variant="ghost" size="sm">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-600">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-2 ml-4">
-                              <Button variant="ghost" size="sm">
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="sm">
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-600">
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
+                            <div className="flex items-center gap-4 text-xs text-slate-500">
+                              <span>来源: {question.source}</span>
+                              <span>•</span>
+                              <span>使用次数: {question.usageCount}</span>
+                              <span>•</span>
+                              <span>正确率: {(question.accuracy * 100).toFixed(0)}%</span>
                             </div>
                           </div>
-                          <div className="flex items-center gap-4 text-xs text-slate-500">
-                            <span>来源: {question.source}</span>
-                            <span>•</span>
-                            <span>使用次数: {question.usageCount}</span>
-                            <span>•</span>
-                            <span>正确率: {(question.accuracy * 100).toFixed(0)}%</span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="py-12 text-center">
+                      <Layers className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+                      <p className="text-slate-500">暂无符合条件的题目</p>
+                      <Button variant="outline" className="mt-4" onClick={clearFilters}>
+                        清除筛选条件
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
