@@ -34,9 +34,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { teacherMenuItems } from '@/config/menu';
 
-// 五维能力评估体系
+// 五维能力评估体系（包含得分来源）
 const fiveDimensions = [
   { 
     id: 'decision',
@@ -47,12 +48,60 @@ const fiveDimensions = [
     score: 78,
     description: '关键商业决策、选品定价、渠道选择、物流供应链、营销活动等',
     subAbilities: [
-      { name: '市场分析决策', score: 82, description: '市场趋势判断、竞争分析' },
-      { name: '选品决策', score: 75, description: '产品选择、利润空间评估' },
-      { name: '定价策略', score: 76, description: '价格制定、促销策略' },
-      { name: '渠道选择', score: 79, description: '销售渠道布局、资源配置' },
-      { name: '物流供应链管理', score: 73, description: '物流选择、供应链优化、成本控制' },
-      { name: '营销与活动决策', score: 77, description: '营销策略制定、活动策划执行' },
+      { 
+        name: '市场分析决策', 
+        score: 82, 
+        description: '市场趋势判断、竞争分析',
+        scoreSource: {
+          exam: { name: '市场分析专项测试', score: 85, weight: 50 },
+          practice: { name: '市场调研实训', score: 80, weight: 50 }
+        }
+      },
+      { 
+        name: '选品决策', 
+        score: 75, 
+        description: '产品选择、利润空间评估',
+        scoreSource: {
+          exam: { name: '选品策略测试', score: 78, weight: 50 },
+          practice: { name: '选品实训任务', score: 72, weight: 50 }
+        }
+      },
+      { 
+        name: '定价策略', 
+        score: 76, 
+        description: '价格制定、促销策略',
+        scoreSource: {
+          exam: { name: '定价策略测试', score: 80, weight: 50 },
+          practice: { name: '定价实训', score: 72, weight: 50 }
+        }
+      },
+      { 
+        name: '渠道选择', 
+        score: 79, 
+        description: '销售渠道布局、资源配置',
+        scoreSource: {
+          exam: { name: '渠道管理测试', score: 82, weight: 50 },
+          practice: { name: '渠道运营实训', score: 76, weight: 50 }
+        }
+      },
+      { 
+        name: '物流供应链管理', 
+        score: 73, 
+        description: '物流选择、供应链优化、成本控制',
+        scoreSource: {
+          exam: { name: '供应链管理测试', score: 76, weight: 50 },
+          practice: { name: '物流配置实训', score: 70, weight: 50 }
+        }
+      },
+      { 
+        name: '营销与活动决策', 
+        score: 77, 
+        description: '营销策略制定、活动策划执行',
+        scoreSource: {
+          exam: { name: '营销策略测试', score: 80, weight: 50 },
+          practice: { name: '营销活动实训', score: 74, weight: 50 }
+        }
+      },
     ]
   },
   { 
@@ -64,12 +113,59 @@ const fiveDimensions = [
     score: 72,
     description: 'AI工具使用策略、内容审核、效率优化、视觉设计、文案创作等',
     subAbilities: [
-      { name: 'AI工具选择', score: 78, description: 'AI工具识别与选择' },
-      { name: '内容审核能力', score: 68, description: 'AI生成内容审核与优化' },
-      { name: '效率优化', score: 74, description: 'AI辅助提升工作效率' },
-      { name: 'AI耦合度控制', score: 68, description: '避免过度依赖AI' },
-      { name: 'AI视觉策划设计', score: 71, description: 'AI辅助图片设计、视频制作、视觉优化' },
-      { name: 'AI文案创意撰写', score: 73, description: 'AI辅助文案创作、内容优化、创意生成' },
+      { 
+        name: 'AI工具选择', 
+        score: 78, 
+        description: 'AI工具识别与选择',
+        scoreSource: {
+          exam: { name: 'AI工具知识测试', score: 82, weight: 50 },
+          practice: { name: 'AI工具使用实训', score: 74, weight: 50 }
+        }
+      },
+      { 
+        name: '内容审核能力', 
+        score: 68, 
+        description: 'AI生成内容审核与优化',
+        scoreSource: {
+          exam: { name: '内容审核测试', score: 72, weight: 40 },
+          practice: { name: '内容审核实训', score: 65, weight: 60 }
+        }
+      },
+      { 
+        name: '效率优化', 
+        score: 74, 
+        description: 'AI辅助提升工作效率',
+        scoreSource: {
+          exam: { name: 'AI效率测试', score: 76, weight: 50 },
+          practice: { name: '效率优化实训', score: 72, weight: 50 }
+        }
+      },
+      { 
+        name: 'AI耦合度控制', 
+        score: 68, 
+        description: '避免过度依赖AI',
+        scoreSource: {
+          system: { name: 'AI使用行为分析', score: 68, weight: 100, detail: '基于AI使用频率、复制粘贴比例、原创度等指标综合计算' }
+        }
+      },
+      { 
+        name: 'AI视觉策划设计', 
+        score: 71, 
+        description: 'AI辅助图片设计、视频制作、视觉优化',
+        scoreSource: {
+          exam: { name: 'AI视觉设计测试', score: 74, weight: 40 },
+          practice: { name: '视觉设计实训', score: 68, weight: 60 }
+        }
+      },
+      { 
+        name: 'AI文案创意撰写', 
+        score: 73, 
+        description: 'AI辅助文案创作、内容优化、创意生成',
+        scoreSource: {
+          exam: { name: '文案创意测试', score: 76, weight: 40 },
+          practice: { name: '文案撰写实训', score: 70, weight: 60 }
+        }
+      },
     ]
   },
   { 
@@ -81,10 +177,42 @@ const fiveDimensions = [
     score: 81,
     description: '数据分析、问题诊断、优化策略等',
     subAbilities: [
-      { name: '数据采集', score: 85, description: '关键数据识别与收集' },
-      { name: '数据分析', score: 82, description: '数据趋势分析与洞察' },
-      { name: '问题诊断', score: 78, description: '问题定位与根因分析' },
-      { name: '优化迭代', score: 79, description: '基于数据的优化策略' },
+      { 
+        name: '数据采集', 
+        score: 85, 
+        description: '关键数据识别与收集',
+        scoreSource: {
+          exam: { name: '数据采集测试', score: 88, weight: 50 },
+          practice: { name: '数据采集实训', score: 82, weight: 50 }
+        }
+      },
+      { 
+        name: '数据分析', 
+        score: 82, 
+        description: '数据趋势分析与洞察',
+        scoreSource: {
+          exam: { name: '数据分析测试', score: 85, weight: 50 },
+          practice: { name: '数据分析实训', score: 79, weight: 50 }
+        }
+      },
+      { 
+        name: '问题诊断', 
+        score: 78, 
+        description: '问题定位与根因分析',
+        scoreSource: {
+          exam: { name: '问题诊断测试', score: 82, weight: 50 },
+          practice: { name: '问题诊断实训', score: 74, weight: 50 }
+        }
+      },
+      { 
+        name: '优化迭代', 
+        score: 79, 
+        description: '基于数据的优化策略',
+        scoreSource: {
+          exam: { name: '优化策略测试', score: 82, weight: 50 },
+          practice: { name: '优化迭代实训', score: 76, weight: 50 }
+        }
+      },
     ]
   },
   { 
@@ -96,10 +224,42 @@ const fiveDimensions = [
     score: 75,
     description: '危机识别、应对方案、客户投诉处理等',
     subAbilities: [
-      { name: '风险识别', score: 80, description: '潜在风险预判' },
-      { name: '应对方案制定', score: 72, description: '危机处理方案设计' },
-      { name: '客户投诉处理', score: 76, description: '投诉响应与解决' },
-      { name: '舆情管理', score: 72, description: '负面舆情应对' },
+      { 
+        name: '风险识别', 
+        score: 80, 
+        description: '潜在风险预判',
+        scoreSource: {
+          exam: { name: '风险识别测试', score: 84, weight: 50 },
+          practice: { name: '风险识别实训', score: 76, weight: 50 }
+        }
+      },
+      { 
+        name: '应对方案制定', 
+        score: 72, 
+        description: '危机处理方案设计',
+        scoreSource: {
+          exam: { name: '应对策略测试', score: 75, weight: 40 },
+          practice: { name: '风险应对实训', score: 70, weight: 60 }
+        }
+      },
+      { 
+        name: '客户投诉处理', 
+        score: 76, 
+        description: '投诉响应与解决',
+        scoreSource: {
+          exam: { name: '客服能力测试', score: 78, weight: 40 },
+          practice: { name: '投诉处理实训', score: 74, weight: 60 }
+        }
+      },
+      { 
+        name: '舆情管理', 
+        score: 72, 
+        description: '负面舆情应对',
+        scoreSource: {
+          exam: { name: '舆情管理测试', score: 75, weight: 50 },
+          practice: { name: '舆情处理实训', score: 69, weight: 50 }
+        }
+      },
     ]
   },
   { 
@@ -111,22 +271,69 @@ const fiveDimensions = [
     score: 83,
     description: '平台规则、法律法规、知识产权等',
     subAbilities: [
-      { name: '平台规则理解', score: 88, description: '电商平台规则掌握' },
-      { name: '法律法规意识', score: 82, description: '广告法、消费者权益保护' },
-      { name: '知识产权保护', score: 80, description: '商标、专利、版权' },
-      { name: '数据合规', score: 82, description: '用户数据保护与合规' },
+      { 
+        name: '平台规则理解', 
+        score: 88, 
+        description: '电商平台规则掌握',
+        scoreSource: {
+          exam: { name: '平台规则测试', score: 90, weight: 60 },
+          practice: { name: '合规操作实训', score: 85, weight: 40 }
+        }
+      },
+      { 
+        name: '法律法规意识', 
+        score: 82, 
+        description: '广告法、消费者权益保护',
+        scoreSource: {
+          exam: { name: '法律法规测试', score: 85, weight: 70 },
+          practice: { name: '合规案例实训', score: 75, weight: 30 }
+        }
+      },
+      { 
+        name: '知识产权保护', 
+        score: 80, 
+        description: '商标、专利、版权',
+        scoreSource: {
+          exam: { name: '知识产权测试', score: 82, weight: 70 },
+          practice: { name: '侵权识别实训', score: 76, weight: 30 }
+        }
+      },
+      { 
+        name: '数据合规', 
+        score: 82, 
+        description: '用户数据保护与合规',
+        scoreSource: {
+          exam: { name: '数据合规测试', score: 85, weight: 60 },
+          practice: { name: '数据保护实训', score: 78, weight: 40 }
+        }
+      },
     ]
   },
 ];
 
+// 计算具体能力得分（基于考试和实训加权）
+const calculateSubAbilityScore = (subAbility: typeof fiveDimensions[0]['subAbilities'][0]) => {
+  const source = subAbility.scoreSource;
+  if (source.system) {
+    return source.system.score;
+  }
+  if (source.exam && source.practice) {
+    return Math.round(source.exam.score * source.exam.weight / 100 + source.practice.score * source.practice.weight / 100);
+  }
+  return subAbility.score;
+};
+
 // 计算五维分数（基于子能力平均分）
 const calculateDimensionScore = (dimension: typeof fiveDimensions[0]) => {
-  const sum = dimension.subAbilities.reduce((acc, sub) => acc + sub.score, 0);
+  const sum = dimension.subAbilities.reduce((acc, sub) => acc + calculateSubAbilityScore(sub), 0);
   return Math.round(sum / dimension.subAbilities.length);
 };
 
 // 更新五维分数
 fiveDimensions.forEach(dim => {
+  dim.subAbilities.forEach(sub => {
+    sub.score = calculateSubAbilityScore(sub);
+  });
   dim.score = calculateDimensionScore(dim);
 });
 
@@ -702,18 +909,21 @@ export default function TeacherAnalysisPage() {
                       </div>
                       <Progress value={dim.score} className="h-2 mb-3" />
                       <div className="space-y-1">
-                        {dim.subAbilities.map((sub, i) => (
-                          <div key={i} className="flex items-center justify-between text-xs">
-                            <span className="text-slate-600">{sub.name}</span>
+                        {dim.subAbilities.slice(0, 4).map((sub, i) => (
+                          <div key={i} className="flex items-center justify-between text-xs group cursor-help" title="点击下方各维度具体能力分析查看得分来源">
+                            <span className="text-slate-600 group-hover:text-slate-800">{sub.name}</span>
                             <span className={`font-medium ${
                               sub.score >= 80 ? 'text-green-600' : 
                               sub.score >= 60 ? 'text-amber-600' : 'text-red-600'
                             }`}>{sub.score}</span>
                           </div>
                         ))}
+                        {dim.subAbilities.length > 4 && (
+                          <p className="text-xs text-slate-400 text-center">+{dim.subAbilities.length - 4} 项能力</p>
+                        )}
                       </div>
                       <p className="text-xs text-slate-500 mt-2 pt-2 border-t border-slate-200">
-                        维度分 = 子能力平均分
+                        点击下方「各维度具体能力分析」查看得分来源
                       </p>
                     </CardContent>
                   </Card>
@@ -779,6 +989,117 @@ export default function TeacherAnalysisPage() {
                                     }`}>{sub.score}</span>
                                   </div>
                                   <Progress value={sub.score} className="h-2" />
+                                  
+                                  {/* 得分来源按钮 */}
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      <Button variant="ghost" size="sm" className="w-full mt-3 h-8 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50">
+                                        <Eye className="h-3 w-3 mr-1" />
+                                        查看得分来源
+                                      </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-md">
+                                      <DialogHeader>
+                                        <DialogTitle className="flex items-center gap-2">
+                                          <span className={getColorClasses(dim.color, 'text')}>{sub.name}</span>
+                                          得分来源
+                                        </DialogTitle>
+                                        <DialogDescription>
+                                          得分 = 考试成绩 × 50% + 实训成绩 × 50%
+                                        </DialogDescription>
+                                      </DialogHeader>
+                                      
+                                      <div className="space-y-4 mt-4">
+                                        {/* 考试成绩来源 */}
+                                        {sub.scoreSource.exam && (
+                                          <div className="p-4 rounded-lg border border-blue-200 bg-blue-50">
+                                            <div className="flex items-center justify-between mb-2">
+                                              <div className="flex items-center gap-2">
+                                                <FileText className="h-4 w-4 text-blue-600" />
+                                                <span className="font-medium text-slate-800">考试成绩</span>
+                                              </div>
+                                              <Badge variant="secondary" className="text-xs">
+                                                权重 {sub.scoreSource.exam.weight}%
+                                              </Badge>
+                                            </div>
+                                            <div className="space-y-2">
+                                              <div className="flex items-center justify-between text-sm">
+                                                <span className="text-slate-600">{sub.scoreSource.exam.name}</span>
+                                                <span className="font-bold text-blue-600">{sub.scoreSource.exam.score}分</span>
+                                              </div>
+                                              <Progress value={sub.scoreSource.exam.score} className="h-2" />
+                                            </div>
+                                          </div>
+                                        )}
+                                        
+                                        {/* 实训成绩来源 */}
+                                        {sub.scoreSource.practice && (
+                                          <div className="p-4 rounded-lg border border-green-200 bg-green-50">
+                                            <div className="flex items-center justify-between mb-2">
+                                              <div className="flex items-center gap-2">
+                                                <Activity className="h-4 w-4 text-green-600" />
+                                                <span className="font-medium text-slate-800">实训成绩</span>
+                                              </div>
+                                              <Badge variant="secondary" className="text-xs">
+                                                权重 {sub.scoreSource.practice.weight}%
+                                              </Badge>
+                                            </div>
+                                            <div className="space-y-2">
+                                              <div className="flex items-center justify-between text-sm">
+                                                <span className="text-slate-600">{sub.scoreSource.practice.name}</span>
+                                                <span className="font-bold text-green-600">{sub.scoreSource.practice.score}分</span>
+                                              </div>
+                                              <Progress value={sub.scoreSource.practice.score} className="h-2" />
+                                            </div>
+                                          </div>
+                                        )}
+                                        
+                                        {/* 系统自动计算 */}
+                                        {sub.scoreSource.system && (
+                                          <div className="p-4 rounded-lg border border-purple-200 bg-purple-50">
+                                            <div className="flex items-center justify-between mb-2">
+                                              <div className="flex items-center gap-2">
+                                                <Brain className="h-4 w-4 text-purple-600" />
+                                                <span className="font-medium text-slate-800">系统自动计算</span>
+                                              </div>
+                                              <Badge variant="secondary" className="text-xs">
+                                                权重 {sub.scoreSource.system.weight}%
+                                              </Badge>
+                                            </div>
+                                            <div className="space-y-2">
+                                              <div className="flex items-center justify-between text-sm">
+                                                <span className="text-slate-600">{sub.scoreSource.system.name}</span>
+                                                <span className="font-bold text-purple-600">{sub.scoreSource.system.score}分</span>
+                                              </div>
+                                              <Progress value={sub.scoreSource.system.score} className="h-2" />
+                                              <p className="text-xs text-slate-500 mt-2">
+                                                {sub.scoreSource.system.detail}
+                                              </p>
+                                            </div>
+                                          </div>
+                                        )}
+                                        
+                                        {/* 计算公式 */}
+                                        <div className="p-3 rounded-lg bg-slate-100 border border-slate-200">
+                                          <p className="text-sm text-slate-600">
+                                            <strong>计算公式：</strong>
+                                            {sub.scoreSource.system ? (
+                                              <span className="text-purple-600 font-medium"> {sub.scoreSource.system.score}分</span>
+                                            ) : (
+                                              <span>
+                                                {' '}<span className="text-blue-600">{sub.scoreSource.exam?.score} × {sub.scoreSource.exam?.weight}%</span>
+                                                {' + '}
+                                                <span className="text-green-600">{sub.scoreSource.practice?.score} × {sub.scoreSource.practice?.weight}%</span>
+                                                {' = '}
+                                                <strong className={getColorClasses(dim.color, 'text')}>{sub.score}分</strong>
+                                              </span>
+                                            )}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </DialogContent>
+                                  </Dialog>
+                                  
                                   <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
                                     <span>能力水平</span>
                                     <span>{sub.score >= 80 ? '优秀' : sub.score >= 60 ? '良好' : '需提升'}</span>
