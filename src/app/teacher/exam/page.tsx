@@ -1000,9 +1000,9 @@ export default function TeacherExamPage() {
             </div>
             
             {/* 弹窗内容 */}
-            <div className="flex-1 overflow-hidden p-6">
-              <Tabs value={localDatabaseTab} onValueChange={(v) => setLocalDatabaseTab(v as 'files' | 'analysis' | 'questions')} className="h-full flex flex-col">
-                <div className="flex items-center justify-between mb-6">
+            <div className="flex-1 overflow-hidden p-6 flex flex-col">
+              <Tabs value={localDatabaseTab} onValueChange={(v) => setLocalDatabaseTab(v as 'files' | 'analysis' | 'questions')} className="h-full flex flex-col flex-1">
+                <div className="flex items-center justify-between mb-6 flex-shrink-0">
                   <TabsList className="bg-slate-100 h-12 px-1">
                     <TabsTrigger value="files" className="gap-2 px-6 h-10 data-[state=active]:bg-white data-[state=active]:shadow-sm">
                       <FileUp className="h-4 w-4" />导入文件
@@ -1037,7 +1037,7 @@ export default function TeacherExamPage() {
                 </div>
 
                 {/* 导入文件 */}
-                <TabsContent value="files" className="flex-1 overflow-auto mt-0">
+                <TabsContent value="files" className="flex-1 overflow-y-auto overflow-x-hidden mt-0" style={{ scrollbarGutter: 'stable' }}>
                   <div className="space-y-4">
                   {/* 上传提示区域 */}
                   <div 
@@ -1146,7 +1146,7 @@ export default function TeacherExamPage() {
               </TabsContent>
 
               {/* 智能分析转化 */}
-              <TabsContent value="analysis" className="flex-1 overflow-auto mt-0">
+              <TabsContent value="analysis" className="flex-1 overflow-y-auto overflow-x-hidden mt-0" style={{ scrollbarGutter: 'stable' }}>
                 <div className="grid grid-cols-3 gap-4 mb-4">
                   <Card className="border-0 shadow-sm">
                     <CardContent className="p-4 text-center">
@@ -1255,8 +1255,8 @@ export default function TeacherExamPage() {
               </TabsContent>
 
               {/* 所有题目 */}
-              <TabsContent value="questions" className="flex-1 overflow-y-auto overflow-x-hidden mt-0">
-                <div className="mb-4 flex items-center gap-3">
+              <TabsContent value="questions" className="flex-1 overflow-y-auto overflow-x-hidden mt-0" style={{ scrollbarGutter: 'stable' }}>
+                <div className="mb-4 flex items-center gap-3 flex-wrap">
                   <div className="flex-1 relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                     <Input placeholder="搜索题目..." className="pl-10" />
