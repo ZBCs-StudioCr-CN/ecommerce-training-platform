@@ -976,10 +976,10 @@ export default function TeacherExamPage() {
 
       {/* 本地题库管理全屏弹窗 */}
       {showLocalDatabase && (
-        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center">
-          <div className="w-[95vw] h-[95vh] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center overflow-hidden">
+          <div className="w-[95vw] h-[95vh] max-w-[95vw] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden">
             {/* 弹窗头部 */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+            <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-indigo-50">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
                   <Database className="h-5 w-5 text-white" />
@@ -1000,9 +1000,9 @@ export default function TeacherExamPage() {
             </div>
             
             {/* 弹窗内容 */}
-            <div className="flex-1 overflow-hidden p-6">
+            <div className="flex-1 min-h-0 overflow-x-hidden overflow-y-auto p-6">
               <Tabs value={localDatabaseTab} onValueChange={(v) => setLocalDatabaseTab(v as 'files' | 'analysis' | 'questions')} className="h-full flex flex-col">
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center justify-between mb-6 flex-shrink-0">
                   <TabsList className="bg-slate-100 h-12 px-1">
                     <TabsTrigger value="files" className="gap-2 px-6 h-10 data-[state=active]:bg-white data-[state=active]:shadow-sm">
                       <FileUp className="h-4 w-4" />导入文件
@@ -1014,7 +1014,7 @@ export default function TeacherExamPage() {
                       <BookOpen className="h-4 w-4" />所有题目
                     </TabsTrigger>
                   </TabsList>
-                  <div className="flex gap-3">
+                  <div className="flex gap-3 flex-shrink-0">
                     {localDatabaseTab === 'files' && (
                       <>
                         <input type="file" ref={fileInputRef} className="hidden" accept=".xlsx,.xls,.docx,.doc,.pdf,.txt" multiple onChange={handleFileUpload} />
@@ -1037,8 +1037,8 @@ export default function TeacherExamPage() {
                 </div>
 
                 {/* 导入文件 */}
-                <TabsContent value="files" className="flex-1 overflow-auto mt-0">
-                  <div className="space-y-4">
+                <TabsContent value="files" className="flex-1 min-h-0 overflow-x-hidden overflow-y-auto mt-0">
+                  <div className="space-y-4 pr-2">
                   {/* 上传提示区域 */}
                   <div 
                     className="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer"
@@ -1146,137 +1146,140 @@ export default function TeacherExamPage() {
               </TabsContent>
 
               {/* 智能分析转化 */}
-              <TabsContent value="analysis" className="flex-1 overflow-auto mt-0">
-                <div className="grid grid-cols-3 gap-4 mb-4">
-                  <Card className="border-0 shadow-sm">
-                    <CardContent className="p-4 text-center">
-                      <p className="text-3xl font-bold text-slate-800">{importedFiles.length}</p>
-                      <p className="text-sm text-slate-500">导入文件</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="border-0 shadow-sm">
-                    <CardContent className="p-4 text-center">
-                      <p className="text-3xl font-bold text-blue-600">{importedFiles.filter(f => f.status === 'completed').reduce((sum, f) => sum + f.analyzedCount, 0)}</p>
-                      <p className="text-sm text-slate-500">已分析题目</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="border-0 shadow-sm">
-                    <CardContent className="p-4 text-center">
-                      <p className="text-3xl font-bold text-amber-600">{importedFiles.filter(f => f.status === 'pending').reduce((sum, f) => sum + f.questionCount, 0)}</p>
-                      <p className="text-sm text-slate-500">待分析题目</p>
-                    </CardContent>
-                  </Card>
-                </div>
+              <TabsContent value="analysis" className="flex-1 min-h-0 overflow-x-hidden overflow-y-auto mt-0">
+                <div className="pr-2 space-y-4">
+                  <div className="grid grid-cols-3 gap-4">
+                    <Card className="border-0 shadow-sm">
+                      <CardContent className="p-4 text-center">
+                        <p className="text-3xl font-bold text-slate-800">{importedFiles.length}</p>
+                        <p className="text-sm text-slate-500">导入文件</p>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-0 shadow-sm">
+                      <CardContent className="p-4 text-center">
+                        <p className="text-3xl font-bold text-blue-600">{importedFiles.filter(f => f.status === 'completed').reduce((sum, f) => sum + f.analyzedCount, 0)}</p>
+                        <p className="text-sm text-slate-500">已分析题目</p>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-0 shadow-sm">
+                      <CardContent className="p-4 text-center">
+                        <p className="text-3xl font-bold text-amber-600">{importedFiles.filter(f => f.status === 'pending').reduce((sum, f) => sum + f.questionCount, 0)}</p>
+                        <p className="text-sm text-slate-500">待分析题目</p>
+                      </CardContent>
+                    </Card>
+                  </div>
 
-                <Card className="border-0 shadow-md">
-                  <CardHeader>
-                    <CardTitle className="text-base">AI智能分析说明</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3 text-sm text-slate-600">
-                      <div className="flex items-start gap-3">
-                        <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0 mt-0.5">1</div>
-                        <div>
-                          <p className="font-medium text-slate-700">题目类型识别</p>
-                          <p>自动识别单选题、多选题、判断题、案例分析题、简答题</p>
+                  <Card className="border-0 shadow-md">
+                    <CardHeader>
+                      <CardTitle className="text-base">AI智能分析说明</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3 text-sm text-slate-600">
+                        <div className="flex items-start gap-3">
+                          <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0 mt-0.5">1</div>
+                          <div>
+                            <p className="font-medium text-slate-700">题目类型识别</p>
+                            <p>自动识别单选题、多选题、判断题、案例分析题、简答题</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-6 h-6 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center flex-shrink-0 mt-0.5">2</div>
+                          <div>
+                            <p className="font-medium text-slate-700">五维能力标签</p>
+                            <p>根据题目内容自动匹配：自主决策能力、AI辅助应用、数据复盘与优化、风险应对、合规与规则意识</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-6 h-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center flex-shrink-0 mt-0.5">3</div>
+                          <div>
+                            <p className="font-medium text-slate-700">难度评估</p>
+                            <p>基于题目复杂度和知识点，自动评估为简单、中等、困难三个等级</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center flex-shrink-0 mt-0.5">4</div>
+                          <div>
+                            <p className="font-medium text-slate-700">自动归类</p>
+                            <p>分析完成的题目将自动归类到首页五维能力题库中</p>
+                          </div>
                         </div>
                       </div>
-                      <div className="flex items-start gap-3">
-                        <div className="w-6 h-6 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center flex-shrink-0 mt-0.5">2</div>
-                        <div>
-                          <p className="font-medium text-slate-700">五维能力标签</p>
-                          <p>根据题目内容自动匹配：自主决策能力、AI辅助应用、数据复盘与优化、风险应对、合规与规则意识</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <div className="w-6 h-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center flex-shrink-0 mt-0.5">3</div>
-                        <div>
-                          <p className="font-medium text-slate-700">难度评估</p>
-                          <p>基于题目复杂度和知识点，自动评估为简单、中等、困难三个等级</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <div className="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center flex-shrink-0 mt-0.5">4</div>
-                        <div>
-                          <p className="font-medium text-slate-700">自动归类</p>
-                          <p>分析完成的题目将自动归类到首页五维能力题库中</p>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
 
-                <div className="mt-4">
-                  <h3 className="font-medium text-slate-800 mb-3">分析队列</h3>
-                  <div className="space-y-2">
-                    {analyzedQuestions.map((q) => {
-                      const ability = abilityDimensions.find(a => a.id === q.ability)!;
-                      const AbilityIcon = ability.icon;
-                      
-                      return (
-                        <div key={q.id} className="p-3 rounded-lg border border-slate-200 flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            {q.analysisStatus === 'completed' ? (
-                              <CheckCircle2 className="h-5 w-5 text-green-500" />
-                            ) : q.analysisStatus === 'analyzing' ? (
-                              <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
-                            ) : (
-                              <Clock className="h-5 w-5 text-slate-400" />
-                            )}
-                            <div>
-                              <p className="text-sm text-slate-700 line-clamp-1">{q.originalContent}</p>
-                              <div className="flex items-center gap-2 mt-1">
-                                <Badge variant="outline" className="text-xs">{questionTypes.find(t => t.id === q.type)?.name}</Badge>
-                                <Badge className={`text-xs ${ability.bgColor} ${ability.textColor}`}>
-                                  <AbilityIcon className="h-3 w-3 mr-1" />{ability.name}
-                                </Badge>
-                                <Badge className={`text-xs ${difficultyLevels.find(d => d.id === q.difficulty)?.color}`}>
-                                  {difficultyLevels.find(d => d.id === q.difficulty)?.name}
-                                </Badge>
+                  <div>
+                    <h3 className="font-medium text-slate-800 mb-3">分析队列</h3>
+                    <div className="space-y-2">
+                      {analyzedQuestions.map((q) => {
+                        const ability = abilityDimensions.find(a => a.id === q.ability)!;
+                        const AbilityIcon = ability.icon;
+                        
+                        return (
+                          <div key={q.id} className="p-3 rounded-lg border border-slate-200 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              {q.analysisStatus === 'completed' ? (
+                                <CheckCircle2 className="h-5 w-5 text-green-500" />
+                              ) : q.analysisStatus === 'analyzing' ? (
+                                <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
+                              ) : (
+                                <Clock className="h-5 w-5 text-slate-400" />
+                              )}
+                              <div>
+                                <p className="text-sm text-slate-700 line-clamp-1">{q.originalContent}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Badge variant="outline" className="text-xs">{questionTypes.find(t => t.id === q.type)?.name}</Badge>
+                                  <Badge className={`text-xs ${ability.bgColor} ${ability.textColor}`}>
+                                    <AbilityIcon className="h-3 w-3 mr-1" />{ability.name}
+                                  </Badge>
+                                  <Badge className={`text-xs ${difficultyLevels.find(d => d.id === q.difficulty)?.color}`}>
+                                    {difficultyLevels.find(d => d.id === q.difficulty)?.name}
+                                  </Badge>
+                                </div>
                               </div>
                             </div>
+                            <div className="text-right">
+                              {q.analysisStatus === 'completed' && (
+                                <Badge className="bg-green-100 text-green-700">已完成</Badge>
+                              )}
+                              {q.analysisStatus === 'analyzing' && (
+                                <Badge className="bg-blue-100 text-blue-700">分析中</Badge>
+                              )}
+                              {q.analysisStatus === 'pending' && (
+                                <Badge className="bg-slate-100 text-slate-600">待分析</Badge>
+                              )}
+                            </div>
                           </div>
-                          <div className="text-right">
-                            {q.analysisStatus === 'completed' && (
-                              <Badge className="bg-green-100 text-green-700">已完成</Badge>
-                            )}
-                            {q.analysisStatus === 'analyzing' && (
-                              <Badge className="bg-blue-100 text-blue-700">分析中</Badge>
-                            )}
-                            {q.analysisStatus === 'pending' && (
-                              <Badge className="bg-slate-100 text-slate-600">待分析</Badge>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </TabsContent>
 
               {/* 所有题目 */}
-              <TabsContent value="questions" className="flex-1 overflow-auto mt-0">
-                <div className="mb-4 flex items-center gap-3">
-                  <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                    <Input placeholder="搜索题目..." className="pl-10" />
+              <TabsContent value="questions" className="flex-1 min-h-0 overflow-x-hidden overflow-y-auto mt-0">
+                <div className="pr-2">
+                  <div className="mb-4 flex items-center gap-3 flex-wrap">
+                    <div className="flex-1 min-w-[200px] relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                      <Input placeholder="搜索题目..." className="pl-10" />
+                    </div>
+                    <Select value={selectedAbility} onValueChange={setSelectedAbility}>
+                      <SelectTrigger className="w-36"><SelectValue placeholder="能力维度" /></SelectTrigger>
+                      <SelectContent position="popper" className="z-[200]">
+                        <SelectItem value="all">全部维度</SelectItem>
+                        {abilityDimensions.map((dim) => (<SelectItem key={dim.id} value={dim.id}>{dim.name}</SelectItem>))}
+                      </SelectContent>
+                    </Select>
+                    <Select value={selectedType} onValueChange={setSelectedType}>
+                      <SelectTrigger className="w-28"><SelectValue placeholder="题型" /></SelectTrigger>
+                      <SelectContent position="popper" className="z-[200]">
+                        <SelectItem value="all">全部类型</SelectItem>
+                        {questionTypes.map((type) => (<SelectItem key={type.id} value={type.id}>{type.name}</SelectItem>))}
+                      </SelectContent>
+                    </Select>
+                    <Button variant="outline"><Download className="h-4 w-4 mr-2" />导出</Button>
                   </div>
-                  <Select value={selectedAbility} onValueChange={setSelectedAbility}>
-                    <SelectTrigger className="w-36"><SelectValue placeholder="能力维度" /></SelectTrigger>
-                    <SelectContent position="popper" className="z-[200]">
-                      <SelectItem value="all">全部维度</SelectItem>
-                      {abilityDimensions.map((dim) => (<SelectItem key={dim.id} value={dim.id}>{dim.name}</SelectItem>))}
-                    </SelectContent>
-                  </Select>
-                  <Select value={selectedType} onValueChange={setSelectedType}>
-                    <SelectTrigger className="w-28"><SelectValue placeholder="题型" /></SelectTrigger>
-                    <SelectContent position="popper" className="z-[200]">
-                      <SelectItem value="all">全部类型</SelectItem>
-                      {questionTypes.map((type) => (<SelectItem key={type.id} value={type.id}>{type.name}</SelectItem>))}
-                    </SelectContent>
-                  </Select>
-                  <Button variant="outline"><Download className="h-4 w-4 mr-2" />导出</Button>
-                </div>
 
                 {/* 筛选结果提示 */}
                 {(selectedAbility !== 'all' || selectedType !== 'all') && (
@@ -1348,6 +1351,7 @@ export default function TeacherExamPage() {
                       </div>
                     );
                   })}
+                </div>
                 </div>
               </TabsContent>
             </Tabs>
