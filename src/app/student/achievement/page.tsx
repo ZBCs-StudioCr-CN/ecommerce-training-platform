@@ -280,39 +280,24 @@ export default function AchievementPage() {
               </CardContent>
             </Card>
 
-            {/* 五大评分维度 */}
+            {/* 个人作品集 */}
             <Card className="border-0 shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Brain className="h-5 w-5 text-purple-600" />
-                  五大评分维度
+                  <Zap className="h-5 w-5 text-amber-600" />
+                  个人作品集
                 </CardTitle>
-                <CardDescription>AI融合评分机制</CardDescription>
+                <CardDescription>电商运营能力证明</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {radar.dimensions.map((dim, index) => (
-                    <div key={index} className="flex items-center gap-3">
-                      <div 
-                        className="w-8 h-8 rounded-lg flex items-center justify-center"
-                        style={{ backgroundColor: dim.color }}
-                      >
-                        <span className="text-white text-xs font-bold">{dim.weight}</span>
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-sm text-slate-700">{dim.name}</span>
-                          <span className="text-sm font-bold" style={{ color: dim.color }}>{dim.value}%</span>
-                        </div>
-                        <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full rounded-full"
-                            style={{ width: `${dim.value}%`, backgroundColor: dim.color }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                <div className="text-center py-4">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center mx-auto mb-4">
+                    <FileText className="h-8 w-8 text-white" />
+                  </div>
+                  <p className="text-sm text-slate-600 mb-4">完成更多实训模块，生成您的个人电商运营作品集</p>
+                  <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700">
+                    生成作品集
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -481,28 +466,6 @@ export default function AchievementPage() {
                     <p className="font-medium">🧠 AI驾驭者</p>
                     <p className="text-sm text-emerald-100 mt-1">自主决策比例超过70%</p>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* 个人电商运营作品集 */}
-            <Card className="border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-amber-600" />
-                  个人作品集
-                </CardTitle>
-                <CardDescription>电商运营能力证明</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-4">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center mx-auto mb-4">
-                    <FileText className="h-8 w-8 text-white" />
-                  </div>
-                  <p className="text-sm text-slate-600 mb-4">完成更多实训模块，生成您的个人电商运营作品集</p>
-                  <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700">
-                    生成作品集
-                  </Button>
                 </div>
               </CardContent>
             </Card>
