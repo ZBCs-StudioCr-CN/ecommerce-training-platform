@@ -124,6 +124,20 @@ export function StudentLayout({ children, activeMenu }: StudentLayoutProps) {
           </div>
         </div>
 
+        {/* 风险事件提醒 */}
+        <div className="mx-4 mt-3 p-4 rounded-xl bg-gradient-to-r from-orange-50 to-red-50 border border-orange-100">
+          <div className="flex items-center gap-2 mb-2">
+            <AlertTriangle className="h-4 w-4 text-orange-600" />
+            <span className="text-sm font-medium text-orange-700">风险事件</span>
+            <Badge className="bg-red-500 text-white text-xs ml-auto">3 待处理</Badge>
+          </div>
+          <Link href="/student/risk-events" className="block">
+            <Button size="sm" className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white">
+              查看详情
+            </Button>
+          </Link>
+        </div>
+
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200 bg-white">
           <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors">
             <LogOut className="h-5 w-5" />
@@ -185,6 +199,20 @@ export function StudentSidebar({ activeMenu }: { activeMenu?: string }) {
             <p className="text-slate-500">自主决策</p>
           </div>
         </div>
+      </div>
+
+      {/* 风险事件提醒 */}
+      <div className="mx-4 mt-3 p-4 rounded-xl bg-gradient-to-r from-orange-50 to-red-50 border border-orange-100">
+        <div className="flex items-center gap-2 mb-2">
+          <AlertTriangle className="h-4 w-4 text-orange-600" />
+          <span className="text-sm font-medium text-orange-700">风险事件</span>
+          <Badge className="bg-red-500 text-white text-xs ml-auto">3 待处理</Badge>
+        </div>
+        <Link href="/student/risk-events" className="block">
+          <Button size="sm" className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white">
+            查看详情
+          </Button>
+        </Link>
       </div>
 
       <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200 bg-white">

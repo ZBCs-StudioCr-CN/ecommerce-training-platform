@@ -43,7 +43,6 @@ import {
 } from '@/components/ui/dialog';
 import { StudentLayout } from '@/components/student-layout';
 import { AIAssistantButton } from '@/components/ai-assistant';
-import { RiskEventButton } from '@/components/risk-event-simulator';
 import { PRACTICE_STAGES, FIVE_DIMENSIONS, type PracticeStage, type StageConfig } from '@/data/ability-practice';
 import { generateMockStats, generateScoreBreakdown } from '@/lib/autonomous-decision-calculator';
 
@@ -740,8 +739,6 @@ export default function StudentDashboardPage() {
 
       {/* 悬浮AI助手按钮 */}
       <AIAssistantButton />
-      {/* 悬浮风险事件按钮 */}
-      <RiskEventButton />
     </StudentLayout>
   );
 }
