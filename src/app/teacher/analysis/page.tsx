@@ -42,15 +42,17 @@ const fiveDimensions = [
     id: 'decision',
     name: '自主决策能力', 
     icon: Target,
-    weight: 30,
+    weight: 35,
     color: 'blue',
     score: 78,
-    description: '关键商业决策、选品定价、渠道选择等',
+    description: '关键商业决策、选品定价、渠道选择、物流供应链、营销活动等',
     subAbilities: [
       { name: '市场分析决策', score: 82, description: '市场趋势判断、竞争分析' },
       { name: '选品决策', score: 75, description: '产品选择、利润空间评估' },
       { name: '定价策略', score: 76, description: '价格制定、促销策略' },
       { name: '渠道选择', score: 79, description: '销售渠道布局、资源配置' },
+      { name: '物流供应链管理', score: 73, description: '物流选择、供应链优化、成本控制' },
+      { name: '营销与活动决策', score: 77, description: '营销策略制定、活动策划执行' },
     ]
   },
   { 
@@ -60,19 +62,21 @@ const fiveDimensions = [
     weight: 20,
     color: 'purple',
     score: 72,
-    description: 'AI工具使用策略、内容审核、效率优化等',
+    description: 'AI工具使用策略、内容审核、效率优化、视觉设计、文案创作等',
     subAbilities: [
       { name: 'AI工具选择', score: 78, description: 'AI工具识别与选择' },
       { name: '内容审核能力', score: 68, description: 'AI生成内容审核与优化' },
       { name: '效率优化', score: 74, description: 'AI辅助提升工作效率' },
       { name: 'AI耦合度控制', score: 68, description: '避免过度依赖AI' },
+      { name: 'AI视觉策划设计', score: 71, description: 'AI辅助图片设计、视频制作、视觉优化' },
+      { name: 'AI文案创意撰写', score: 73, description: 'AI辅助文案创作、内容优化、创意生成' },
     ]
   },
   { 
     id: 'analysis',
     name: '数据复盘与优化', 
     icon: TrendingUp,
-    weight: 25,
+    weight: 20,
     color: 'green',
     score: 81,
     description: '数据分析、问题诊断、优化策略等',

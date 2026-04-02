@@ -79,7 +79,7 @@ const abilityDimensions = [
     bgColor: 'bg-blue-50',
     borderColor: 'border-blue-200',
     textColor: 'text-blue-600',
-    description: '关键商业决策、选品定价、渠道选择等',
+    description: '市场分析、选品定价、渠道选择、物流供应链、营销活动决策',
     questionCount: 156,
   },
   {
@@ -90,7 +90,7 @@ const abilityDimensions = [
     bgColor: 'bg-purple-50',
     borderColor: 'border-purple-200',
     textColor: 'text-purple-600',
-    description: 'AI工具使用策略、内容审核、效率优化等',
+    description: 'AI工具使用、内容审核、效率优化、视觉设计、文案创作',
     questionCount: 89,
   },
   {
@@ -101,7 +101,7 @@ const abilityDimensions = [
     bgColor: 'bg-green-50',
     borderColor: 'border-green-200',
     textColor: 'text-green-600',
-    description: '数据分析、问题诊断、优化策略等',
+    description: '数据采集、数据分析、问题诊断、优化迭代',
     questionCount: 124,
   },
   {
@@ -112,7 +112,7 @@ const abilityDimensions = [
     bgColor: 'bg-amber-50',
     borderColor: 'border-amber-200',
     textColor: 'text-amber-600',
-    description: '危机识别、应对方案、客户投诉处理等',
+    description: '风险识别、应对方案、客户投诉处理、舆情管理',
     questionCount: 98,
   },
   {
@@ -123,7 +123,7 @@ const abilityDimensions = [
     bgColor: 'bg-red-50',
     borderColor: 'border-red-200',
     textColor: 'text-red-600',
-    description: '平台规则、法律法规、知识产权等',
+    description: '平台规则、法律法规、知识产权、数据合规',
     questionCount: 76,
   },
 ];
@@ -263,7 +263,7 @@ export default function TeacherExamPage() {
     totalScore: 100,
     duration: 90,
     difficultyRatio: { easy: 30, medium: 50, hard: 20 },
-    abilityRatio: { decision: 30, ai: 20, analysis: 25, risk: 15, compliance: 10 },
+    abilityRatio: { decision: 35, ai: 20, analysis: 20, risk: 15, compliance: 10 },
     questionTypeRatio: { single: 40, multiple: 20, judgment: 15, case: 15, short: 10 },
   });
   const [isGenerating, setIsGenerating] = useState(false);

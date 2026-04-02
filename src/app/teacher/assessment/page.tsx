@@ -55,9 +55,9 @@ import { teacherMenuItems } from '@/config/menu';
 
 // 五维能力
 const abilityDimensions = [
-  { id: 'decision', name: '自主决策能力', icon: Target, weight: 30, color: 'bg-blue-500' },
+  { id: 'decision', name: '自主决策能力', icon: Target, weight: 35, color: 'bg-blue-500' },
   { id: 'ai', name: 'AI辅助应用', icon: Brain, weight: 20, color: 'bg-purple-500' },
-  { id: 'analysis', name: '数据复盘与优化', icon: TrendingUp, weight: 25, color: 'bg-green-500' },
+  { id: 'analysis', name: '数据复盘与优化', icon: TrendingUp, weight: 20, color: 'bg-green-500' },
   { id: 'risk', name: '风险应对', icon: AlertTriangle, weight: 15, color: 'bg-amber-500' },
   { id: 'compliance', name: '合规与规则意识', icon: Shield, weight: 10, color: 'bg-red-500' },
 ];
