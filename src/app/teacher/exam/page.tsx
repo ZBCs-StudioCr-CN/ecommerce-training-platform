@@ -412,6 +412,7 @@ export default function TeacherExamPage() {
     setImportedFiles(importedFiles.map(f => 
       f.id === fileId ? { ...f, status: 'analyzing' as const } : f
     ));
+    
     // 模拟分析进度
     let progress = 0;
     const interval = setInterval(() => {
@@ -419,8 +420,51 @@ export default function TeacherExamPage() {
       setImportedFiles(prev => prev.map(f => {
         if (f.id === fileId) {
           const newCount = Math.min(Math.floor(progress / 10 * 15), 150);
+          
+          // 分析完成时，生成模拟题目并添加到本地题库
           if (progress >= 100) {
             clearInterval(interval);
+            
+            // 生成模拟题目
+            const sampleQuestions: AnalyzedQuestion[] = [
+              {
+                id: `AQ${Date.now()}_1`,
+                originalContent: '在进行跨境电商选品时，应该优先考虑哪些因素？',
+                type: 'multiple',
+                ability: 'decision',
+                difficulty: 'medium',
+                options: ['市场需求', '竞争程度', '利润空间', '供应链稳定性'],
+                correctAnswer: [0, 1, 2, 3],
+                analysisStatus: 'completed',
+                fileId: fileId,
+              },
+              {
+                id: `AQ${Date.now()}_2`,
+                originalContent: 'AI生成的营销文案可以直接发布使用。',
+                type: 'judgment',
+                ability: 'ai',
+                difficulty: 'easy',
+                options: ['正确', '错误'],
+                correctAnswer: 1,
+                analysisStatus: 'completed',
+                fileId: fileId,
+              },
+              {
+                id: `AQ${Date.now()}_3`,
+                originalContent: '某店铺日销售额突然下降50%，请分析可能的原因并提出解决方案。',
+                type: 'case',
+                ability: 'analysis',
+                difficulty: 'hard',
+                options: [],
+                correctAnswer: '需要人工评分',
+                analysisStatus: 'completed',
+                fileId: fileId,
+              },
+            ];
+            
+            // 添加到本地题库
+            setAnalyzedQuestions(prev => [...prev, ...sampleQuestions]);
+            
             return { ...f, status: 'completed' as const, analyzedCount: newCount, questionCount: newCount };
           }
           return { ...f, analyzedCount: newCount, questionCount: newCount };
@@ -555,7 +599,7 @@ export default function TeacherExamPage() {
                   <Database className="h-4 w-4 mr-2" />
                   本地题库管理
                 </Button>
-                <Button variant="outline">
+                <Button variant="outline" onClick={() => { setLocalDatabaseTab('files'); setShowLocalDatabase(true); }}>
                   <Upload className="h-4 w-4 mr-2" />
                   导入题目
                 </Button>
@@ -995,60 +1039,107 @@ export default function TeacherExamPage() {
                 {/* 导入文件 */}
                 <TabsContent value="files" className="flex-1 overflow-auto mt-0">
                   <div className="space-y-4">
-                  {importedFiles.length > 0 ? (
-                    importedFiles.map((file) => (
-                      <div key={file.id} className="p-4 rounded-xl border border-slate-200 hover:border-blue-300 transition-all">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                              file.type === 'xlsx' || file.type === 'xls' ? 'bg-green-100' :
-                              file.type === 'docx' || file.type === 'doc' ? 'bg-blue-100' :
-                              file.type === 'pdf' ? 'bg-red-100' : 'bg-slate-100'
-                            }`}>
-                              <FileSpreadsheet className={`h-6 w-6 ${
-                                file.type === 'xlsx' || file.type === 'xls' ? 'text-green-600' :
-                                file.type === 'docx' || file.type === 'doc' ? 'text-blue-600' :
-                                file.type === 'pdf' ? 'text-red-600' : 'text-slate-600'
-                              }`} />
-                            </div>
-                            <div>
-                              <p className="font-medium text-slate-800">{file.name}</p>
-                              <div className="flex items-center gap-3 text-sm text-slate-500 mt-1">
-                                <span>{formatFileSize(file.size)}</span>
-                                <span>•</span>
-                                <span>{file.uploadTime}</span>
-                                <span>•</span>
-                                <span>{file.questionCount} 道题目</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            {getFileStatusIcon(file.status)}
-                            <div className="text-right">
-                              {getFileStatusText(file.status)}
-                              {file.status === 'analyzing' && (
-                                <div className="w-32 mt-1">
-                                  <Progress value={(file.analyzedCount / file.questionCount) * 100 || 0} className="h-1.5" />
-                                </div>
-                              )}
-                            </div>
-                            {file.status === 'pending' && (
-                              <Button size="sm" onClick={() => startAnalysis(file.id)}>
-                                <Play className="h-4 w-4 mr-1" />开始分析
-                              </Button>
-                            )}
-                            <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-600">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
+                  {/* 上传提示区域 */}
+                  <div 
+                    className="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <input type="file" ref={fileInputRef} className="hidden" accept=".xlsx,.xls,.docx,.doc,.pdf,.txt" multiple onChange={handleFileUpload} />
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">
+                        <Upload className="h-8 w-8 text-blue-500" />
+                      </div>
+                      <div>
+                        <p className="text-lg font-medium text-slate-700">点击或拖拽文件到此处上传</p>
+                        <p className="text-sm text-slate-500 mt-1">支持 Excel、Word、PDF、TXT 格式，可一次上传多个文件</p>
+                      </div>
+                      <Button className="mt-2">
+                        <Upload className="h-4 w-4 mr-2" />选择文件
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* 文件列表 */}
+                  {importedFiles.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-medium text-slate-700">已上传文件 ({importedFiles.length})</h3>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={analyzeAllFiles}
+                            disabled={!importedFiles.some(f => f.status === 'pending')}
+                          >
+                            <Play className="h-4 w-4 mr-1" />分析全部
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => setImportedFiles([])}
+                          >
+                            <Trash2 className="h-4 w-4 mr-1" />清空列表
+                          </Button>
                         </div>
                       </div>
-                    ))
-                  ) : (
-                    <div className="py-12 text-center">
-                      <FileUp className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-                      <p className="text-slate-500">暂无导入文件</p>
-                      <p className="text-sm text-slate-400 mt-1">点击"上传文件"按钮导入题库文件</p>
+                      {importedFiles.map((file) => (
+                        <div key={file.id} className="p-4 rounded-xl border border-slate-200 hover:border-blue-300 transition-all bg-white">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                                file.type === 'xlsx' || file.type === 'xls' ? 'bg-green-100' :
+                                file.type === 'docx' || file.type === 'doc' ? 'bg-blue-100' :
+                                file.type === 'pdf' ? 'bg-red-100' : 'bg-slate-100'
+                              }`}>
+                                <FileSpreadsheet className={`h-6 w-6 ${
+                                  file.type === 'xlsx' || file.type === 'xls' ? 'text-green-600' :
+                                  file.type === 'docx' || file.type === 'doc' ? 'text-blue-600' :
+                                  file.type === 'pdf' ? 'text-red-600' : 'text-slate-600'
+                                }`} />
+                              </div>
+                              <div>
+                                <p className="font-medium text-slate-800">{file.name}</p>
+                                <div className="flex items-center gap-3 text-sm text-slate-500 mt-1">
+                                  <span>{formatFileSize(file.size)}</span>
+                                  <span>•</span>
+                                  <span>{file.uploadTime}</span>
+                                  {file.questionCount > 0 && (
+                                    <>
+                                      <span>•</span>
+                                      <span className="text-blue-600 font-medium">{file.questionCount} 道题目</span>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              {getFileStatusIcon(file.status)}
+                              <div className="text-right">
+                                {getFileStatusText(file.status)}
+                                {file.status === 'analyzing' && (
+                                  <div className="w-32 mt-1">
+                                    <Progress value={(file.analyzedCount / file.questionCount) * 100 || 0} className="h-1.5" />
+                                  </div>
+                                )}
+                              </div>
+                              {file.status === 'pending' && (
+                                <Button size="sm" onClick={() => startAnalysis(file.id)}>
+                                  <Play className="h-4 w-4 mr-1" />开始分析
+                                </Button>
+                              )}
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                                onClick={() => setImportedFiles(importedFiles.filter(f => f.id !== file.id))}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
