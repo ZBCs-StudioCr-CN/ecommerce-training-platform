@@ -26,6 +26,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { StudentLayout } from '@/components/student-layout';
+import { FIVE_DIMENSIONS } from '@/data/ability-practice';
 
 const practiceReports = [
   { id: 1, title: '市场调研与选品实训报告', module: '市场调研', score: 92, date: '2026-03-15', status: 'completed' },
@@ -37,16 +38,33 @@ const certificates = [
   { id: 2, title: '跨境电商技能竞赛三等奖', issueDate: '2026-03-20', issuer: '教务处', type: 'competition' },
 ];
 
-// 能力雷达图数据
-const abilityRadar = {
-  dimensions: [
-    { name: '商业决策', value: 78, weight: 30, color: '#3b82f6', icon: Target },
-    { name: '流量逻辑', value: 65, weight: 25, color: '#8b5cf6', icon: TrendingUp },
-    { name: '数据复盘', value: 72, weight: 25, color: '#f59e0b', icon: LineChart },
-    { name: '风险应对', value: 55, weight: 20, color: '#ef4444', icon: AlertTriangle },
-  ],
-  overall: 68,
+// 图标映射
+const iconMap: Record<string, React.ElementType> = {
+  Target,
+  Brain,
+  TrendingUp,
+  AlertTriangle,
+  Shield,
 };
+
+// 五维能力雷达图数据
+const abilityRadar = {
+  dimensions: FIVE_DIMENSIONS.map(dim => ({
+    id: dim.id,
+    name: dim.name,
+    value: Math.round(65 + Math.random() * 30), // 模拟得分
+    weight: dim.weight,
+    color: dim.color,
+    icon: iconMap[dim.icon] || Target,
+  })),
+  overall: 0,
+};
+
+// 计算综合得分
+abilityRadar.overall = Math.round(
+  abilityRadar.dimensions.reduce((sum, d) => sum + d.value * d.weight, 0) / 
+  abilityRadar.dimensions.reduce((sum, d) => sum + d.weight, 0)
+);
 
 // 五大评分维度得分
 const scoringDimensions = [
@@ -128,7 +146,7 @@ export default function AchievementPage() {
                   <LineChart className="h-5 w-5 text-purple-600" />
                   能力雷达图
                 </CardTitle>
-                <CardDescription>四大核心能力评估</CardDescription>
+                <CardDescription>五维能力评估</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
