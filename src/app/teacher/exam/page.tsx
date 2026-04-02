@@ -930,43 +930,71 @@ export default function TeacherExamPage() {
         </div>
       </main>
 
-      {/* 本地题库管理弹窗 */}
-      <Dialog open={showLocalDatabase} onOpenChange={setShowLocalDatabase}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Database className="h-5 w-5 text-blue-500" />
-              本地题库管理
-            </DialogTitle>
-            <DialogDescription>管理导入的题库文件，使用AI智能分析转化题目</DialogDescription>
-          </DialogHeader>
-          
-          <div className="flex-1 overflow-hidden">
-            <Tabs value={localDatabaseTab} onValueChange={(v) => setLocalDatabaseTab(v as 'files' | 'analysis' | 'questions')} className="h-full flex flex-col">
-              <div className="flex items-center justify-between border-b pb-2 mb-4">
-                <TabsList className="bg-slate-100">
-                  <TabsTrigger value="files" className="gap-2"><FileUp className="h-4 w-4" />导入文件</TabsTrigger>
-                  <TabsTrigger value="analysis" className="gap-2"><Sparkles className="h-4 w-4" />智能分析转化</TabsTrigger>
-                  <TabsTrigger value="questions" className="gap-2"><BookOpen className="h-4 w-4" />所有题目</TabsTrigger>
-                </TabsList>
-                <div className="flex gap-2">
-                  {localDatabaseTab === 'files' && (
-                    <>
-                      <input type="file" ref={fileInputRef} className="hidden" accept=".xlsx,.xls,.docx,.doc,.pdf,.txt" multiple onChange={handleFileUpload} />
-                      <Button onClick={() => fileInputRef.current?.click()}><Upload className="h-4 w-4 mr-2" />上传文件</Button>
-                    </>
-                  )}
-                  {localDatabaseTab === 'analysis' && (
-                    <Button onClick={analyzeAllFiles} disabled={!importedFiles.some(f => f.status === 'pending')}>
-                      <Play className="h-4 w-4 mr-2" />分析所有待处理
-                    </Button>
-                  )}
+      {/* 本地题库管理全屏弹窗 */}
+      {showLocalDatabase && (
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center">
+          <div className="w-[95vw] h-[95vh] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+            {/* 弹窗头部 */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                  <Database className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-slate-800">本地题库管理</h2>
+                  <p className="text-sm text-slate-500">管理导入的题库文件，使用AI智能分析转化题目</p>
                 </div>
               </div>
+              <Button
+                variant="ghost"
+                size="lg"
+                onClick={() => setShowLocalDatabase(false)}
+                className="h-10 w-10 rounded-full hover:bg-red-100 hover:text-red-600"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+            
+            {/* 弹窗内容 */}
+            <div className="flex-1 overflow-hidden p-6">
+              <Tabs value={localDatabaseTab} onValueChange={(v) => setLocalDatabaseTab(v as 'files' | 'analysis' | 'questions')} className="h-full flex flex-col">
+                <div className="flex items-center justify-between mb-6">
+                  <TabsList className="bg-slate-100 h-12 px-1">
+                    <TabsTrigger value="files" className="gap-2 px-6 h-10 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                      <FileUp className="h-4 w-4" />导入文件
+                    </TabsTrigger>
+                    <TabsTrigger value="analysis" className="gap-2 px-6 h-10 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                      <Sparkles className="h-4 w-4" />智能分析转化
+                    </TabsTrigger>
+                    <TabsTrigger value="questions" className="gap-2 px-6 h-10 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                      <BookOpen className="h-4 w-4" />所有题目
+                    </TabsTrigger>
+                  </TabsList>
+                  <div className="flex gap-3">
+                    {localDatabaseTab === 'files' && (
+                      <>
+                        <input type="file" ref={fileInputRef} className="hidden" accept=".xlsx,.xls,.docx,.doc,.pdf,.txt" multiple onChange={handleFileUpload} />
+                        <Button size="lg" onClick={() => fileInputRef.current?.click()}>
+                          <Upload className="h-4 w-4 mr-2" />上传文件
+                        </Button>
+                      </>
+                    )}
+                    {localDatabaseTab === 'analysis' && (
+                      <Button size="lg" onClick={analyzeAllFiles} disabled={!importedFiles.some(f => f.status === 'pending')}>
+                        <Play className="h-4 w-4 mr-2" />分析所有待处理
+                      </Button>
+                    )}
+                    {localDatabaseTab === 'questions' && (
+                      <Button variant="outline" size="lg">
+                        <Download className="h-4 w-4 mr-2" />导出全部
+                      </Button>
+                    )}
+                  </div>
+                </div>
 
-              {/* 导入文件 */}
-              <TabsContent value="files" className="flex-1 overflow-auto mt-0">
-                <div className="space-y-3">
+                {/* 导入文件 */}
+                <TabsContent value="files" className="flex-1 overflow-auto mt-0">
+                  <div className="space-y-4">
                   {importedFiles.length > 0 ? (
                     importedFiles.map((file) => (
                       <div key={file.id} className="p-4 rounded-xl border border-slate-200 hover:border-blue-300 transition-all">
@@ -1209,8 +1237,9 @@ export default function TeacherExamPage() {
               </TabsContent>
             </Tabs>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </div>
+      )}
 
       {/* 添加题目弹窗 */}
       <Dialog open={showAddQuestion} onOpenChange={setShowAddQuestion}>
