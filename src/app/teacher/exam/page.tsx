@@ -976,8 +976,8 @@ export default function TeacherExamPage() {
 
       {/* 本地题库管理全屏弹窗 */}
       {showLocalDatabase && (
-        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center overflow-hidden">
-          <div className="w-[95vw] h-[95vh] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col" style={{ scrollbarGutter: 'stable' }}>
+        <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center">
+          <div className="w-[95vw] h-[95vh] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col">
             {/* 弹窗头部 */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-indigo-50">
               <div className="flex items-center gap-3">
@@ -1000,9 +1000,9 @@ export default function TeacherExamPage() {
             </div>
             
             {/* 弹窗内容 */}
-            <div className="flex-1 overflow-hidden p-6 flex flex-col">
-              <Tabs value={localDatabaseTab} onValueChange={(v) => setLocalDatabaseTab(v as 'files' | 'analysis' | 'questions')} className="h-full flex flex-col flex-1">
-                <div className="flex items-center justify-between mb-6 flex-shrink-0">
+            <div className="flex-1 overflow-hidden p-6">
+              <Tabs value={localDatabaseTab} onValueChange={(v) => setLocalDatabaseTab(v as 'files' | 'analysis' | 'questions')} className="h-full flex flex-col">
+                <div className="flex items-center justify-between mb-6">
                   <TabsList className="bg-slate-100 h-12 px-1">
                     <TabsTrigger value="files" className="gap-2 px-6 h-10 data-[state=active]:bg-white data-[state=active]:shadow-sm">
                       <FileUp className="h-4 w-4" />导入文件
@@ -1037,7 +1037,7 @@ export default function TeacherExamPage() {
                 </div>
 
                 {/* 导入文件 */}
-                <TabsContent value="files" className="flex-1 overflow-y-auto overflow-x-hidden mt-0" style={{ scrollbarGutter: 'stable' }}>
+                <TabsContent value="files" className="flex-1 overflow-auto mt-0">
                   <div className="space-y-4">
                   {/* 上传提示区域 */}
                   <div 
@@ -1146,7 +1146,7 @@ export default function TeacherExamPage() {
               </TabsContent>
 
               {/* 智能分析转化 */}
-              <TabsContent value="analysis" className="flex-1 overflow-y-auto overflow-x-hidden mt-0" style={{ scrollbarGutter: 'stable' }}>
+              <TabsContent value="analysis" className="flex-1 overflow-auto mt-0">
                 <div className="grid grid-cols-3 gap-4 mb-4">
                   <Card className="border-0 shadow-sm">
                     <CardContent className="p-4 text-center">
@@ -1255,22 +1255,22 @@ export default function TeacherExamPage() {
               </TabsContent>
 
               {/* 所有题目 */}
-              <TabsContent value="questions" className="flex-1 overflow-y-auto overflow-x-hidden mt-0" style={{ scrollbarGutter: 'stable' }}>
-                <div className="mb-4 flex items-center gap-3 flex-wrap">
+              <TabsContent value="questions" className="flex-1 overflow-auto mt-0">
+                <div className="mb-4 flex items-center gap-3">
                   <div className="flex-1 relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                     <Input placeholder="搜索题目..." className="pl-10" />
                   </div>
                   <Select value={selectedAbility} onValueChange={setSelectedAbility}>
                     <SelectTrigger className="w-36"><SelectValue placeholder="能力维度" /></SelectTrigger>
-                    <SelectContent position="popper" sideOffset={4} className="z-[200]">
+                    <SelectContent position="popper" className="z-[200]">
                       <SelectItem value="all">全部维度</SelectItem>
                       {abilityDimensions.map((dim) => (<SelectItem key={dim.id} value={dim.id}>{dim.name}</SelectItem>))}
                     </SelectContent>
                   </Select>
                   <Select value={selectedType} onValueChange={setSelectedType}>
                     <SelectTrigger className="w-28"><SelectValue placeholder="题型" /></SelectTrigger>
-                    <SelectContent position="popper" sideOffset={4} className="z-[200]">
+                    <SelectContent position="popper" className="z-[200]">
                       <SelectItem value="all">全部类型</SelectItem>
                       {questionTypes.map((type) => (<SelectItem key={type.id} value={type.id}>{type.name}</SelectItem>))}
                     </SelectContent>

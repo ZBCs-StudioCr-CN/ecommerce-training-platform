@@ -132,18 +132,6 @@
   }
 }
 
-/* 防止下拉框打开时滚动条闪烁 */
-html {
-  overflow-y: scroll !important;
-  scrollbar-gutter: stable !important;
-}
-
-/* Radix UI 打开弹窗时的处理 */
-body[data-scroll-locked] {
-  overflow-y: scroll !important;
-  padding-right: 0 !important;
-}
-
 body {
   @apply font-sans;
 }
