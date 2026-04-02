@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   Bell,
   LogOut,
@@ -52,6 +53,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { teacherMenuItems } from '@/config/menu';
+import { useLogout } from '@/lib/auth';
 
 // 五维能力
 const abilityDimensions = [
@@ -182,6 +184,8 @@ const commentTemplates = [
 ];
 
 export default function TeacherAssessmentPage() {
+  const router = useRouter();
+  const handleLogout = useLogout();
   const [activeMenu, setActiveMenu] = useState('assessment');
   const [activeTab, setActiveTab] = useState('pending');
   const [selectedReview, setSelectedReview] = useState<typeof pendingReviews[0] | null>(null);
@@ -277,7 +281,10 @@ export default function TeacherAssessmentPage() {
         </nav>
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200 bg-white">
-          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors">
+          <button 
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
+          >
             <LogOut className="h-5 w-5" />
             <span className="font-medium">退出登录</span>
           </button>

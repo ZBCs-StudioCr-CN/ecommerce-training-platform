@@ -19,6 +19,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { getPendingRiskCount } from '@/data/risk-events';
+import { useLogout } from '@/lib/auth';
 
 const menuItems = [
   { id: 'dashboard', label: '实训控制台', icon: LayoutDashboard, href: '/student/dashboard' },
@@ -39,6 +40,7 @@ interface StudentLayoutProps {
 
 export function StudentLayout({ children, activeMenu }: StudentLayoutProps) {
   const pathname = usePathname();
+  const handleLogout = useLogout();
   const currentMenu = activeMenu || menuItems.find(item => pathname.startsWith(item.href))?.id || 'dashboard';
   
   // 获取用户信息（这里可以后续替换为真实的用户数据）
@@ -140,7 +142,10 @@ export function StudentLayout({ children, activeMenu }: StudentLayoutProps) {
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200 bg-white">
-          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors">
+          <button 
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
+          >
             <LogOut className="h-5 w-5" />
             <span className="font-medium">退出登录</span>
           </button>
@@ -158,6 +163,7 @@ export function StudentLayout({ children, activeMenu }: StudentLayoutProps) {
 // 仅导出侧边栏组件（用于自定义布局的页面）
 export function StudentSidebar({ activeMenu }: { activeMenu?: string }) {
   const pathname = usePathname();
+  const handleLogout = useLogout();
   const currentMenu = activeMenu || menuItems.find(item => pathname.startsWith(item.href))?.id || 'dashboard';
 
   return (
@@ -217,7 +223,10 @@ export function StudentSidebar({ activeMenu }: { activeMenu?: string }) {
       </div>
 
       <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200 bg-white">
-        <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors">
+        <button 
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
+        >
           <LogOut className="h-5 w-5" />
           <span className="font-medium">退出登录</span>
         </button>
@@ -228,6 +237,7 @@ export function StudentSidebar({ activeMenu }: { activeMenu?: string }) {
 
 // 仅导出顶部导航组件
 export function StudentHeader() {
+  const handleLogout = useLogout();
   const user = {
     name: '张三',
     class: '电商2201班',

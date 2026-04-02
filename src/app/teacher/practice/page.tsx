@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   Bell,
   LogOut,
@@ -34,6 +35,7 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { teacherMenuItems } from '@/config/menu';
+import { useLogout } from '@/lib/auth';
 
 const practiceModules = [
   { id: 'market', name: '市场调研与选品', weight: 15, description: '市场分析、竞品调研、选品决策' },
@@ -61,6 +63,8 @@ const existingTasks = [
 ];
 
 export default function TeacherPracticePage() {
+  const router = useRouter();
+  const handleLogout = useLogout();
   const [activeMenu, setActiveMenu] = useState('practice');
   const [activeTab, setActiveTab] = useState('create');
   const [taskType, setTaskType] = useState<'module' | 'comprehensive'>('module');
@@ -177,7 +181,10 @@ export default function TeacherPracticePage() {
         </nav>
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200 bg-white">
-          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors">
+          <button 
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
+          >
             <LogOut className="h-5 w-5" />
             <span className="font-medium">退出登录</span>
           </button>

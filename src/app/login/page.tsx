@@ -94,6 +94,13 @@ export default function LoginPage() {
 
   const handleLogin = async () => {
     setIsLoading(true);
+    // 存储用户信息到localStorage
+    localStorage.setItem('user_role', selectedRole);
+    localStorage.setItem('user_info', JSON.stringify({
+      role: selectedRole,
+      username: username || 'demo_user',
+      loginTime: new Date().toISOString(),
+    }));
     // 模拟登录
     setTimeout(() => {
       router.push(currentRole.redirectPath);

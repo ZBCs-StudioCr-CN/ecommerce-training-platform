@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   Bell,
   Globe,
@@ -36,6 +37,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { teacherMenuItems } from '@/config/menu';
+import { useLogout } from '@/lib/auth';
 
 // 五维能力评估体系（方案二：考试评估维度，实训评估具体能力）
 const fiveDimensions: Array<{
@@ -388,6 +390,8 @@ const classPerformance = [
 ];
 
 export default function TeacherAnalysisPage() {
+  const router = useRouter();
+  const handleLogout = useLogout();
   const [activeMenu, setActiveMenu] = useState('analysis');
   const [activeTab, setActiveTab] = useState('overview');
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
@@ -481,7 +485,10 @@ export default function TeacherAnalysisPage() {
           ))}
         </nav>
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200 bg-white">
-          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors">
+          <button 
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
+          >
             <LogOut className="h-5 w-5" />
             <span className="font-medium">退出登录</span>
           </button>

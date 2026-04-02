@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   FileText,
   Clock,
@@ -47,6 +48,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useLogout } from '@/lib/auth';
 
 // 学生端菜单配置
 const studentMenuItems = [
@@ -283,6 +285,8 @@ const mockExamQuestions: Array<{
 ];
 
 export default function StudentExamPage() {
+  const router = useRouter();
+  const handleLogout = useLogout();
   const [activeMenu, setActiveMenu] = useState('exam');
   const [activeTab, setActiveTab] = useState('available');
   const [examState, setExamState] = useState<'list' | 'exam' | 'result' | 'analysis'>('list');
@@ -1071,7 +1075,10 @@ export default function StudentExamPage() {
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200 bg-white">
-          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors">
+          <button 
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
+          >
             <LogOut className="h-5 w-5" />
             <span className="font-medium">退出登录</span>
           </button>

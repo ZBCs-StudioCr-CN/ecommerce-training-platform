@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
   Users,
@@ -30,6 +31,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
+import { useLogout } from '@/lib/auth';
 
 const menuItems = [
   { id: 'dashboard', label: '数据总览', icon: LayoutDashboard, href: '/admin/dashboard' },
@@ -41,6 +43,8 @@ const menuItems = [
 ];
 
 export default function AdminDashboard() {
+  const router = useRouter();
+  const handleLogout = useLogout();
   const [activeMenu, setActiveMenu] = useState('dashboard');
 
   const statsData = [
@@ -167,7 +171,10 @@ export default function AdminDashboard() {
         </nav>
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200 bg-white">
-          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors">
+          <button 
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
+          >
             <LogOut className="h-5 w-5" />
             <span className="font-medium">退出登录</span>
           </button>
