@@ -116,6 +116,7 @@ const mockProgress = {
     autonomousDecisions: 78,
     lastWeekCalls: 8,
   },
+  riskEventsHandled: 8, // 已处理的风险事件数量
 };
 
 // 模拟店铺数据
@@ -412,24 +413,68 @@ export default function StudentDashboardPage() {
               </CardContent>
             </Card>
 
-            {/* AI使用建议 */}
-            <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-500 to-pink-600 text-white">
+            {/* 危机处理能力 */}
+            <Card className="border-0 shadow-lg bg-gradient-to-br from-amber-500 to-orange-600 text-white">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Brain className="h-5 w-5" />
-                  AI使用建议
+                  <AlertTriangle className="h-5 w-5" />
+                  危机处理能力
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  <div className="p-3 rounded-lg bg-white/20">
-                    <p className="font-medium">💡 建议</p>
-                    <p className="text-sm text-purple-100 mt-1">您的自主决策比例为78%，继续保持独立思考习惯！</p>
+                <div className="flex items-center gap-6">
+                  {/* LV等级显示 */}
+                  <div className="flex flex-col items-center">
+                    <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center border-4 border-white/30">
+                      <div className="text-center">
+                        <span className="text-xs text-amber-100">LV</span>
+                        <p className="text-2xl font-bold">{(() => {
+                          // 根据处理的风险事件数量计算等级
+                          const handledCount = mockProgress.riskEventsHandled || 8;
+                          if (handledCount < 1) return 1;
+                          if (handledCount < 4) return 2;  // LV2: 1起
+                          if (handledCount < 9) return 3;  // LV3: 1+3=4起
+                          if (handledCount < 19) return 4; // LV4: 4+5=9起
+                          // LV5+: 19起开始每10起升一级
+                          return Math.min(10, 5 + Math.floor((handledCount - 19) / 10));
+                        })()}</p>
+                      </div>
+                    </div>
+                    <p className="text-sm text-amber-100 mt-2">危机处理等级</p>
                   </div>
-                  <div className="p-3 rounded-lg bg-white/20">
-                    <p className="font-medium">📈 提升</p>
-                    <p className="text-sm text-purple-100 mt-1">风险应对能力有待提升，建议多参与风险事件模拟。</p>
+                  
+                  {/* 处理数据统计 */}
+                  <div className="flex-1 space-y-3">
+                    <div className="p-3 rounded-lg bg-white/20">
+                      <div className="flex items-center justify-between">
+                        <span className="text-amber-100">已处理风险事件</span>
+                        <span className="text-2xl font-bold">{mockProgress.riskEventsHandled || 8}起</span>
+                      </div>
+                    </div>
+                    <div className="p-3 rounded-lg bg-white/20">
+                      <div className="flex items-center justify-between">
+                        <span className="text-amber-100">距离下一等级</span>
+                        <span className="text-lg font-semibold">
+                          {(() => {
+                            const handledCount = mockProgress.riskEventsHandled || 8;
+                            if (handledCount < 1) return `还需1起`;
+                            if (handledCount < 4) return `还需${4 - handledCount}起`;
+                            if (handledCount < 9) return `还需${9 - handledCount}起`;
+                            if (handledCount < 19) return `还需${19 - handledCount}起`;
+                            const nextMilestone = 19 + Math.ceil((handledCount - 18) / 10) * 10;
+                            return `还需${nextMilestone - handledCount}起`;
+                          })()}
+                        </span>
+                      </div>
+                    </div>
                   </div>
+                </div>
+                
+                {/* 等级说明 */}
+                <div className="mt-4 pt-3 border-t border-white/20">
+                  <p className="text-xs text-amber-100">
+                    LV1→2需1起 | LV2→3需3起 | LV3→4需5起 | LV4→5需10起 | 后续每10起升一级
+                  </p>
                 </div>
               </CardContent>
             </Card>
