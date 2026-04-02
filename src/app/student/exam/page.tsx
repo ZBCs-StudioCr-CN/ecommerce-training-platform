@@ -53,12 +53,12 @@ const studentMenuItems = [
   { id: 'dashboard', label: '实训控制台', icon: LayoutDashboard, href: '/student/dashboard' },
   { id: 'learning', label: '学习中心', icon: BookOpen, href: '/student/learning' },
   { id: 'practice', label: '仿真实训', icon: Store, href: '/student/practice' },
-  { id: 'ai-assistant', label: 'AI助手', icon: Brain, href: '/student/ai-assistant', highlight: true },
   { id: 'risk-events', label: '风险应对', icon: AlertTriangle, href: '/student/risk-events' },
-  { id: 'assessment', label: '能力评估', icon: Target, href: '/student/assessment' },
   { id: 'exam', label: '考核中心', icon: Award, href: '/student/exam' },
+  { id: 'assessment', label: '能力评估', icon: Target, href: '/student/assessment' },
   { id: 'achievement', label: '成果中心', icon: FileText, href: '/student/achievement' },
   { id: 'qa', label: '答疑提问', icon: MessageCircle, href: '/student/qa' },
+  { id: 'ai-assistant', label: 'AI助手', icon: Brain, href: '/student/ai-assistant', highlight: true },
 ];
 
 // 五维能力配置
@@ -1039,21 +1039,35 @@ export default function StudentExamPage() {
         </nav>
 
         {/* AI能力统计 */}
-        <div className="mx-4 mt-4 p-4 rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100">
-          <div className="flex items-center gap-2 mb-2">
-            <Brain className="h-4 w-4 text-purple-600" />
-            <span className="text-sm font-medium text-purple-700">AI辅助统计</span>
+        <div className="mx-4 mt-2 p-3 rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100">
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <Brain className="h-3.5 w-3.5 text-purple-600" />
+            <span className="text-xs font-medium text-purple-700">AI辅助统计</span>
           </div>
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="text-center p-2 bg-white rounded-lg">
-              <p className="text-lg font-bold text-purple-600">23</p>
-              <p className="text-slate-500">AI调用</p>
+          <div className="grid grid-cols-2 gap-1.5 text-xs">
+            <div className="text-center p-1.5 bg-white rounded-md">
+              <p className="text-base font-bold text-purple-600">23</p>
+              <p className="text-slate-500 text-[10px]">AI调用</p>
             </div>
-            <div className="text-center p-2 bg-white rounded-lg">
-              <p className="text-lg font-bold text-emerald-600">78%</p>
-              <p className="text-slate-500">自主决策</p>
+            <div className="text-center p-1.5 bg-white rounded-md">
+              <p className="text-base font-bold text-emerald-600">78%</p>
+              <p className="text-slate-500 text-[10px]">自主决策</p>
             </div>
           </div>
+        </div>
+
+        {/* 风险事件提醒 */}
+        <div className="mx-4 mt-2 p-3 rounded-lg bg-gradient-to-r from-orange-50 to-red-50 border border-orange-100">
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <AlertTriangle className="h-3.5 w-3.5 text-orange-600" />
+            <span className="text-xs font-medium text-orange-700">风险事件</span>
+            <Badge className="bg-red-500 text-white text-[10px] ml-auto px-1.5 py-0">6 待处理</Badge>
+          </div>
+          <Link href="/student/risk-events" className="block">
+            <Button size="sm" className="w-full h-7 text-xs bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white">
+              查看详情
+            </Button>
+          </Link>
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200 bg-white">
