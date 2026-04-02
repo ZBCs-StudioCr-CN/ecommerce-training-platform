@@ -135,3 +135,42 @@
 body {
   @apply font-sans;
 }
+
+/* 修复下拉框/弹窗打开时滚动条闪烁导致的布局抖动 */
+html {
+  overflow-y: scroll;
+}
+
+/* 强制保留滚动条槽位 */
+body {
+  overflow-y: scroll;
+}
+
+/* Radix UI 组件打开时防止布局偏移 */
+[data-radix-popper-anchor-wrapper],
+[data-radix-popper-content-wrapper] {
+  position: fixed !important;
+}
+
+/* 全屏弹窗内部滚动条样式优化 */
+.overflow-auto::-webkit-scrollbar,
+.overflow-y-auto::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.overflow-auto::-webkit-scrollbar-track,
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.overflow-auto::-webkit-scrollbar-thumb,
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: oklch(0.7 0 0);
+  border-radius: 4px;
+}
+
+.overflow-auto::-webkit-scrollbar-thumb:hover,
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.5 0 0);
+}
