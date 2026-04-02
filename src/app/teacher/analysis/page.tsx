@@ -25,6 +25,9 @@ import {
   CheckCircle2,
   Clock,
   Loader2,
+  Shield,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -33,13 +36,95 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { teacherMenuItems } from '@/config/menu';
 
-// 能力维度数据
-const abilityDimensions = [
-  { name: '商业决策', score: 78, fullScore: 100, description: '市场判断、选品决策、定价策略' },
-  { name: '流量逻辑', score: 65, fullScore: 100, description: '广告投放、SEO优化、流量分析' },
-  { name: '数据复盘', score: 72, fullScore: 100, description: '数据分析、效果评估、优化迭代' },
-  { name: '风险应对', score: 82, fullScore: 100, description: '危机处理、合规意识、风险预防' },
+// 五维能力评估体系
+const fiveDimensions = [
+  { 
+    id: 'decision',
+    name: '自主决策能力', 
+    icon: Target,
+    weight: 30,
+    color: 'blue',
+    score: 78,
+    description: '关键商业决策、选品定价、渠道选择等',
+    subAbilities: [
+      { name: '市场分析决策', score: 82, description: '市场趋势判断、竞争分析' },
+      { name: '选品决策', score: 75, description: '产品选择、利润空间评估' },
+      { name: '定价策略', score: 76, description: '价格制定、促销策略' },
+      { name: '渠道选择', score: 79, description: '销售渠道布局、资源配置' },
+    ]
+  },
+  { 
+    id: 'ai',
+    name: 'AI辅助应用', 
+    icon: Brain,
+    weight: 20,
+    color: 'purple',
+    score: 72,
+    description: 'AI工具使用策略、内容审核、效率优化等',
+    subAbilities: [
+      { name: 'AI工具选择', score: 78, description: 'AI工具识别与选择' },
+      { name: '内容审核能力', score: 68, description: 'AI生成内容审核与优化' },
+      { name: '效率优化', score: 74, description: 'AI辅助提升工作效率' },
+      { name: 'AI耦合度控制', score: 68, description: '避免过度依赖AI' },
+    ]
+  },
+  { 
+    id: 'analysis',
+    name: '数据复盘与优化', 
+    icon: TrendingUp,
+    weight: 25,
+    color: 'green',
+    score: 81,
+    description: '数据分析、问题诊断、优化策略等',
+    subAbilities: [
+      { name: '数据采集', score: 85, description: '关键数据识别与收集' },
+      { name: '数据分析', score: 82, description: '数据趋势分析与洞察' },
+      { name: '问题诊断', score: 78, description: '问题定位与根因分析' },
+      { name: '优化迭代', score: 79, description: '基于数据的优化策略' },
+    ]
+  },
+  { 
+    id: 'risk',
+    name: '风险应对', 
+    icon: AlertTriangle,
+    weight: 15,
+    color: 'amber',
+    score: 75,
+    description: '危机识别、应对方案、客户投诉处理等',
+    subAbilities: [
+      { name: '风险识别', score: 80, description: '潜在风险预判' },
+      { name: '应对方案制定', score: 72, description: '危机处理方案设计' },
+      { name: '客户投诉处理', score: 76, description: '投诉响应与解决' },
+      { name: '舆情管理', score: 72, description: '负面舆情应对' },
+    ]
+  },
+  { 
+    id: 'compliance',
+    name: '合规与规则意识', 
+    icon: Shield,
+    weight: 10,
+    color: 'red',
+    score: 83,
+    description: '平台规则、法律法规、知识产权等',
+    subAbilities: [
+      { name: '平台规则理解', score: 88, description: '电商平台规则掌握' },
+      { name: '法律法规意识', score: 82, description: '广告法、消费者权益保护' },
+      { name: '知识产权保护', score: 80, description: '商标、专利、版权' },
+      { name: '数据合规', score: 82, description: '用户数据保护与合规' },
+    ]
+  },
 ];
+
+// 计算五维分数（基于子能力平均分）
+const calculateDimensionScore = (dimension: typeof fiveDimensions[0]) => {
+  const sum = dimension.subAbilities.reduce((acc, sub) => acc + sub.score, 0);
+  return Math.round(sum / dimension.subAbilities.length);
+};
+
+// 更新五维分数
+fiveDimensions.forEach(dim => {
+  dim.score = calculateDimensionScore(dim);
+});
 
 // AI使用统计数据
 const aiUsageStats = {
@@ -74,19 +159,9 @@ const alertStudents = [
 
 // 班级表现数据
 const classPerformance = [
-  { name: '电商2201班', students: 42, avgScore: 85.2, completion: 92, aiUsage: 23.5, abilityScores: [80, 68, 75, 85] },
-  { name: '跨境电商2203班', students: 38, avgScore: 82.5, completion: 88, aiUsage: 25.1, abilityScores: [76, 70, 72, 82] },
-  { name: '电商2202班', students: 45, avgScore: 79.8, completion: 85, aiUsage: 19.8, abilityScores: [78, 58, 69, 79] },
-];
-
-// 技能模块掌握情况
-const skillMastery = [
-  { name: '市场调研', mastery: 85, students: 42, trend: 'up' },
-  { name: '独立站搭建', mastery: 72, students: 38, trend: 'stable' },
-  { name: '流量推广', mastery: 58, students: 35, trend: 'down' },
-  { name: '转化运营', mastery: 75, students: 40, trend: 'up' },
-  { name: '数据分析', mastery: 80, students: 42, trend: 'stable' },
-  { name: '风险应对', mastery: 82, students: 45, trend: 'up' },
+  { name: '电商2201班', students: 42, avgScore: 85.2, completion: 92, aiUsage: 23.5, abilityScores: [80, 72, 83, 76, 85] },
+  { name: '跨境电商2203班', students: 38, avgScore: 82.5, completion: 88, aiUsage: 25.1, abilityScores: [76, 70, 80, 74, 82] },
+  { name: '电商2202班', students: 45, avgScore: 79.8, completion: 85, aiUsage: 19.8, abilityScores: [78, 68, 79, 73, 80] },
 ];
 
 export default function TeacherAnalysisPage() {
@@ -94,6 +169,14 @@ export default function TeacherAnalysisPage() {
   const [activeTab, setActiveTab] = useState('overview');
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   const [aiReport, setAiReport] = useState<string | null>(null);
+  const [expandedDimensions, setExpandedDimensions] = useState<string[]>([]);
+
+  // 切换维度展开/收起
+  const toggleDimension = (id: string) => {
+    setExpandedDimensions(prev => 
+      prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]
+    );
+  };
 
   // 生成AI分析报告
   const generateAIReport = async () => {
@@ -104,7 +187,7 @@ export default function TeacherAnalysisPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           classPerformance,
-          abilityDimensions,
+          fiveDimensions,
           aiUsageStats,
           alertStudents,
         }),
@@ -118,6 +201,18 @@ export default function TeacherAnalysisPage() {
     } finally {
       setIsGeneratingReport(false);
     }
+  };
+
+  // 获取颜色类名
+  const getColorClasses = (color: string, type: 'bg' | 'text' | 'border' | 'bgLight') => {
+    const colors: Record<string, Record<string, string>> = {
+      blue: { bg: 'bg-blue-500', text: 'text-blue-600', border: 'border-blue-200', bgLight: 'bg-blue-50' },
+      purple: { bg: 'bg-purple-500', text: 'text-purple-600', border: 'border-purple-200', bgLight: 'bg-purple-50' },
+      green: { bg: 'bg-green-500', text: 'text-green-600', border: 'border-green-200', bgLight: 'bg-green-50' },
+      amber: { bg: 'bg-amber-500', text: 'text-amber-600', border: 'border-amber-200', bgLight: 'bg-amber-50' },
+      red: { bg: 'bg-red-500', text: 'text-red-600', border: 'border-red-200', bgLight: 'bg-red-50' },
+    };
+    return colors[color]?.[type] || colors.blue[type];
   };
 
   return (
@@ -174,7 +269,7 @@ export default function TeacherAnalysisPage() {
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-slate-800">学情分析</h2>
-            <p className="text-slate-500">全面分析学生学习情况和能力发展</p>
+            <p className="text-slate-500">全面分析学生学习情况和五维能力发展</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={generateAIReport} disabled={isGeneratingReport}>
@@ -219,8 +314,8 @@ export default function TeacherAnalysisPage() {
                   <TrendingUp className="h-6 w-6 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-slate-800">82.5</p>
-                  <p className="text-sm text-slate-500">平均分</p>
+                  <p className="text-2xl font-bold text-slate-800">77.8</p>
+                  <p className="text-sm text-slate-500">五维均分</p>
                 </div>
               </div>
             </CardContent>
@@ -289,33 +384,78 @@ export default function TeacherAnalysisPage() {
           {/* 总体概览 */}
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-3 gap-6">
-              {/* 能力雷达图 */}
+              {/* 五维能力雷达图 */}
               <Card className="col-span-2 border-0 shadow-lg">
                 <CardHeader>
-                  <CardTitle>四大核心能力评估</CardTitle>
-                  <CardDescription>基于实训数据的综合能力分析</CardDescription>
+                  <CardTitle>五维能力评估</CardTitle>
+                  <CardDescription>基于实训数据的综合能力分析（点击展开查看具体能力得分）</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-6">
-                    {abilityDimensions.map((dim) => (
-                      <div key={dim.name} className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium text-slate-700">{dim.name}</span>
-                          <span className={`text-lg font-bold ${
-                            dim.score >= 80 ? 'text-green-600' : 
-                            dim.score >= 60 ? 'text-amber-600' : 'text-red-600'
-                          }`}>
-                            {dim.score}
-                          </span>
+                  <div className="space-y-3">
+                    {fiveDimensions.map((dim) => {
+                      const Icon = dim.icon;
+                      const isExpanded = expandedDimensions.includes(dim.id);
+                      
+                      return (
+                        <div key={dim.id} className={`rounded-xl border ${getColorClasses(dim.color, 'border')} overflow-hidden`}>
+                          {/* 维度主行 */}
+                          <div 
+                            className={`p-4 ${getColorClasses(dim.color, 'bgLight')} cursor-pointer hover:opacity-80 transition-opacity`}
+                            onClick={() => toggleDimension(dim.id)}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className={`w-10 h-10 rounded-lg ${getColorClasses(dim.color, 'bg')} flex items-center justify-center`}>
+                                  <Icon className="h-5 w-5 text-white" />
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-semibold text-slate-800">{dim.name}</span>
+                                    <Badge variant="outline" className="text-xs">权重 {dim.weight}%</Badge>
+                                  </div>
+                                  <p className="text-xs text-slate-500">{dim.description}</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                <div className="text-right">
+                                  <span className={`text-2xl font-bold ${getColorClasses(dim.color, 'text')}`}>{dim.score}</span>
+                                  <span className="text-sm text-slate-400">/100</span>
+                                </div>
+                                <Progress value={dim.score} className="w-24 h-2" />
+                                {isExpanded ? <ChevronUp className="h-5 w-5 text-slate-400" /> : <ChevronDown className="h-5 w-5 text-slate-400" />}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* 子能力展开 */}
+                          {isExpanded && (
+                            <div className="p-4 bg-white">
+                              <p className="text-xs text-slate-500 mb-3">具体能力得分（平均分 = 维度总分）</p>
+                              <div className="grid grid-cols-2 gap-3">
+                                {dim.subAbilities.map((sub, i) => (
+                                  <div key={i} className="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                                    <div className="flex items-center justify-between mb-1">
+                                      <span className="text-sm font-medium text-slate-700">{sub.name}</span>
+                                      <span className={`text-sm font-bold ${
+                                        sub.score >= 80 ? 'text-green-600' : 
+                                        sub.score >= 60 ? 'text-amber-600' : 'text-red-600'
+                                      }`}>{sub.score}</span>
+                                    </div>
+                                    <Progress value={sub.score} className="h-1.5 mb-1" />
+                                    <p className="text-xs text-slate-500">{sub.description}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
-                        <Progress value={dim.score} className="h-3 mb-2" />
-                        <p className="text-xs text-slate-500">{dim.description}</p>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
+                  
                   <div className="mt-4 p-3 rounded-lg bg-blue-50 border border-blue-200">
                     <p className="text-sm text-blue-700">
-                      <strong>AI建议：</strong>流量逻辑能力整体较弱(65分)，建议增加广告投放策略和SEO优化相关教学内容，可结合实际案例进行针对性训练。
+                      <strong>AI建议：</strong>AI辅助应用能力整体较弱(72分)，建议增加AI工具使用策略和内容审核相关教学内容，引导学生合理使用AI而非过度依赖。
                     </p>
                   </div>
                 </CardContent>
@@ -357,7 +497,7 @@ export default function TeacherAnalysisPage() {
             <Card className="border-0 shadow-lg">
               <CardHeader>
                 <CardTitle>班级表现对比</CardTitle>
-                <CardDescription>各班级的学习成绩和能力对比</CardDescription>
+                <CardDescription>各班级的学习成绩和五维能力对比</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-3 gap-6">
@@ -390,12 +530,26 @@ export default function TeacherAnalysisPage() {
                         </div>
                       </div>
                       <div className="mt-3 pt-3 border-t border-slate-200">
-                        <p className="text-xs text-slate-500 mb-2">能力分布</p>
+                        <p className="text-xs text-slate-500 mb-2">五维能力分布</p>
                         <div className="flex gap-1">
                           {cls.abilityScores.map((score, i) => (
-                            <div key={i} className="flex-1 h-8 rounded" style={{
-                              backgroundColor: `hsl(${200 + (score - 60) * 2}, 70%, ${70 - score / 4}%)`
-                            }} title={`${abilityDimensions[i]?.name}: ${score}`} />
+                            <div 
+                              key={i} 
+                              className="flex-1 h-8 rounded flex items-center justify-center text-xs font-medium text-white"
+                              style={{
+                                backgroundColor: score >= 80 ? '#22c55e' : score >= 70 ? '#3b82f6' : score >= 60 ? '#f59e0b' : '#ef4444'
+                              }}
+                              title={`${fiveDimensions[i].name}: ${score}`}
+                            >
+                              {score}
+                            </div>
+                          ))}
+                        </div>
+                        <div className="flex gap-1 mt-1">
+                          {fiveDimensions.map((dim, i) => (
+                            <div key={i} className="flex-1 text-center text-xs text-slate-500 truncate">
+                              {dim.name.slice(0, 2)}
+                            </div>
                           ))}
                         </div>
                       </div>
@@ -522,94 +676,182 @@ export default function TeacherAnalysisPage() {
 
           {/* 能力评估 */}
           <TabsContent value="ability" className="space-y-6">
-            <div className="grid grid-cols-2 gap-6">
-              {/* 技能模块掌握情况 */}
-              <Card className="border-0 shadow-lg">
-                <CardHeader>
-                  <CardTitle>技能模块掌握情况</CardTitle>
-                  <CardDescription>各技能模块的学生掌握程度</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {skillMastery.map((skill) => (
-                      <div key={skill.name} className="p-3 rounded-lg border border-slate-200">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-slate-700">{skill.name}</span>
-                            {skill.trend === 'up' && <TrendingUp className="h-4 w-4 text-green-500" />}
-                            {skill.trend === 'down' && <TrendingUp className="h-4 w-4 text-red-500 rotate-180" />}
+            {/* 五维能力总览 */}
+            <div className="grid grid-cols-5 gap-4">
+              {fiveDimensions.map((dim) => {
+                const Icon = dim.icon;
+                return (
+                  <Card key={dim.id} className={`border-0 shadow-lg ${getColorClasses(dim.color, 'bgLight')} ${getColorClasses(dim.color, 'border')} border`}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className={`w-10 h-10 rounded-lg ${getColorClasses(dim.color, 'bg')} flex items-center justify-center`}>
+                          <Icon className="h-5 w-5 text-white" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-slate-800 text-sm">{dim.name}</p>
+                          <p className="text-xs text-slate-500">权重 {dim.weight}%</p>
+                        </div>
+                      </div>
+                      <div className="text-center mb-3">
+                        <span className={`text-4xl font-bold ${getColorClasses(dim.color, 'text')}`}>{dim.score}</span>
+                        <span className="text-lg text-slate-400">/100</span>
+                      </div>
+                      <Progress value={dim.score} className="h-2 mb-3" />
+                      <div className="space-y-1">
+                        {dim.subAbilities.map((sub, i) => (
+                          <div key={i} className="flex items-center justify-between text-xs">
+                            <span className="text-slate-600">{sub.name}</span>
+                            <span className={`font-medium ${
+                              sub.score >= 80 ? 'text-green-600' : 
+                              sub.score >= 60 ? 'text-amber-600' : 'text-red-600'
+                            }`}>{sub.score}</span>
                           </div>
-                          <span className={`text-lg font-bold ${
-                            skill.mastery >= 80 ? 'text-green-600' : 
-                            skill.mastery >= 60 ? 'text-amber-600' : 'text-red-600'
-                          }`}>
-                            {skill.mastery}%
-                          </span>
-                        </div>
-                        <Progress value={skill.mastery} className="h-2" />
-                        <p className="text-xs text-slate-500 mt-1">{skill.students}名学生已掌握</p>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* 风险应对专项分析 */}
-              <Card className="border-0 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 text-amber-500" />
-                    风险应对专项分析
-                  </CardTitle>
-                  <CardDescription>风险应对实训成绩分布</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-4 gap-2 text-center">
-                      <div className="p-3 rounded-lg bg-green-50 border border-green-200">
-                        <p className="text-xl font-bold text-green-600">68</p>
-                        <p className="text-xs text-green-600">优秀(≥90)</p>
-                      </div>
-                      <div className="p-3 rounded-lg bg-blue-50 border border-blue-200">
-                        <p className="text-xl font-bold text-blue-600">35</p>
-                        <p className="text-xs text-blue-600">良好(80-89)</p>
-                      </div>
-                      <div className="p-3 rounded-lg bg-amber-50 border border-amber-200">
-                        <p className="text-xl font-bold text-amber-600">18</p>
-                        <p className="text-xs text-amber-600">及格(60-79)</p>
-                      </div>
-                      <div className="p-3 rounded-lg bg-red-50 border border-red-200">
-                        <p className="text-xl font-bold text-red-600">4</p>
-                        <p className="text-xs text-red-600">未通过(&lt;60)</p>
-                      </div>
-                    </div>
-
-                    <div className="p-3 rounded-lg bg-slate-50">
-                      <p className="text-sm font-medium text-slate-700 mb-2">AI内容检测统计</p>
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-green-500" />
-                          <span className="text-sm text-slate-600">通过检测: 112人(89%)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <AlertCircle className="h-4 w-4 text-red-500" />
-                          <span className="text-sm text-slate-600">未通过: 13人(11%)</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="p-3 rounded-lg bg-amber-50 border border-amber-200">
-                      <p className="text-sm font-medium text-amber-800 mb-1">薄弱环节分析</p>
-                      <ul className="text-xs text-amber-700 space-y-1">
-                        <li>• 响应速度平均得分最低(14.2/20)</li>
-                        <li>• 合规意识得分波动较大</li>
-                        <li>• 建议加强实时危机处理训练</li>
-                      </ul>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                      <p className="text-xs text-slate-500 mt-2 pt-2 border-t border-slate-200">
+                        维度分 = 子能力平均分
+                      </p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
+
+            {/* 详细能力分析 */}
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle>各维度具体能力分析</CardTitle>
+                <CardDescription>点击展开查看每个维度下的具体能力得分详情</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {fiveDimensions.map((dim) => {
+                    const Icon = dim.icon;
+                    const isExpanded = expandedDimensions.includes(dim.id);
+                    const avgScore = Math.round(dim.subAbilities.reduce((sum, sub) => sum + sub.score, 0) / dim.subAbilities.length);
+                    
+                    return (
+                      <div key={dim.id} className={`rounded-xl border ${getColorClasses(dim.color, 'border')} overflow-hidden`}>
+                        <div 
+                          className={`p-4 ${getColorClasses(dim.color, 'bgLight')} cursor-pointer hover:opacity-80 transition-opacity`}
+                          onClick={() => toggleDimension(dim.id)}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-12 h-12 rounded-lg ${getColorClasses(dim.color, 'bg')} flex items-center justify-center`}>
+                                <Icon className="h-6 w-6 text-white" />
+                              </div>
+                              <div>
+                                <p className="font-semibold text-slate-800">{dim.name}</p>
+                                <p className="text-sm text-slate-500">{dim.description}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-6">
+                              <div className="text-right">
+                                <p className="text-xs text-slate-500">维度总分</p>
+                                <p className={`text-2xl font-bold ${getColorClasses(dim.color, 'text')}`}>{avgScore}</p>
+                              </div>
+                              <div className="w-32">
+                                <Progress value={avgScore} className="h-2" />
+                              </div>
+                              {isExpanded ? <ChevronUp className="h-5 w-5 text-slate-400" /> : <ChevronDown className="h-5 w-5 text-slate-400" />}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {isExpanded && (
+                          <div className="p-4 bg-white">
+                            <div className="grid grid-cols-2 gap-4">
+                              {dim.subAbilities.map((sub, i) => (
+                                <div key={i} className="p-4 rounded-lg border border-slate-200 hover:border-blue-300 transition-colors">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <div>
+                                      <p className="font-medium text-slate-800">{sub.name}</p>
+                                      <p className="text-xs text-slate-500">{sub.description}</p>
+                                    </div>
+                                    <span className={`text-xl font-bold ${
+                                      sub.score >= 80 ? 'text-green-600' : 
+                                      sub.score >= 60 ? 'text-amber-600' : 'text-red-600'
+                                    }`}>{sub.score}</span>
+                                  </div>
+                                  <Progress value={sub.score} className="h-2" />
+                                  <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
+                                    <span>能力水平</span>
+                                    <span>{sub.score >= 80 ? '优秀' : sub.score >= 60 ? '良好' : '需提升'}</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                            <div className="mt-4 p-3 rounded-lg bg-slate-50 border border-slate-200">
+                              <p className="text-sm text-slate-600">
+                                <strong>维度分计算方式：</strong>
+                                {dim.subAbilities.map(s => s.score).join(' + ')} = {dim.subAbilities.reduce((sum, s) => sum + s.score, 0)} ÷ {dim.subAbilities.length} = <strong className={getColorClasses(dim.color, 'text')}>{avgScore}分</strong>
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 风险应对专项分析 */}
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-amber-500" />
+                  风险应对专项分析
+                </CardTitle>
+                <CardDescription>风险应对实训成绩分布</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-4 gap-2 text-center">
+                    <div className="p-3 rounded-lg bg-green-50 border border-green-200">
+                      <p className="text-xl font-bold text-green-600">68</p>
+                      <p className="text-xs text-green-600">优秀(≥90)</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-blue-50 border border-blue-200">
+                      <p className="text-xl font-bold text-blue-600">35</p>
+                      <p className="text-xs text-blue-600">良好(80-89)</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-amber-50 border border-amber-200">
+                      <p className="text-xl font-bold text-amber-600">18</p>
+                      <p className="text-xs text-amber-600">及格(60-79)</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+                      <p className="text-xl font-bold text-red-600">4</p>
+                      <p className="text-xs text-red-600">未通过(&lt;60)</p>
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-lg bg-slate-50">
+                    <p className="text-sm font-medium text-slate-700 mb-2">AI内容检测统计</p>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        <span className="text-sm text-slate-600">通过检测: 112人(89%)</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <AlertCircle className="h-4 w-4 text-red-500" />
+                        <span className="text-sm text-slate-600">未通过: 13人(11%)</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-lg bg-amber-50 border border-amber-200">
+                    <p className="text-sm font-medium text-amber-800 mb-1">薄弱环节分析</p>
+                    <ul className="text-xs text-amber-700 space-y-1">
+                      <li>• 响应速度平均得分最低(14.2/20)</li>
+                      <li>• 合规意识得分波动较大</li>
+                      <li>• 建议加强实时危机处理训练</li>
+                    </ul>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* 预警中心 */}
@@ -698,27 +940,27 @@ export default function TeacherAnalysisPage() {
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
                         student.severity === 'high' ? 'bg-red-100' : 'bg-amber-100'
                       }`}>
-                        {student.type === 'ai_overuse' && <Brain className="h-5 w-5 text-red-600" />}
-                        {student.type === 'progress_lag' && <Clock className="h-5 w-5 text-amber-600" />}
-                        {student.type === 'risk_fail' && <AlertCircle className="h-5 w-5 text-red-600" />}
+                        <span className={`font-medium ${
+                          student.severity === 'high' ? 'text-red-600' : 'text-amber-600'
+                        }`}>{student.name[0]}</span>
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="font-medium text-slate-800">{student.name}</span>
-                          <Badge variant={student.severity === 'high' ? 'destructive' : 'default'} className="text-xs">
+                          <Badge variant="outline">{student.class}</Badge>
+                          <Badge variant={student.severity === 'high' ? 'destructive' : 'default'}>
                             {student.severity === 'high' ? '高风险' : '中等'}
                           </Badge>
-                          <Badge variant="outline" className="text-xs">{student.class}</Badge>
                         </div>
                         <p className="text-sm text-slate-600">{student.message}</p>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex gap-2">
                         <Button variant="outline" size="sm">
                           <Eye className="h-4 w-4 mr-1" />
-                          查看详情
+                          详情
                         </Button>
-                        <Button size="sm">
-                          发送提醒
+                        <Button variant="outline" size="sm">
+                          处理
                         </Button>
                       </div>
                     </div>
@@ -726,67 +968,8 @@ export default function TeacherAnalysisPage() {
                 </div>
               </CardContent>
             </Card>
-
-            {/* AI预警建议 */}
-            <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-blue-50 border border-purple-200">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-purple-800">
-                  <Sparkles className="h-5 w-5" />
-                  AI预警处理建议
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 rounded-lg bg-white border border-purple-200">
-                    <h4 className="font-medium text-slate-800 mb-2">AI依赖过高处理方案</h4>
-                    <ul className="text-sm text-slate-600 space-y-1">
-                      <li>• 与学生一对一沟通，了解过度依赖AI的原因</li>
-                      <li>• 强调AI耦合度超过60%将导致风险应对实训0分</li>
-                      <li>• 引导学生将AI作为辅助工具，而非替代思考</li>
-                      <li>• 安排专项训练，培养独立决策能力</li>
-                    </ul>
-                  </div>
-                  <div className="p-4 rounded-lg bg-white border border-purple-200">
-                    <h4 className="font-medium text-slate-800 mb-2">进度落后干预措施</h4>
-                    <ul className="text-sm text-slate-600 space-y-1">
-                      <li>• 及时发送提醒通知</li>
-                      <li>• 分析进度落后的具体原因</li>
-                      <li>• 提供额外辅导或延长截止时间</li>
-                      <li>• 鼓励同学互助学习</li>
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </TabsContent>
         </Tabs>
-
-        {/* AI生成的分析报告 */}
-        {aiReport && (
-          <Card className="mt-6 border-0 shadow-lg border-purple-200 bg-purple-50/50">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-purple-500" />
-                  AI生成分析报告
-                </CardTitle>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    重新生成
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <Download className="h-4 w-4 mr-2" />
-                    导出PDF
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: aiReport }} />
-            </CardContent>
-          </Card>
-        )}
       </main>
     </div>
   );
