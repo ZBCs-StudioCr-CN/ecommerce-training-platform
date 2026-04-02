@@ -309,7 +309,6 @@ export default function StudentLearningPage() {
                           <Badge className={categoryConfig[course.category].bgColor + ' ' + categoryConfig[course.category].color}>
                             {categoryConfig[course.category].name}
                           </Badge>
-                          <Badge variant="outline">{course.credit} 学分</Badge>
                         </div>
                         <h3 className="font-semibold text-slate-800 mb-1">{course.name}</h3>
                         <p className="text-sm text-slate-500 line-clamp-2">{course.description}</p>
