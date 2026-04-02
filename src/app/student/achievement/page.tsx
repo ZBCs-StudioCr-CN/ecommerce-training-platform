@@ -275,19 +275,6 @@ export default function AchievementPage() {
                     })()}
                   </svg>
                 </div>
-
-                {/* 综合得分 */}
-                <div className="p-4 rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-slate-600">综合能力得分</p>
-                      <p className="text-2xl font-bold text-purple-600">{radar.overall}%</p>
-                    </div>
-                    <div className="w-16 h-16 rounded-full border-4 border-purple-200 flex items-center justify-center bg-white">
-                      <span className="text-xl font-bold text-purple-600">{radar.overall}</span>
-                    </div>
-                  </div>
-                </div>
               </CardContent>
             </Card>
 
