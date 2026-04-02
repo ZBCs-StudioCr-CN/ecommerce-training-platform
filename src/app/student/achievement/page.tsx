@@ -33,9 +33,11 @@ const practiceReports = [
   { id: 2, title: '独立站搭建实训报告', module: '独立站搭建', score: null, date: '2026-03-26', status: 'in_progress' },
 ];
 
-const certificates = [
-  { id: 1, title: '市场调研与选品专项证书', issueDate: '2026-03-16', issuer: '电商学院', type: 'module' },
-  { id: 2, title: '跨境电商技能竞赛三等奖', issueDate: '2026-03-20', issuer: '教务处', type: 'competition' },
+// 比赛荣誉数据
+const honors = [
+  { id: 1, competition: '跨境电商技能竞赛', rank: 3, total: 120, date: '2026-03-20', organizer: '教务处', level: '校级' },
+  { id: 2, competition: '电商运营模拟大赛', rank: 1, total: 85, date: '2026-04-01', organizer: '电商学院', level: '院级' },
+  { id: 3, competition: '创新创业大赛', rank: 2, total: 200, date: '2026-03-10', organizer: '创新创业学院', level: '校级' },
 ];
 
 // 图标映射
@@ -91,7 +93,7 @@ export default function AchievementPage() {
               AI融合版
             </Badge>
           </div>
-          <p className="text-slate-500">能力雷达图 · 实训报告 · 作品集 · 证书档案</p>
+          <p className="text-slate-500">能力雷达图 · 实训报告 · 作品集 · 荣誉榜</p>
         </div>
 
         {/* 统计卡片 */}
@@ -409,45 +411,47 @@ export default function AchievementPage() {
             </Card>
           </div>
 
-          {/* 右侧：证书 + 成就 */}
+          {/* 右侧：荣誉 + 成就 */}
           <div className="space-y-6">
             <Card className="border-0 shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Award className="h-5 w-5 text-amber-600" />
-                  我的证书
+                  <Trophy className="h-5 w-5 text-amber-600" />
+                  我的荣誉
                 </CardTitle>
-                <CardDescription>获得的证书和荣誉</CardDescription>
+                <CardDescription>比赛获奖记录</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {certificates.map((cert) => (
+                <div className="space-y-3">
+                  {honors.map((honor) => (
                     <div
-                      key={cert.id}
-                      className="p-4 rounded-xl border border-slate-200 hover:border-emerald-300 transition-colors"
+                      key={honor.id}
+                      className="p-4 rounded-xl border border-slate-200 hover:border-amber-300 transition-colors bg-gradient-to-r from-amber-50/50 to-orange-50/50"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                          cert.type === 'module' ? 'bg-emerald-100' : 'bg-amber-100'
-                        }`}>
-                          <Award className={`h-5 w-5 ${
-                            cert.type === 'module' ? 'text-emerald-600' : 'text-amber-600'
-                          }`} />
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                            honor.rank === 1 ? 'bg-gradient-to-br from-yellow-400 to-amber-500' :
+                            honor.rank === 2 ? 'bg-gradient-to-br from-slate-300 to-slate-400' :
+                            honor.rank === 3 ? 'bg-gradient-to-br from-amber-600 to-orange-700' :
+                            'bg-gradient-to-br from-slate-400 to-slate-500'
+                          }`}>
+                            <span className="text-white font-bold text-lg">{honor.rank}</span>
+                          </div>
+                          <div>
+                            <p className="font-medium text-slate-800">{honor.competition}</p>
+                            <p className="text-xs text-slate-500">{honor.organizer} · {honor.level}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium text-slate-800 text-sm">{cert.title}</p>
-                          <p className="text-xs text-slate-500">{cert.issuer} · {cert.issueDate}</p>
+                        <div className="text-right">
+                          <p className="text-sm font-bold text-amber-600">
+                            {honor.rank === 1 ? '一等奖' : honor.rank === 2 ? '二等奖' : honor.rank === 3 ? '三等奖' : `第${honor.rank}名`}
+                          </p>
+                          <p className="text-xs text-slate-400">参赛{honor.total}人</p>
                         </div>
                       </div>
-                      <div className="mt-3 flex gap-2">
-                        <Button size="sm" variant="outline" className="flex-1">
-                          <Eye className="h-3 w-3 mr-1" />
-                          查看
-                        </Button>
-                        <Button size="sm" variant="outline" className="flex-1">
-                          <Download className="h-3 w-3 mr-1" />
-                          下载
-                        </Button>
+                      <div className="mt-2 text-xs text-slate-400">
+                        获奖时间：{honor.date}
                       </div>
                     </div>
                   ))}
