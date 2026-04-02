@@ -296,7 +296,7 @@ export default function StudentDashboardPage() {
                   <LineChart className="h-5 w-5 text-purple-600" />
                   五维能力评估
                 </CardTitle>
-                <CardDescription>实训板块展示实训得分，综合评定 = 考试50% + 实训50%</CardDescription>
+                <CardDescription>点击展开查看各维度具体能力得分</CardDescription>
               </CardHeader>
               <CardContent>
                 {abilityRadar ? (
@@ -364,12 +364,12 @@ export default function StudentDashboardPage() {
                     <div className="mt-6 p-4 rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm text-slate-600">实训综合得分</p>
+                          <p className="text-sm text-slate-600">实训平均分</p>
                           <p className="text-2xl font-bold text-purple-600">{abilityRadar.overall}</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-xs text-slate-500">综合评定</p>
-                          <p className="text-sm text-slate-600">考试50% + 实训50%</p>
+                          <p className="text-xs text-slate-500">五维能力实训</p>
+                          <p className="text-sm text-slate-600">加权平均得分</p>
                         </div>
                       </div>
                     </div>
