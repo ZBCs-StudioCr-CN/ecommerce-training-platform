@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Bell,
@@ -366,6 +366,28 @@ export default function TeacherExamPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // 弹窗打开时锁定主页面滚动
+  useEffect(() => {
+    if (showLocalDatabase) {
+      // 保存当前滚动位置
+      const scrollY = window.scrollY;
+      // 锁定滚动
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflowY = 'scroll'; // 保持滚动条可见
+      
+      return () => {
+        // 恢复滚动
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflowY = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [showLocalDatabase]);
+
   // 点击能力维度卡片
   const handleAbilityClick = (abilityId: string) => {
     setSelectedAbility(abilityId);
@@ -520,11 +542,11 @@ export default function TeacherExamPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50" style={{ scrollbarGutter: 'stable' }}>
       {/* 顶部导航 */}
       <header className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 z-50">
-        <div className="flex items-center justify-between h-full px-6">
-          <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between h-full px-6 max-w-full">
+          <div className="flex items-center gap-4 flex-shrink-0">
             <Link href="/login" className="flex items-center gap-2">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
                 <Globe className="h-6 w-6 text-white" />
@@ -536,7 +558,7 @@ export default function TeacherExamPage() {
             </Link>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-shrink-0">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input placeholder="搜索..." className="w-64 pl-9 h-9" />
