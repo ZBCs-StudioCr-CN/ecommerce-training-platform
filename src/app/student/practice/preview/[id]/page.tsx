@@ -1117,15 +1117,13 @@ export default function StorePreviewPage() {
               </Button>
             </div>
 
-            <Button 
-              variant="outline" 
-              size="sm"
+            <button
               onClick={() => router.push(`/student/practice/store/${storeId}`)}
-              className="border-slate-600 text-slate-300 hover:bg-slate-800"
+              className="inline-flex items-center justify-center h-8 px-3 rounded-md text-sm font-medium border border-slate-600 text-slate-300 hover:bg-slate-800 transition-colors"
             >
               <Settings className="h-4 w-4 mr-2" />
               编辑店铺
-            </Button>
+            </button>
           </div>
         </div>
       </div>
