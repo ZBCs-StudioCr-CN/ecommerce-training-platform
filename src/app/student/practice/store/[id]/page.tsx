@@ -1539,7 +1539,11 @@ export default function StoreAdminPage() {
               className={`${
                 ['taobao', 'douyin', 'shopify', 'shoplazza', 'woocommerce'].includes(store.platform)
                   ? 'border-white/30 text-white hover:bg-white/10'
-                  : 'border-slate-300'
+                  : ['pinduoduo'].includes(store.platform)
+                  ? 'border-red-300 text-red-600 hover:bg-red-50'
+                  : ['amazon', 'shopee', 'lazada'].includes(store.platform)
+                  ? 'border-white/30 text-white hover:bg-white/10'
+                  : 'border-slate-300 text-slate-600 hover:bg-slate-50'
               }`}
             >
               <Eye className="h-4 w-4 mr-2" />
