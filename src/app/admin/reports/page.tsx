@@ -78,7 +78,7 @@ export default function AdminReportsPage() {
             { label: '本周实训完成率', value: '78.5%', change: '+5.2%', up: true },
             { label: '本周考核通过率', value: '92.3%', change: '+2.1%', up: true },
             { label: '活跃学生数', value: '1,156', change: '+86', up: true },
-            { label: '平均成绩', value: '85.6分', change: '-1.2分', up: false },
+            { label: '模拟店铺总数', value: '2,543', change: '+127', up: true },
           ].map((stat, i) => (
             <Card key={i} className="border-0 shadow-lg">
               <CardContent className="p-6">
