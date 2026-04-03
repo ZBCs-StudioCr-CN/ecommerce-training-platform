@@ -632,17 +632,24 @@ export default function StoreAdminPage() {
   
   const [activeMenu, setActiveMenu] = useState('home');
   const [expandedMenus, setExpandedMenus] = useState<string[]>(['products']);
-  const [store, setStore] = useState(() => getStoreData(storeId));
+  // 使用稳定的初始状态，避免 hydration mismatch
+  const [store, setStore] = useState(defaultStoreTemplates['shopify']);
   const [isLoading, setIsLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
   
   // 客户端加载店铺数据
   useEffect(() => {
+    setMounted(true);
     const storeData = getStoreData(storeId);
     setStore(storeData);
     setIsLoading(false);
   }, [storeId]);
   
-  const platformConfig = platformConfigs[store.platform as keyof typeof platformConfigs] || platformConfigs.shopify;
+  // 使用稳定的配置选择逻辑
+  const platformKey = (store.platform && platformConfigs[store.platform as keyof typeof platformConfigs]) 
+    ? store.platform as keyof typeof platformConfigs 
+    : 'shopify';
+  const platformConfig = platformConfigs[platformKey];
 
   const completedTasks = mockTasks.filter(t => t.completed).length;
   const progress = Math.round((completedTasks / mockTasks.length) * 100);

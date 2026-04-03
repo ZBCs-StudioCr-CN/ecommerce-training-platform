@@ -352,7 +352,8 @@ export default function StorePreviewPage() {
   const router = useRouter();
   const storeId = params.id as string;
   
-  const [store, setStore] = useState(() => getStoreData(storeId));
+  // 使用稳定的初始状态，避免 hydration mismatch
+  const [store, setStore] = useState(defaultStoreTemplates['shopify']);
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -366,7 +367,10 @@ export default function StorePreviewPage() {
     setIsLoading(false);
   }, [storeId]);
   
-  const theme = platformThemes[store.platform as keyof typeof platformThemes] || platformThemes.shopify;
+  // 使用稳定的配置选择逻辑
+  const theme = platformThemes[store.platform as keyof typeof platformThemes] 
+    ? platformThemes[store.platform as keyof typeof platformThemes] 
+    : platformThemes.shopify;
   
   // 判断是否为独立站
   const isIndependentSite = ['shopify', 'shoplazza', 'woocommerce'].includes(store.platform);
@@ -1062,6 +1066,18 @@ export default function StorePreviewPage() {
         return 'w-full';
     }
   };
+
+  // 加载状态检查 - 确保 hydration 一致性
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-slate-600">加载店铺数据...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-200">
