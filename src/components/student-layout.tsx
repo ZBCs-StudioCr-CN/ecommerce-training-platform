@@ -56,7 +56,7 @@ export function StudentLayout({ children, activeMenu }: StudentLayoutProps) {
       <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md border-b border-slate-200/80 z-50">
         <div className="flex items-center justify-between h-full px-6">
           <div className="flex items-center gap-3">
-            <Link href="/login" className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
                 <Globe className="h-6 w-6 text-white" />
               </div>

@@ -36,7 +36,7 @@ export default function TeacherGradingPage() {
     <div className="min-h-screen bg-slate-50">
       <header className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 z-50">
         <div className="flex items-center justify-between h-full px-6">
-          <Link href="/login" className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
               <Globe className="h-6 w-6 text-white" />
             </div>
