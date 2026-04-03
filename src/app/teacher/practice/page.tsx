@@ -327,17 +327,27 @@ export default function TeacherPracticePage() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="text-sm font-medium text-slate-700 mb-2 block">虚拟预算（美元）</label>
-                        <Input type="number" placeholder="如：5000" defaultValue="5000" />
+                        <label className="text-sm font-medium text-slate-700 mb-2 block">虚拟预算</label>
+                        <div className="flex gap-2">
+                          <select className="h-10 px-3 border rounded-lg text-sm bg-slate-50" defaultValue="usd">
+                            <option value="usd">美元（$）</option>
+                            <option value="cny">人民币（¥）</option>
+                            <option value="eur">欧元（€）</option>
+                          </select>
+                          <Input type="number" placeholder="如：5000" defaultValue="5000" className="flex-1" />
+                        </div>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-slate-700 mb-2 block">目标市场</label>
                         <select className="w-full h-10 px-3 border rounded-lg text-sm">
+                          <option>中国（国内）</option>
                           <option>美国</option>
                           <option>英国</option>
                           <option>德国</option>
                           <option>法国</option>
                           <option>日本</option>
+                          <option>东南亚</option>
+                          <option>其他</option>
                         </select>
                       </div>
                     </div>
