@@ -1,744 +1,768 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import {
-  Store,
-  ChevronRight,
-  ChevronDown,
-  CheckCircle2,
-  Clock,
   Target,
-  Zap,
-  Trophy,
-  TrendingUp,
-  BarChart3,
-  Users,
-  DollarSign,
-  Play,
-  Lock,
-  Star,
-  Gift,
+  Award,
+  Activity,
   Brain,
-  AlertTriangle,
-  LineChart,
-  ShoppingCart,
-  ShoppingBag,
-  Sparkles,
-  Shield,
+  Users,
+  TrendingUp,
+  Clock,
+  Globe,
+  Lock,
+  Bell,
+  AlertCircle,
+  BookOpen,
+  CheckCircle2,
+  BarChart3,
+  Zap,
   Eye,
-  Info,
+  ChevronRight,
+  Download,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StudentLayout } from '@/components/student-layout';
-import { AIAssistantButton } from '@/components/ai-assistant';
-import { PRACTICE_STAGES, FIVE_DIMENSIONS, type PracticeStage, type StageConfig } from '@/data/ability-practice';
-import { generateMockStats, generateScoreBreakdown } from '@/lib/autonomous-decision-calculator';
 
-// 阶段图标映射
-const stageIcons: Record<string, React.ElementType> = {
-  market_research: Target,
-  store_setup: Store,
-  product_listing: BarChart3,
-  logistics_config: DollarSign,
-  marketing_promotion: TrendingUp,
-  risk_management: AlertTriangle,
-  data_analysis: BarChart3,
-  compliance_training: Shield,
-  final_assessment: Trophy,
+// ============================================
+// 模拟数据
+// ============================================
+
+// 个人概况
+const personalOverview = {
+  totalScore: 82.5,
+  classRank: 8,
+  totalStudents: 42,
+  completionRate: 75,
+  weeklyHours: 12,
 };
 
-// 五维能力数据类型
-interface AbilityData {
-  dimensions: Array<{
-    id: string;
-    name: string;
-    practiceScore: number;
-    weight: number;
-    color: string;
-    subAbilities: Array<{
-      id: string;
-      name: string;
-      score: number;
-      evaluationType: string;
-      evaluationSource: string;
-    }>;
-  }>;
-  overall: number;
-}
-
-// 生成五维能力数据（客户端）
-const generateAbilityData = (): AbilityData => {
-  const dimensions = FIVE_DIMENSIONS.map(dim => ({
-    id: dim.id,
-    name: dim.name,
-    practiceScore: Math.round(70 + Math.random() * 20), // 实训得分
-    weight: dim.weight,
-    color: dim.color,
-    subAbilities: dim.subAbilities.map(sub => ({
-      id: sub.id,
-      name: sub.name,
-      score: Math.round(65 + Math.random() * 25),
-      evaluationType: sub.evaluationType,
-      evaluationSource: sub.evaluationSource,
-    })),
-  }));
-  
-  // 综合能力 = 各维度实训得分的加权平均
-  const totalWeight = dimensions.reduce((sum, d) => sum + d.weight, 0);
-  const weightedSum = dimensions.reduce((sum, d) => sum + d.practiceScore * d.weight, 0);
-  const overall = Math.round(weightedSum / totalWeight);
-  
-  return { dimensions, overall };
+// 个人五维能力
+const personalAbilities = {
+  decision: 85,
+  ai: 75,
+  data: 82,
+  risk: 80,
+  compliance: 78,
 };
 
-// 模拟实训进度数据
-const mockProgress = {
-  stages: {
-    market_research: { started: true, completed: true, score: 85, startedAt: '2024-01-15', completedAt: '2024-01-18' },
-    store_setup: { started: true, completed: true, score: 92, startedAt: '2024-01-19', completedAt: '2024-01-25' },
-    product_listing: { started: true, completed: false, score: 70, startedAt: '2024-01-26' },
-    logistics_config: { started: false, completed: false },
-    marketing_promotion: { started: false, completed: false },
-    risk_management: { started: false, completed: false },
-    data_analysis: { started: false, completed: false },
-    compliance_training: { started: false, completed: false },
-    final_assessment: { started: false, completed: false },
-  },
-  overallProgress: 28,
-  experience: 450,
-  level: 3,
-  achievements: ['market_analyst', 'store_builder', 'first_product'],
-  totalTimeSpent: 1200,
-  aiStats: {
-    totalCalls: 23,
-    autonomousDecisions: 78,
-    lastWeekCalls: 8,
-  },
-  riskEventsHandled: 7, // 处理的风险事件数量
+// 班级平均（用于对比）
+const classAverage = {
+  decision: 78,
+  ai: 75,
+  data: 75,
+  risk: 78,
+  compliance: 72,
 };
 
-// 根据处理的风险事件数量计算危机处理能力等级
-// 规则：1升2需1起，2升3需3起，3升4需5起，4升5需10起，后续每10起升一级
-const calculateRiskLevel = (handledCount: number): number => {
-  if (handledCount < 1) return 1;    // Lv.1: 0起
-  if (handledCount < 4) return 2;    // Lv.2: 1-3起
-  if (handledCount < 9) return 3;    // Lv.3: 4-8起
-  if (handledCount < 19) return 4;   // Lv.4: 9-18起
-  return 5 + Math.floor((handledCount - 19) / 10); // Lv.5+: 19起后每10起升一级
-};
-
-// 独立决策详情组件
-function IndependentDecisionDetail() {
-  const stats = generateMockStats('student-001');
-  const breakdown = generateScoreBreakdown(stats);
-
-  return (
-    <div className="space-y-6 mt-4">
-      {/* 总分展示 */}
-      <div className="p-4 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-slate-600">独立决策比例</p>
-            <p className="text-3xl font-bold text-amber-600">{breakdown.autonomousDecisionRatio}%</p>
-          </div>
-          <div className="text-right">
-            <p className="text-xs text-slate-500">计算公式</p>
-            <p className="text-sm text-slate-700">决策行为 × 40% + AI健康度 × 35% + 原创度 × 25%</p>
-          </div>
-        </div>
-      </div>
-
-      {/* 三大维度详情 */}
-      {breakdown.components.map((component, index) => (
-        <div key={index} className="border rounded-lg overflow-hidden">
-          <div className="p-4 bg-slate-50 border-b">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-slate-800">{component.name}</span>
-                <Badge variant="outline" className="text-xs">权重 {component.weight}%</Badge>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-slate-500">得分: {component.score}</span>
-                <span className="text-lg font-bold text-amber-600">加权: {component.weightedScore}</span>
-              </div>
-            </div>
-          </div>
-          
-          <div className="p-4">
-            {component.note && (
-              <div className="mb-3 p-2 rounded bg-blue-50 text-blue-700 text-xs flex items-center gap-1">
-                <Info className="h-3 w-3" />
-                {component.note}
-              </div>
-            )}
-            
-            <div className="grid grid-cols-2 gap-2">
-              {component.details.map((detail, i) => (
-                <div key={i} className="flex items-center justify-between p-2 rounded bg-slate-50">
-                  <span className="text-sm text-slate-600">{detail.label}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-slate-800">{detail.value}{detail.unit}</span>
-                    {'score' in detail && typeof detail.score === 'number' && (
-                      <Badge 
-                        variant={detail.score >= 70 ? 'default' : detail.score >= 30 ? 'secondary' : 'destructive'}
-                        className="text-xs"
-                      >
-                        {detail.score}分
-                      </Badge>
-                    )}
-                    {'score' in detail && typeof detail.score === 'string' && (
-                      <Badge variant="outline" className="text-xs">
-                        {detail.score}
-                      </Badge>
-                    )}
-                    {'weight' in detail && (
-                      <Badge variant="outline" className="text-xs">
-                        权重{detail.weight}%
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      ))}
-
-      {/* 计算说明 */}
-      <div className="p-4 rounded-lg bg-slate-100 text-sm text-slate-600">
-        <p className="font-medium mb-2">计算说明：</p>
-        <ul className="list-disc list-inside space-y-1 text-xs">
-          <li><strong>决策行为得分</strong>：根据每次决策的独立程度评分，完全独立100分，复制粘贴0分</li>
-          <li><strong>AI交互健康度</strong>：只考核交互质量，不考核交互数量。调用AI多但修改多是好事</li>
-          <li><strong>内容原创度</strong>：原创输入占比、编辑修改程度、思考时长综合计算</li>
-        </ul>
-      </div>
-    </div>
-  );
-}
-
-// 模拟店铺数据
-const mockStore = {
-  name: 'My Fashion Store',
-  domain: 'my-fashion-store.myshopify.com',
-  status: 'development',
-  products: 8,
-  orders: 0,
-  visitors: 1250,
-  revenue: 0,
-};
-
-// 三大电商场景
-const scenarios = [
-  { id: 'domestic', name: '国内电商', icon: ShoppingCart, progress: 45, color: 'from-orange-500 to-red-500' },
-  { id: 'crossborder', name: '跨境平台', icon: ShoppingBag, progress: 20, color: 'from-blue-500 to-cyan-500' },
-  { id: 'independent', name: '外贸独立站', icon: Store, progress: 35, color: 'from-emerald-500 to-teal-500' },
+// 能力趋势
+const abilityTrend = [
+  { week: 'W1', decision: 70, ai: 65, data: 68, risk: 72, compliance: 70 },
+  { week: 'W2', decision: 75, ai: 70, data: 72, risk: 75, compliance: 72 },
+  { week: 'W3', decision: 78, ai: 72, data: 75, risk: 78, compliance: 75 },
+  { week: 'W4', decision: 82, ai: 73, data: 78, risk: 79, compliance: 76 },
+  { week: 'W5', decision: 85, ai: 75, data: 82, risk: 80, compliance: 78 },
 ];
 
-export default function StudentDashboardPage() {
-  const [progress] = useState(mockProgress);
-  const [store] = useState(mockStore);
-  const [abilityRadar, setAbilityRadar] = useState<AbilityData | null>(null);
-  const [expandedDimensions, setExpandedDimensions] = useState<Set<string>>(new Set());
+// 实训任务列表
+const practiceTasks = [
+  { name: '市场调研', status: 'completed', score: 85, weight: 15, deadline: '2024-03-15', submitTime: '2024-03-14' },
+  { name: '独立站搭建', status: 'completed', score: 82, weight: 20, deadline: '2024-03-22', submitTime: '2024-03-21' },
+  { name: '流量推广', status: 'in-progress', score: null, weight: 25, deadline: '2024-03-29', progress: 60 },
+  { name: '转化运营', status: 'not-started', score: null, weight: 20, deadline: '2024-04-05', progress: 0 },
+  { name: '数据分析', status: 'not-started', score: null, weight: 15, deadline: '2024-04-12', progress: 0 },
+  { name: '风险应对', status: 'not-started', score: null, weight: 5, deadline: '2024-04-15', progress: 0 },
+];
 
-  // 客户端初始化能力数据
-  useEffect(() => {
-    setAbilityRadar(generateAbilityData());
-  }, []);
+// 成绩详情
+const scoreBreakdown = [
+  { dimension: '自主决策能力', examScore: 80, practiceScore: 88, total: 84, weight: 35 },
+  { dimension: 'AI辅助应用', examScore: 75, practiceScore: 75, total: 75, weight: 20 },
+  { dimension: '数据复盘与优化', examScore: 78, practiceScore: 85, total: 81.5, weight: 20 },
+  { dimension: '风险应对', examScore: 82, practiceScore: 78, total: 80, weight: 15 },
+  { dimension: '合规与规则意识', examScore: 75, practiceScore: 80, total: 77.5, weight: 10 },
+];
 
-  // 计算统计数据
-  const completedStages = Object.values(progress.stages).filter(s => s.completed).length;
-  const totalStages = PRACTICE_STAGES.length;
-  const totalPoints = PRACTICE_STAGES.reduce((sum, stage) => 
-    sum + stage.tasks.reduce((tSum, task) => tSum + task.points, 0), 0
+// AI使用报告
+const aiUsageReport = {
+  coupling: 55,
+  status: 'healthy',
+  weeklyCalls: 245,
+  totalCalls: 1250,
+  originality: 75,
+  moduleUsage: [
+    { name: '市场分析', count: 456, percentage: 36 },
+    { name: '选品建议', count: 325, percentage: 26 },
+    { name: '智能搭建', count: 268, percentage: 21 },
+    { name: '投放建议', count: 156, percentage: 12 },
+    { name: '运营策略', count: 45, percentage: 5 },
+  ],
+};
+
+// 风险应对记录
+const riskHistory = [
+  { type: '客户投诉处理', date: '2024-03-10', score: 85, feedback: '处理及时，沟通专业', improvement: '+5' },
+  { type: '差评处理', date: '2024-03-08', score: 80, feedback: '态度良好，建议加强细节', improvement: '+3' },
+  { type: '平台处罚应对', date: '2024-03-05', score: 78, feedback: '响应及时，方案需完善', improvement: '+2' },
+];
+
+// 竞争力分析
+const competitiveness = {
+  currentRank: 8,
+  totalStudents: 42,
+  top10PercentScore: 90,
+  abilities: {
+    commercialDecision: 82,
+    trafficOperation: 78,
+    dataAnalysis: 80,
+    riskManagement: 85,
+    overall: 81,
+  },
+  jobMarket: {
+    position: '电商运营专员',
+    matchScore: 85,
+    strengths: ['数据复盘', '风险应对'],
+    improvements: ['AI工具使用', '转化运营'],
+  },
+};
+
+// 简单雷达图组件
+const RadarChart = ({ personal, compare, labels }: { personal: number[]; compare: number[]; labels: string[] }) => {
+  const size = 200;
+  const center = size / 2;
+  const radius = 70;
+  const angleStep = (Math.PI * 2) / labels.length;
+
+  const personalPoints = personal.map((value, i) => {
+    const angle = angleStep * i - Math.PI / 2;
+    const r = (value / 100) * radius;
+    const x = center + r * Math.cos(angle);
+    const y = center + r * Math.sin(angle);
+    return `${x},${y}`;
+  }).join(' ');
+
+  const comparePoints = compare.map((value, i) => {
+    const angle = angleStep * i - Math.PI / 2;
+    const r = (value / 100) * radius;
+    const x = center + r * Math.cos(angle);
+    const y = center + r * Math.sin(angle);
+    return `${x},${y}`;
+  }).join(' ');
+
+  const labelsPos = labels.map((label, i) => {
+    const angle = angleStep * i - Math.PI / 2;
+    const r = radius + 18;
+    const x = center + r * Math.cos(angle);
+    const y = center + r * Math.sin(angle);
+    return { x, y, label };
+  });
+
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      {[20, 40, 60, 80, 100].map((r, i) => (
+        <polygon
+          key={i}
+          points={Array.from({ length: labels.length }).map((_, j) => {
+            const angle = angleStep * j - Math.PI / 2;
+            const radius = (r / 100) * 70;
+            const x = center + radius * Math.cos(angle);
+            const y = center + radius * Math.sin(angle);
+            return `${x},${y}`;
+          }).join(' ')}
+          fill="none"
+          stroke="#e2e8f0"
+          strokeWidth="1"
+        />
+      ))}
+
+      <polygon
+        points={comparePoints}
+        fill="rgba(148, 163, 184, 0.15)"
+        stroke="#94a3b8"
+        strokeWidth="2"
+        strokeDasharray="4,2"
+      />
+
+      <polygon
+        points={personalPoints}
+        fill="rgba(16, 185, 129, 0.2)"
+        stroke="#10b981"
+        strokeWidth="2"
+      />
+
+      {labelsPos.map((pos, i) => (
+        <text
+          key={i}
+          x={pos.x}
+          y={pos.y}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontSize="9"
+          fill="#64748b"
+        >
+          {pos.label}
+        </text>
+      ))}
+    </svg>
   );
-  const earnedPoints = PRACTICE_STAGES.reduce((sum, stage) => {
-    const stageProgress = progress.stages[stage.id];
-    if (stageProgress?.completed && 'score' in stageProgress) {
-      return sum + stage.tasks.reduce((tSum, task) => tSum + task.points, 0) * (stageProgress.score || 0) / 100;
-    }
-    return sum;
-  }, 0);
+};
 
-  // 获取当前阶段
-  const getCurrentStage = (): StageConfig | null => {
-    for (const stage of PRACTICE_STAGES) {
-      const stageProgress = progress.stages[stage.id];
-      if (stageProgress?.started && !stageProgress?.completed) {
-        return stage;
-      }
-    }
-    return null;
-  };
-
-  const currentStage = getCurrentStage();
-
-  // 检查阶段是否可开始
-  const canStartStage = (stage: StageConfig): boolean => {
-    if (!stage.prerequisites || stage.prerequisites.length === 0) {
-      return true;
-    }
-    return stage.prerequisites.every(preId => progress.stages[preId]?.completed);
-  };
-
-  // 获取阶段状态
-  const getStageStatus = (stageId: PracticeStage): 'completed' | 'in_progress' | 'available' | 'locked' => {
-    const stageProgress = progress.stages[stageId];
-    if (stageProgress?.completed) return 'completed';
-    if (stageProgress?.started) return 'in_progress';
-    
-    const stage = PRACTICE_STAGES.find(s => s.id === stageId);
-    if (stage && canStartStage(stage)) return 'available';
-    return 'locked';
-  };
+export default function StudentDashboard() {
+  const [activeTab, setActiveTab] = useState('overview');
 
   return (
     <StudentLayout activeMenu="dashboard">
-      <div className="p-8">
-        {/* 页面标题 */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <h2 className="text-2xl font-bold text-slate-800">实训控制台</h2>
-            <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-              <Sparkles className="h-3 w-3 mr-1" />
-              AI融合版
-            </Badge>
+      <div className="space-y-6">
+        {/* 欢迎横幅 */}
+        <div className="p-6 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+          <div className="relative z-10 flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold mb-2">欢迎回来，张三同学！</h2>
+              <p className="text-emerald-100">本周你有 3 个任务待完成，继续保持进步！</p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="text-center">
+                <div className="text-3xl font-bold">{personalOverview.totalScore}</div>
+                <div className="text-sm text-emerald-100">综合能力分</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold">#{personalOverview.classRank}</div>
+                <div className="text-sm text-emerald-100">班级排名</div>
+              </div>
+            </div>
           </div>
-          <p className="text-slate-500">驾驭AI，培养五维核心能力，成为不被替代的电商人才</p>
         </div>
 
-        {/* 概览卡片 */}
-        <div className="grid grid-cols-5 gap-4 mb-8">
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-emerald-100 text-sm">实训进度</p>
-                  <p className="text-3xl font-bold mt-1">{progress.overallProgress}%</p>
-                  <p className="text-emerald-200 text-sm mt-1">{completedStages}/{totalStages} 阶段</p>
-                </div>
-                <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center">
-                  <Target className="h-7 w-7" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="bg-white border border-slate-200 p-1 rounded-xl">
+            <TabsTrigger value="overview" className="rounded-lg data-[state=active]:bg-emerald-500 data-[state=active]:text-white">
+              个人概况
+            </TabsTrigger>
+            <TabsTrigger value="ability" className="rounded-lg data-[state=active]:bg-emerald-500 data-[state=active]:text-white">
+              能力成长
+            </TabsTrigger>
+            <TabsTrigger value="tasks" className="rounded-lg data-[state=active]:bg-emerald-500 data-[state=active]:text-white">
+              实训任务
+            </TabsTrigger>
+            <TabsTrigger value="score" className="rounded-lg data-[state=active]:bg-emerald-500 data-[state=active]:text-white">
+              成绩详情
+            </TabsTrigger>
+            <TabsTrigger value="ai" className="rounded-lg data-[state=active]:bg-emerald-500 data-[state=active]:text-white">
+              AI使用
+            </TabsTrigger>
+            <TabsTrigger value="competitiveness" className="rounded-lg data-[state=active]:bg-emerald-500 data-[state=active]:text-white">
+              竞争力
+            </TabsTrigger>
+          </TabsList>
 
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-500 to-pink-600 text-white">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-purple-100 text-sm">AI辅助统计</p>
-                  <p className="text-3xl font-bold mt-1">{progress.aiStats.totalCalls}</p>
-                  <p className="text-purple-200 text-sm mt-1">调用次数</p>
-                </div>
-                <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center">
-                  <Brain className="h-7 w-7" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-amber-500 to-orange-600 text-white">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-amber-100 text-sm">自主决策</p>
-                  <p className="text-3xl font-bold mt-1">
-                    {(() => {
-                      const stats = generateMockStats('student-001');
-                      return stats.autonomousDecisionRatio;
-                    })()}%
-                  </p>
-                  <p className="text-amber-200 text-sm mt-1">独立决策比例</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-8 w-8 p-0 text-white/80 hover:text-white hover:bg-white/20"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                          <Zap className="h-5 w-5 text-amber-500" />
-                          独立决策比例计算详情
-                        </DialogTitle>
-                        <DialogDescription>
-                          独立决策比例 = 决策行为得分 × 40% + AI交互健康度 × 35% + 内容原创度 × 25%
-                        </DialogDescription>
-                      </DialogHeader>
-                      
-                      <IndependentDecisionDetail />
-                    </DialogContent>
-                  </Dialog>
-                  <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center">
-                    <Zap className="h-7 w-7" />
+          {/* 个人概况 Tab */}
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-4 gap-4">
+              <Card className="border-0 shadow-lg">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-slate-500">综合能力分</p>
+                      <p className="text-3xl font-bold text-slate-800">{personalOverview.totalScore}</p>
+                    </div>
+                    <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
+                      <Award className="h-6 w-6 text-emerald-600" />
+                    </div>
                   </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
 
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-green-500 to-emerald-600 text-white">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-green-100 text-sm">危机处理能力</p>
-                  <p className="text-3xl font-bold mt-1">Lv.{calculateRiskLevel(progress.riskEventsHandled)}</p>
-                  <p className="text-green-200 text-sm mt-1">已处理 {progress.riskEventsHandled} 起风险事件</p>
-                </div>
-                <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center">
-                  <Shield className="h-7 w-7" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              <Card className="border-0 shadow-lg">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-slate-500">班级排名</p>
+                      <p className="text-3xl font-bold text-slate-800">
+                        #{personalOverview.classRank}
+                        <span className="text-base font-normal text-slate-500">/{personalOverview.totalStudents}</span>
+                      </p>
+                    </div>
+                    <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+                      <Users className="h-6 w-6 text-blue-600" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-blue-100 text-sm">综合能力</p>
-                  <p className="text-3xl font-bold mt-1">{abilityRadar?.overall || '--'}%</p>
-                  <p className="text-blue-200 text-sm mt-1">五维核心能力</p>
-                </div>
-                <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center">
-                  <Trophy className="h-7 w-7" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              <Card className="border-0 shadow-lg">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-slate-500">完成进度</p>
+                      <p className="text-3xl font-bold text-slate-800">{personalOverview.completionRate}%</p>
+                    </div>
+                    <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
+                      <Activity className="h-6 w-6 text-purple-600" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-        <div className="grid grid-cols-3 gap-6">
-          {/* 左侧：五维能力雷达图 + 三大场景 */}
-          <div className="col-span-1 space-y-6">
-            {/* 五维能力雷达图 */}
+              <Card className="border-0 shadow-lg">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-slate-500">学习时长</p>
+                      <p className="text-3xl font-bold text-slate-800">{personalOverview.weeklyHours}h</p>
+                    </div>
+                    <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center">
+                      <Clock className="h-6 w-6 text-amber-600" />
+                    </div>
+                  </div>
+                  <p className="text-sm text-slate-500 mt-2">本周累计</p>
+                </CardContent>
+              </Card>
+            </div>
+
             <Card className="border-0 shadow-lg">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <LineChart className="h-5 w-5 text-purple-600" />
-                  五维能力评估
-                </CardTitle>
-                <CardDescription>点击展开查看各维度具体能力得分</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {abilityRadar ? (
-                  <>
-                    {/* 五维能力展示 - 只显示实训得分 */}
-                    <div className="space-y-3">
-                      {abilityRadar.dimensions.map((dim) => {
-                        const isExpanded = expandedDimensions.has(dim.id);
-                        return (
-                          <div key={dim.id}>
-                            <div 
-                              className="flex items-center justify-between mb-1 cursor-pointer"
-                              onClick={() => {
-                                const newSet = new Set(expandedDimensions);
-                                if (isExpanded) {
-                                  newSet.delete(dim.id);
-                                } else {
-                                  newSet.add(dim.id);
-                                }
-                                setExpandedDimensions(newSet);
-                              }}
-                            >
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium text-slate-700">{dim.name}</span>
-                                <Badge variant="outline" className="text-xs h-5">权重{dim.weight}%</Badge>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm font-bold text-green-600">{dim.practiceScore}</span>
-                                <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-                              </div>
-                            </div>
-                            
-                            {/* 实训得分进度条 */}
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="text-xs text-slate-400 w-10">实训</span>
-                              <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
-                                <div 
-                                  className="h-full rounded-full bg-gradient-to-r from-green-400 to-emerald-500"
-                                  style={{ width: `${dim.practiceScore}%` }}
-                                />
-                              </div>
-                              <span className="text-xs font-medium text-green-600 w-8">{dim.practiceScore}</span>
-                            </div>
-                            
-                            {/* 具体能力标签（折叠展开） */}
-                            {isExpanded && (
-                              <div className="flex flex-wrap gap-1.5 ml-12 mb-2">
-                                {dim.subAbilities.map((sub) => (
-                                  <Badge 
-                                    key={sub.id} 
-                                    variant="secondary" 
-                                    className="text-xs px-2 py-0.5 h-5"
-                                    title={`${sub.name}: ${sub.score}分\n评估方式: ${sub.evaluationType === 'practice' ? '实训任务' : sub.evaluationType === 'exam' ? '专项测试' : '系统计算'}\n来源: ${sub.evaluationSource}`}
-                                  >
-                                    {sub.name} {sub.score}分
-                                  </Badge>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    <div className="mt-6 p-4 rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm text-slate-600">实训平均分</p>
-                          <p className="text-2xl font-bold text-purple-600">{abilityRadar.overall}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xs text-slate-500">五维能力实训</p>
-                          <p className="text-sm text-slate-600">加权平均得分</p>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex items-center justify-center h-32 text-slate-400">
-                    加载中...
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* 三大电商场景 */}
-            <Card className="border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle>三大电商场景</CardTitle>
-                <CardDescription>统一流程，场景互通</CardDescription>
+                <CardTitle>本周任务提醒</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {scenarios.map((scenario) => (
-                    <div
-                      key={scenario.id}
-                      className="flex items-center gap-4 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer"
-                    >
-                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${scenario.color} flex items-center justify-center`}>
-                        <scenario.icon className="h-6 w-6 text-white" />
+                  <div className="flex items-center gap-4 p-3 bg-amber-50 rounded-lg">
+                    <Clock className="h-5 w-5 text-amber-500" />
+                    <div className="flex-1">
+                      <p className="font-medium text-slate-800">流量推广任务</p>
+                      <p className="text-sm text-slate-500">剩余 3 天截止</p>
+                    </div>
+                    <Badge variant="outline">进行中</Badge>
+                  </div>
+                  <div className="flex items-center gap-4 p-3 bg-blue-50 rounded-lg">
+                    <BookOpen className="h-5 w-5 text-blue-500" />
+                    <div className="flex-1">
+                      <p className="font-medium text-slate-800">数据分析理论学习</p>
+                      <p className="text-sm text-slate-500">建议完成时间：本周</p>
+                    </div>
+                    <Button variant="outline" size="sm">开始学习</Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* 能力成长 Tab */}
+          <TabsContent value="ability" className="space-y-6">
+            <div className="grid grid-cols-2 gap-6">
+              <Card className="border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Target className="h-5 w-5 text-emerald-500" />
+                    个人五维能力
+                  </CardTitle>
+                  <CardDescription>绿色：个人 | 灰色：班级平均</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-center">
+                    <RadarChart
+                      personal={[
+                        personalAbilities.decision,
+                        personalAbilities.ai,
+                        personalAbilities.data,
+                        personalAbilities.risk,
+                        personalAbilities.compliance,
+                      ]}
+                      compare={[
+                        classAverage.decision,
+                        classAverage.ai,
+                        classAverage.data,
+                        classAverage.risk,
+                        classAverage.compliance,
+                      ]}
+                      labels={['决策', 'AI', '数据', '风险', '合规']}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 mt-4 text-center">
+                    <div>
+                      <div className="text-sm text-slate-500">个人平均</div>
+                      <div className="text-lg font-bold text-emerald-600">
+                        {(
+                          (personalAbilities.decision +
+                           personalAbilities.ai +
+                           personalAbilities.data +
+                           personalAbilities.risk +
+                           personalAbilities.compliance) /
+                          5
+                        ).toFixed(1)}
                       </div>
-                      <div className="flex-1">
-                        <p className="font-medium text-slate-800">{scenario.name}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Progress value={scenario.progress} className="h-2 flex-1" />
-                          <span className="text-xs text-slate-500">{scenario.progress}%</span>
+                    </div>
+                    <div>
+                      <div className="text-sm text-slate-500">班级平均</div>
+                      <div className="text-lg font-bold text-slate-600">
+                        {(
+                          (classAverage.decision +
+                           classAverage.ai +
+                           classAverage.data +
+                           classAverage.risk +
+                           classAverage.compliance) /
+                          5
+                        ).toFixed(1)}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-emerald-500" />
+                    能力趋势
+                  </CardTitle>
+                  <CardDescription>近5周能力变化</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {abilityTrend.map((week, index) => (
+                      <div key={index}>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-slate-700">{week.week}</span>
+                          <div className="flex gap-4 text-xs">
+                            <span>决策: {week.decision}</span>
+                            <span>AI: {week.ai}</span>
+                            <span>数据: {week.data}</span>
+                            <span>风险: {week.risk}</span>
+                            <span>合规: {week.compliance}</span>
+                          </div>
+                        </div>
+                        <div className="flex gap-1 h-2">
+                          <div
+                            className="flex-1 bg-blue-500 rounded"
+                            style={{ width: `${week.decision}%` }}
+                          />
+                          <div
+                            className="flex-1 bg-green-500 rounded"
+                            style={{ width: `${week.ai}%` }}
+                          />
+                          <div
+                            className="flex-1 bg-purple-500 rounded"
+                            style={{ width: `${week.data}%` }}
+                          />
+                          <div
+                            className="flex-1 bg-orange-500 rounded"
+                            style={{ width: `${week.risk}%` }}
+                          />
+                          <div
+                            className="flex-1 bg-pink-500 rounded"
+                            style={{ width: `${week.compliance}%` }}
+                          />
                         </div>
                       </div>
-                      <ChevronRight className="h-5 w-5 text-slate-400" />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* 实训任务 Tab */}
+          <TabsContent value="tasks" className="space-y-6">
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle>实训任务完成情况</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {practiceTasks.map((task, index) => (
+                    <div key={index} className="p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                            task.status === 'completed' ? 'bg-emerald-100 text-emerald-600' :
+                            task.status === 'in-progress' ? 'bg-blue-100 text-blue-600' :
+                            'bg-slate-100 text-slate-400'
+                          }`}>
+                            {task.status === 'completed' && <CheckCircle2 className="h-5 w-5" />}
+                            {task.status === 'in-progress' && <Activity className="h-5 w-5" />}
+                            {task.status === 'not-started' && <Lock className="h-5 w-5" />}
+                          </div>
+                          <div>
+                            <p className="font-medium text-slate-800">{task.name}</p>
+                            <p className="text-xs text-slate-500">权重 {task.weight}%</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          {task.score !== null ? (
+                            <Badge className="bg-emerald-100 text-emerald-700">得分: {task.score}</Badge>
+                          ) : (
+                            <Badge variant="outline">{task.status === 'in-progress' ? '进行中' : '未开始'}</Badge>
+                          )}
+                          <span className="text-sm text-slate-500">{task.deadline}</span>
+                        </div>
+                      </div>
+                      {task.status === 'in-progress' && (
+                        <div>
+                          <div className="flex items-center justify-between text-sm mb-2">
+                            <span className="text-slate-600">完成进度</span>
+                            <span className="font-medium">{task.progress}%</span>
+                          </div>
+                          <Progress value={task.progress} className="h-2" />
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
 
-            {/* AI使用建议 */}
-            <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-500 to-pink-600 text-white">
+          {/* 成绩详情 Tab */}
+          <TabsContent value="score" className="space-y-6">
+            <Card className="border-0 shadow-lg">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Brain className="h-5 w-5" />
-                  AI使用建议
-                </CardTitle>
+                <CardTitle>成绩详情</CardTitle>
+                <CardDescription>考试成绩50% + 实训成绩50%</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  <div className="p-3 rounded-lg bg-white/20">
-                    <p className="font-medium">💡 建议</p>
-                    <p className="text-sm text-purple-100 mt-1">您的自主决策比例为78%，继续保持独立思考习惯！</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-white/20">
-                    <p className="font-medium">📈 提升</p>
-                    <p className="text-sm text-purple-100 mt-1">风险应对能力有待提升，建议多参与风险事件模拟。</p>
-                  </div>
+                <div className="space-y-4">
+                  {scoreBreakdown.map((item, index) => (
+                    <div key={index} className="p-4 border border-slate-200 rounded-lg">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="font-medium text-slate-800">{item.dimension}</span>
+                        <div className="flex items-center gap-4">
+                          <span className="text-sm text-slate-600">权重 {item.weight}%</span>
+                          <Badge className="bg-emerald-100 text-emerald-700">
+                            总分: {item.total.toFixed(1)}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-4 text-center">
+                        <div className="p-3 bg-blue-50 rounded-lg">
+                          <p className="text-sm text-slate-600 mb-1">考试得分</p>
+                          <p className="text-xl font-bold text-blue-600">{item.examScore}</p>
+                        </div>
+                        <div className="p-3 bg-emerald-50 rounded-lg">
+                          <p className="text-sm text-slate-600 mb-1">实训得分</p>
+                          <p className="text-xl font-bold text-emerald-600">{item.practiceScore}</p>
+                        </div>
+                        <div className="p-3 bg-violet-50 rounded-lg">
+                          <p className="text-sm text-slate-600 mb-1">综合得分</p>
+                          <p className="text-xl font-bold text-violet-600">{item.total.toFixed(1)}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </TabsContent>
 
-          {/* 右侧：实训阶段 */}
-          <div className="col-span-2 space-y-6">
-            {/* 当前任务 */}
-            {currentStage && (
-              <Card className="border-0 shadow-lg border-l-4 border-l-emerald-500">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
-                        {(() => {
-                          const Icon = stageIcons[currentStage.id];
-                          return Icon ? <Icon className="h-6 w-6 text-emerald-600" /> : null;
-                        })()}
-                      </div>
-                      <div>
-                        <CardTitle className="text-lg">{currentStage.name}</CardTitle>
-                        <CardDescription>当前进行中 · {currentStage.duration}</CardDescription>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge className="bg-emerald-100 text-emerald-700">进行中</Badge>
-                      <Button 
-                        size="sm" 
-                        className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700"
-                        onClick={() => {}}
-                      >
-                        <Brain className="h-4 w-4 mr-1" />
-                        AI辅助
-                      </Button>
-                    </div>
+          {/* AI使用 Tab */}
+          <TabsContent value="ai" className="space-y-6">
+            <div className="grid grid-cols-4 gap-4">
+              <Card className="border-0 shadow-lg">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Brain className="h-5 w-5 text-blue-500" />
+                    <span className="text-sm text-slate-500">耦合度</span>
                   </div>
+                  <p className="text-3xl font-bold text-slate-800">{aiUsageReport.coupling}%</p>
+                  <Badge className={aiUsageReport.coupling < 60 ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}>
+                    {aiUsageReport.coupling < 60 ? '健康使用' : '需注意'}
+                  </Badge>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-lg">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Activity className="h-5 w-5 text-green-500" />
+                    <span className="text-sm text-slate-500">本周调用</span>
+                  </div>
+                  <p className="text-3xl font-bold text-slate-800">{aiUsageReport.weeklyCalls}</p>
+                  <Badge className="bg-blue-100 text-blue-700">次</Badge>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-lg">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Zap className="h-5 w-5 text-purple-500" />
+                    <span className="text-sm text-slate-500">累计调用</span>
+                  </div>
+                  <p className="text-3xl font-bold text-slate-800">{aiUsageReport.totalCalls}</p>
+                  <Badge className="bg-purple-100 text-purple-700">次</Badge>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-lg">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Eye className="h-5 w-5 text-emerald-500" />
+                    <span className="text-sm text-slate-500">原创度</span>
+                  </div>
+                  <p className="text-3xl font-bold text-slate-800">{aiUsageReport.originality}%</p>
+                  <Badge className="bg-emerald-100 text-emerald-700">原创占比</Badge>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle>模块使用分布</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {aiUsageReport.moduleUsage.map((module, index) => (
+                    <div key={index}>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-slate-600">{module.name}</span>
+                        <div className="flex items-center gap-3">
+                          <span className="font-medium text-slate-800">{module.count.toLocaleString()} 次</span>
+                          <span className="text-sm text-slate-500">{module.percentage}%</span>
+                        </div>
+                      </div>
+                      <Progress value={module.percentage} className="h-2" />
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* 竞争力 Tab */}
+          <TabsContent value="competitiveness" className="space-y-6">
+            <div className="grid grid-cols-2 gap-6">
+              <Card className="border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5 text-emerald-500" />
+                    班级排名
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
+                  <div className="text-center mb-6">
+                    <div className="text-6xl font-bold text-emerald-600 mb-2">
+                      #{competitiveness.currentRank}
+                    </div>
+                    <div className="text-sm text-slate-500">
+                      共 {competitiveness.totalStudents} 名学生
+                    </div>
+                  </div>
+                  <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-slate-600">任务进度</span>
+                      <span className="text-slate-600">前10%平均分</span>
                       <span className="font-medium text-slate-800">
-                        0/{currentStage.tasks.length}
+                        {competitiveness.top10PercentScore}
                       </span>
                     </div>
-                    <Progress value={0} className="h-2" />
-                    <div className="flex gap-3">
-                      <Link href="/student/practice" className="flex-1">
-                        <Button className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700">
-                          <Play className="h-4 w-4 mr-2" />
-                          继续实训
-                        </Button>
-                      </Link>
-                      <Button variant="outline" className="flex-1">
-                        查看任务详情
-                      </Button>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-600">你的得分</span>
+                      <span className="font-medium text-emerald-600">
+                        {personalOverview.totalScore}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-600">差距</span>
+                      <span className="font-medium text-red-600">
+                        {competitiveness.top10PercentScore - personalOverview.totalScore}
+                      </span>
                     </div>
                   </div>
                 </CardContent>
               </Card>
-            )}
 
-            {/* 实训阶段列表 */}
+              <Card className="border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5 text-emerald-500" />
+                    就业能力评估
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-slate-600">商业决策能力</span>
+                        <span className="font-medium">{competitiveness.abilities.commercialDecision}</span>
+                      </div>
+                      <Progress value={competitiveness.abilities.commercialDecision} className="h-2" />
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-slate-600">流量运营能力</span>
+                        <span className="font-medium">{competitiveness.abilities.trafficOperation}</span>
+                      </div>
+                      <Progress value={competitiveness.abilities.trafficOperation} className="h-2" />
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-slate-600">数据分析能力</span>
+                        <span className="font-medium">{competitiveness.abilities.dataAnalysis}</span>
+                      </div>
+                      <Progress value={competitiveness.abilities.dataAnalysis} className="h-2" />
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-slate-600">风险管理能力</span>
+                        <span className="font-medium">{competitiveness.abilities.riskManagement}</span>
+                      </div>
+                      <Progress value={competitiveness.abilities.riskManagement} className="h-2" />
+                    </div>
+                    <div className="pt-4 border-t border-slate-200">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-slate-700">综合就业竞争力</span>
+                        <Badge className="bg-emerald-100 text-emerald-700">
+                          {competitiveness.abilities.overall}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
             <Card className="border-0 shadow-lg">
               <CardHeader>
-                <CardTitle>实训阶段</CardTitle>
-                <CardDescription>完成各阶段任务，掌握全链路电商能力</CardDescription>
+                <CardTitle>目标岗位匹配</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {PRACTICE_STAGES.slice(0, 6).map((stage) => {
-                    const status = getStageStatus(stage.id);
-                    const Icon = stageIcons[stage.id] || Target;
-                    const stageProgress = progress.stages[stage.id];
-                    
-                    return (
-                      <div
-                        key={stage.id}
-                        className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${
-                          status === 'completed' 
-                            ? 'border-green-200 bg-green-50' 
-                            : status === 'in_progress'
-                            ? 'border-emerald-300 bg-emerald-50 shadow-sm'
-                            : status === 'available'
-                            ? 'border-slate-200 hover:border-emerald-300 hover:shadow-sm cursor-pointer'
-                            : 'border-slate-200 bg-slate-50 opacity-60'
-                        }`}
-                      >
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                          status === 'completed' 
-                            ? 'bg-green-100' 
-                            : status === 'in_progress'
-                            ? 'bg-emerald-100'
-                            : status === 'available'
-                            ? 'bg-slate-100'
-                            : 'bg-slate-100'
-                        }`}>
-                          {status === 'completed' ? (
-                            <CheckCircle2 className="h-6 w-6 text-green-600" />
-                          ) : status === 'locked' ? (
-                            <Lock className="h-6 w-6 text-slate-400" />
-                          ) : (
-                            <Icon className={`h-6 w-6 ${
-                              status === 'in_progress' ? 'text-emerald-600' : 'text-slate-500'
-                            }`} />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-medium text-slate-800">{stage.name}</h4>
-                            {status === 'completed' && 'score' in stageProgress && stageProgress.score && (
-                              <Badge className="bg-green-100 text-green-700">{Math.round(stageProgress.score)}分</Badge>
-                            )}
-                          </div>
-                          <p className="text-sm text-slate-500 mt-1">{stage.description}</p>
-                          <div className="flex items-center gap-4 mt-2 text-xs text-slate-500">
-                            <span>{stage.tasks.length} 个任务</span>
-                            <span>{stage.duration}</span>
-                            {stage.rewards.badge && <span>🎖️ {stage.rewards.badge}</span>}
-                          </div>
-                          {/* 显示关联的五维能力 */}
-                          {stage.abilities && stage.abilities.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-2">
-                              {stage.abilities.map((ability, idx) => {
-                                const dim = abilityRadar?.dimensions.find((d) => d.id === ability.dimension);
-                                return (
-                                  <Badge 
-                                    key={idx}
-                                    variant="outline" 
-                                    className="text-xs"
-                                    style={{ borderColor: dim?.color, color: dim?.color }}
-                                  >
-                                    {dim?.name || ability.dimension}
-                                  </Badge>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {status === 'completed' && (
-                            <Badge className="bg-green-500">已完成</Badge>
-                          )}
-                          {status === 'in_progress' && (
-                            <Badge className="bg-emerald-500">进行中</Badge>
-                          )}
-                          {status === 'available' && (
-                            <Link href="/student/practice">
-                              <Button size="sm" className="bg-gradient-to-r from-emerald-500 to-teal-600">开始</Button>
-                            </Link>
-                          )}
-                          {status === 'locked' && (
-                            <Badge variant="outline" className="text-slate-400">需完成前置</Badge>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
+                <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-lg mb-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-lg bg-emerald-100 flex items-center justify-center">
+                      <Globe className="h-6 w-6 text-emerald-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-slate-800">{competitiveness.jobMarket.position}</p>
+                      <p className="text-sm text-slate-500">匹配度: {competitiveness.jobMarket.matchScore}%</p>
+                    </div>
+                  </div>
+                  <Badge className="bg-emerald-100 text-emerald-700">高匹配</Badge>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-slate-600 mb-2">优势能力</p>
+                    <div className="flex flex-wrap gap-2">
+                      {competitiveness.jobMarket.strengths.map((item, index) => (
+                        <Badge key={index} className="bg-emerald-100 text-emerald-700">{item}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-600 mb-2">提升建议</p>
+                    <div className="flex flex-wrap gap-2">
+                      {competitiveness.jobMarket.improvements.map((item, index) => (
+                        <Badge key={index} variant="outline">{item}</Badge>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          </div>
-        </div>
+          </TabsContent>
+        </Tabs>
       </div>
-
-      {/* 悬浮AI助手按钮 */}
-      <AIAssistantButton />
     </StudentLayout>
   );
 }
