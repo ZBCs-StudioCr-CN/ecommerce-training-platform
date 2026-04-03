@@ -1532,23 +1532,19 @@ export default function StoreAdminPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Button 
-              variant="outline" 
-              size="sm"
+            <button
               onClick={() => router.push(`/student/practice/preview/${storeId}`)}
-              className={`${
-                ['taobao', 'douyin', 'shopify', 'shoplazza', 'woocommerce'].includes(store.platform)
-                  ? 'border-white/30 text-white hover:bg-white/10'
+              className={`inline-flex items-center justify-center h-8 px-3 rounded-md text-sm font-medium transition-colors ${
+                ['taobao', 'douyin', 'shopify', 'shoplazza', 'woocommerce', 'amazon', 'shopee', 'lazada'].includes(store.platform)
+                  ? 'border border-white/30 text-white hover:bg-white/10'
                   : ['pinduoduo'].includes(store.platform)
-                  ? 'border-red-300 text-red-600 hover:bg-red-50'
-                  : ['amazon', 'shopee', 'lazada'].includes(store.platform)
-                  ? 'border-white/30 text-white hover:bg-white/10'
-                  : 'border-slate-300 text-slate-600 hover:bg-slate-50'
+                  ? 'border border-red-300 text-red-600 hover:bg-red-50'
+                  : 'border border-slate-300 text-slate-600 hover:bg-slate-50'
               }`}
             >
               <Eye className="h-4 w-4 mr-2" />
               {isChinesePlatform ? '预览前台' : 'View Store'}
-            </Button>
+            </button>
             
             <Button variant="ghost" size="icon" className={`${
               ['taobao', 'douyin', 'shopify', 'shoplazza', 'woocommerce'].includes(store.platform)
