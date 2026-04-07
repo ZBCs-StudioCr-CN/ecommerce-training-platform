@@ -373,12 +373,12 @@ export default function TeacherCoursesPage() {
               <Card className="border-0 shadow-sm">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
-                      <GraduationCap className="h-5 w-5 text-amber-600" />
+                    <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+                      <BookOpen className="h-5 w-5 text-blue-600" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-slate-800">{totalCredits}</p>
-                      <p className="text-xs text-slate-500">总学分</p>
+                      <p className="text-2xl font-bold text-slate-800">{courses.length}</p>
+                      <p className="text-xs text-slate-500">课程总数</p>
                     </div>
                   </div>
                 </CardContent>
@@ -466,9 +466,6 @@ export default function TeacherCoursesPage() {
                                       <Clock className="h-4 w-4" />
                                       {course.duration}
                                     </span>
-                                    {course.credit && (
-                                      <span>{course.credit} 学分</span>
-                                    )}
                                   </div>
                                   <div className="flex items-center gap-3 mt-3">
                                     <Progress value={getCourseProgress(course)} className="flex-1 h-2" />
@@ -520,9 +517,6 @@ export default function TeacherCoursesPage() {
                                 <Clock className="h-4 w-4" />
                                 {course.duration}
                               </span>
-                              {course.credit && (
-                                <span>{course.credit} 学分</span>
-                              )}
                             </div>
                             <div className="flex items-center gap-3 mt-3">
                               <Progress value={getCourseProgress(course)} className="flex-1 h-2" />
@@ -558,9 +552,6 @@ export default function TeacherCoursesPage() {
                         <Badge className={`${categoryConfig[selectedCourse.category].bgColor} ${categoryConfig[selectedCourse.category].color}`}>
                           {categoryConfig[selectedCourse.category].name}
                         </Badge>
-                        {selectedCourse.credit && (
-                          <Badge variant="outline">{selectedCourse.credit} 学分</Badge>
-                        )}
                       </div>
                       <CardTitle>{selectedCourse.name}</CardTitle>
                       <CardDescription>{selectedCourse.description}</CardDescription>
