@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { getPendingRiskCount } from '@/data/risk-events';
 import { useLogout } from '@/lib/auth';
 
 const menuItems = [
@@ -126,6 +127,20 @@ export function StudentLayout({ children, activeMenu }: StudentLayoutProps) {
           </div>
         </div>
 
+        {/* 风险事件提醒 */}
+        <div className="mx-4 mt-2 p-3 rounded-lg bg-gradient-to-r from-orange-50 to-red-50 border border-orange-100">
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <AlertTriangle className="h-3.5 w-3.5 text-orange-600" />
+            <span className="text-xs font-medium text-orange-700">风险事件</span>
+            <Badge className="bg-red-500 text-white text-[10px] ml-auto px-1.5 py-0">{getPendingRiskCount()} 待处理</Badge>
+          </div>
+          <Link href="/student/risk-events" className="block">
+            <Button size="sm" className="w-full h-7 text-xs bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white">
+              查看详情
+            </Button>
+          </Link>
+        </div>
+
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200 bg-white">
           <button 
             onClick={handleLogout}
@@ -191,6 +206,20 @@ export function StudentSidebar({ activeMenu }: { activeMenu?: string }) {
             <p className="text-slate-500 text-[10px]">自主决策</p>
           </div>
         </div>
+      </div>
+
+      {/* 风险事件提醒 */}
+      <div className="mx-4 mt-2 p-3 rounded-lg bg-gradient-to-r from-orange-50 to-red-50 border border-orange-100">
+        <div className="flex items-center gap-1.5 mb-1.5">
+          <AlertTriangle className="h-3.5 w-3.5 text-orange-600" />
+          <span className="text-xs font-medium text-orange-700">风险事件</span>
+          <Badge className="bg-red-500 text-white text-[10px] ml-auto px-1.5 py-0">{getPendingRiskCount()} 待处理</Badge>
+        </div>
+        <Link href="/student/risk-events" className="block">
+          <Button size="sm" className="w-full h-7 text-xs bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white">
+            查看详情
+          </Button>
+        </Link>
       </div>
 
       <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200 bg-white">
