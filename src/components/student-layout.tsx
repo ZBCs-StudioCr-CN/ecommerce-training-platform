@@ -85,9 +85,10 @@ export function StudentLayout({ children, activeMenu }: StudentLayoutProps) {
         </div>
       </header>
 
-      {/* 侧边导航 */}
-      <aside className="fixed left-0 top-16 bottom-0 w-60 bg-white border-r border-slate-200/80 overflow-y-auto">
-        <nav className="p-4 space-y-1">
+      {/* 侧边导航 - 固定宽度，内容区域滚动 */}
+      <aside className="fixed left-0 top-16 bottom-0 w-[240px] bg-white border-r border-slate-200/80 flex flex-col">
+        {/* 导航菜单区域 - 可滚动 */}
+        <nav className="flex-1 overflow-y-auto p-4 space-y-1">
           {menuItems.map((item) => (
             <Link
               key={item.id}
@@ -109,42 +110,44 @@ export function StudentLayout({ children, activeMenu }: StudentLayoutProps) {
           ))}
         </nav>
 
-        {/* AI能力统计 */}
-        <div className="mx-4 mt-2 p-3 rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100">
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <Brain className="h-3.5 w-3.5 text-purple-600" />
-            <span className="text-xs font-medium text-purple-700">AI辅助统计</span>
-          </div>
-          <div className="grid grid-cols-2 gap-1.5 text-xs">
-            <div className="text-center p-1.5 bg-white rounded-md">
-              <p className="text-base font-bold text-purple-600">23</p>
-              <p className="text-slate-500 text-[10px]">AI调用</p>
+        {/* 底部固定区域 - 统计卡片和退出登录 */}
+        <div className="border-t border-slate-200 bg-white">
+          {/* AI能力统计 */}
+          <div className="mx-4 mt-4 p-3 rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <Brain className="h-3.5 w-3.5 text-purple-600" />
+              <span className="text-xs font-medium text-purple-700">AI辅助统计</span>
             </div>
-            <div className="text-center p-1.5 bg-white rounded-md">
-              <p className="text-base font-bold text-emerald-600">78%</p>
-              <p className="text-slate-500 text-[10px]">自主决策</p>
+            <div className="grid grid-cols-2 gap-1.5 text-xs">
+              <div className="text-center p-1.5 bg-white rounded-md">
+                <p className="text-base font-bold text-purple-600">23</p>
+                <p className="text-slate-500 text-[10px]">AI调用</p>
+              </div>
+              <div className="text-center p-1.5 bg-white rounded-md">
+                <p className="text-base font-bold text-emerald-600">78%</p>
+                <p className="text-slate-500 text-[10px]">自主决策</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* 风险事件提醒 */}
-        <div className="mx-4 mt-2 p-3 rounded-lg bg-gradient-to-r from-orange-50 to-red-50 border border-orange-100">
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <AlertTriangle className="h-3.5 w-3.5 text-orange-600" />
-            <span className="text-xs font-medium text-orange-700">风险事件</span>
-            <Badge className="bg-red-500 text-white text-[10px] ml-auto px-1.5 py-0">{getPendingRiskCount()} 待处理</Badge>
+          {/* 风险事件提醒 */}
+          <div className="mx-4 mt-2 p-3 rounded-lg bg-gradient-to-r from-orange-50 to-red-50 border border-orange-100">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <AlertTriangle className="h-3.5 w-3.5 text-orange-600" />
+              <span className="text-xs font-medium text-orange-700">风险事件提醒</span>
+              <Badge className="bg-red-500 text-white text-[10px] ml-auto px-1.5 py-0">{getPendingRiskCount()} 待处理</Badge>
+            </div>
+            <Link href="/student/risk-events" className="block">
+              <Button size="sm" className="w-full h-7 text-xs bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white">
+                查看详情
+              </Button>
+            </Link>
           </div>
-          <Link href="/student/risk-events" className="block">
-            <Button size="sm" className="w-full h-7 text-xs bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white">
-              查看详情
-            </Button>
-          </Link>
-        </div>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200 bg-white">
+          {/* 退出登录按钮 */}
           <button 
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
+            className="w-[calc(100%-32px)] mx-4 my-4 flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
           >
             <LogOut className="h-5 w-5" />
             <span className="font-medium">退出登录</span>
@@ -152,8 +155,8 @@ export function StudentLayout({ children, activeMenu }: StudentLayoutProps) {
         </div>
       </aside>
 
-      {/* 主内容区 */}
-      <main className="ml-60 pt-16 min-h-screen">
+      {/* 主内容区 - 使用固定宽度的偏移量 */}
+      <main className="ml-[240px] pt-16 min-h-screen">
         {children}
       </main>
     </div>
@@ -167,8 +170,9 @@ export function StudentSidebar({ activeMenu }: { activeMenu?: string }) {
   const currentMenu = activeMenu || menuItems.find(item => pathname.startsWith(item.href))?.id || 'dashboard';
 
   return (
-    <aside className="fixed left-0 top-16 bottom-0 w-60 bg-white border-r border-slate-200/80 overflow-y-auto">
-      <nav className="p-4 space-y-1">
+    <aside className="fixed left-0 top-16 bottom-0 w-[240px] bg-white border-r border-slate-200/80 flex flex-col">
+      {/* 导航菜单区域 - 可滚动 */}
+      <nav className="flex-1 overflow-y-auto p-4 space-y-1">
         {menuItems.map((item) => (
           <Link
             key={item.id}
@@ -190,42 +194,44 @@ export function StudentSidebar({ activeMenu }: { activeMenu?: string }) {
         ))}
       </nav>
 
-      {/* AI能力统计 */}
-      <div className="mx-4 mt-2 p-3 rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100">
-        <div className="flex items-center gap-1.5 mb-1.5">
-          <Brain className="h-3.5 w-3.5 text-purple-600" />
-          <span className="text-xs font-medium text-purple-700">AI辅助统计</span>
-        </div>
-        <div className="grid grid-cols-2 gap-1.5 text-xs">
-          <div className="text-center p-1.5 bg-white rounded-md">
-            <p className="text-base font-bold text-purple-600">23</p>
-            <p className="text-slate-500 text-[10px]">AI调用</p>
+      {/* 底部固定区域 */}
+      <div className="border-t border-slate-200 bg-white">
+        {/* AI能力统计 */}
+        <div className="mx-4 mt-4 p-3 rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100">
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <Brain className="h-3.5 w-3.5 text-purple-600" />
+            <span className="text-xs font-medium text-purple-700">AI辅助统计</span>
           </div>
-          <div className="text-center p-1.5 bg-white rounded-md">
-            <p className="text-base font-bold text-emerald-600">78%</p>
-            <p className="text-slate-500 text-[10px]">自主决策</p>
+          <div className="grid grid-cols-2 gap-1.5 text-xs">
+            <div className="text-center p-1.5 bg-white rounded-md">
+              <p className="text-base font-bold text-purple-600">23</p>
+              <p className="text-slate-500 text-[10px]">AI调用</p>
+            </div>
+            <div className="text-center p-1.5 bg-white rounded-md">
+              <p className="text-base font-bold text-emerald-600">78%</p>
+              <p className="text-slate-500 text-[10px]">自主决策</p>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* 风险事件提醒 */}
-      <div className="mx-4 mt-2 p-3 rounded-lg bg-gradient-to-r from-orange-50 to-red-50 border border-orange-100">
-        <div className="flex items-center gap-1.5 mb-1.5">
-          <AlertTriangle className="h-3.5 w-3.5 text-orange-600" />
-          <span className="text-xs font-medium text-orange-700">风险事件</span>
-          <Badge className="bg-red-500 text-white text-[10px] ml-auto px-1.5 py-0">{getPendingRiskCount()} 待处理</Badge>
+        {/* 风险事件提醒 */}
+        <div className="mx-4 mt-2 p-3 rounded-lg bg-gradient-to-r from-orange-50 to-red-50 border border-orange-100">
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <AlertTriangle className="h-3.5 w-3.5 text-orange-600" />
+            <span className="text-xs font-medium text-orange-700">风险事件提醒</span>
+            <Badge className="bg-red-500 text-white text-[10px] ml-auto px-1.5 py-0">{getPendingRiskCount()} 待处理</Badge>
+          </div>
+          <Link href="/student/risk-events" className="block">
+            <Button size="sm" className="w-full h-7 text-xs bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white">
+              查看详情
+            </Button>
+          </Link>
         </div>
-        <Link href="/student/risk-events" className="block">
-          <Button size="sm" className="w-full h-7 text-xs bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white">
-            查看详情
-          </Button>
-        </Link>
-      </div>
 
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200 bg-white">
+        {/* 退出登录按钮 */}
         <button 
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
+          className="w-[calc(100%-32px)] mx-4 my-4 flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
         >
           <LogOut className="h-5 w-5" />
           <span className="font-medium">退出登录</span>
@@ -248,7 +254,7 @@ export function StudentHeader() {
     <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md border-b border-slate-200/80 z-50">
       <div className="flex items-center justify-between h-full px-6">
         <div className="flex items-center gap-3">
-          <Link href="/login" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
               <Globe className="h-6 w-6 text-white" />
             </div>
