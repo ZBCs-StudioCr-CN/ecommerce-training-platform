@@ -185,50 +185,56 @@ export default function StudentLearningPage() {
           </Card>
         </div>
 
-        {/* 课程分类视图 */}
+        {/* 课程分类视图 - 与教师端一致的样式 */}
         {!selectedCourse && (
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-4">
             {Object.entries(categoryConfig).map(([key, config]) => {
               const Icon = config.icon;
-              const chaptersInCategory = coursesInCategory.filter(c => c.category === key).reduce((sum, c) => sum + c.chapters.length, 0);
-              const durationInCategory = coursesInCategory.filter(c => c.category === key).reduce((sum, c) => {
+              const coursesInCat = publishedCourses.filter(c => c.category === key);
+              const chaptersInCat = coursesInCat.reduce((sum, c) => sum + c.chapters.length, 0);
+              const hoursInCat = coursesInCat.reduce((sum, c) => {
                 const hours = parseInt(c.duration.replace(/[^0-9]/g, '')) || 0;
                 return sum + hours;
               }, 0);
 
               return (
-                <Card
+                <div
                   key={key}
-                  className={`border-0 shadow-lg cursor-pointer transition-all hover:shadow-xl ${
-                    selectedCategory === key ? 'ring-2 ring-emerald-500' : ''
+                  className={`bg-white rounded-xl border-2 p-4 cursor-pointer transition-all hover:shadow-md ${
+                    selectedCategory === key ? 'border-emerald-500 shadow-md' : 'border-transparent shadow-sm hover:border-slate-200'
                   }`}
                   onClick={() => setSelectedCategory(key as CourseCategory)}
                 >
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-14 h-14 rounded-xl ${config.bgColor} flex items-center justify-center`}>
-                        <Icon className={`h-7 w-7 ${config.color}`} />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-1">
-                          <h4 className="font-semibold text-slate-800">{config.name}</h4>
-                          <Badge variant="outline">{coursesInCategory.filter(c => c.category === key).length} 课程</Badge>
-                        </div>
-                        <div className="flex items-center gap-4 text-sm text-slate-500">
-                          <span className="flex items-center gap-1">
-                            <Video className="h-4 w-4" />
-                            {chaptersInCategory} 章节
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            {durationInCategory}h
-                          </span>
-                        </div>
-                      </div>
-                      <ChevronRight className="h-5 w-5 text-slate-400" />
+                  <div className="flex items-center gap-4">
+                    {/* 左侧图标 */}
+                    <div className={`w-12 h-12 rounded-xl ${config.bgColor} flex items-center justify-center shrink-0`}>
+                      <Icon className={`h-6 w-6 ${config.color}`} />
                     </div>
-                  </CardContent>
-                </Card>
+
+                    {/* 中间内容 */}
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-slate-800">{config.name}</h4>
+                      <div className="flex items-center gap-3 text-xs text-slate-500 mt-1">
+                        <span className="flex items-center gap-1">
+                          <FolderOpen className="h-3 w-3" />
+                          {chaptersInCat} 章节
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {hoursInCat}h
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* 右侧 */}
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-full">
+                        {coursesInCat.length} 课程
+                      </span>
+                      <ChevronRight className={`h-4 w-4 ${selectedCategory === key ? 'text-emerald-500' : 'text-slate-400'}`} />
+                    </div>
+                  </div>
+                </div>
               );
             })}
           </div>
