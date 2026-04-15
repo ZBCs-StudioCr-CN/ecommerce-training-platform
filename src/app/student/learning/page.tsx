@@ -1,29 +1,36 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
-  CheckCircle2,
-  Clock,
-  Play,
-  ChevronRight,
-  Video,
-  Download,
-  Bookmark,
-  Loader2,
   GraduationCap,
   Target,
   Wrench,
   TrendingUp,
   Award as CertificateIcon,
+  BookOpen,
+  Video,
+  FileText,
+  Clock,
+  ChevronRight,
+  ChevronLeft,
+  FolderOpen,
+  Play,
+  CheckCircle2,
+  Loader2,
+  Globe,
+  Bell,
+  Brain,
+  AlertTriangle,
+  Download,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { VideoPlayer } from '@/components/video-player';
 import { StudentLayout } from '@/components/student-layout';
+import { VideoPlayer } from '@/components/video-player';
+import { courses, getPublishedCourses } from '@/data/courses';
 import type { Course, Chapter, CourseCategory } from '@/data/courses';
 
 // 课程分类配置
@@ -35,103 +42,60 @@ const categoryConfig: Record<CourseCategory, { name: string; icon: React.Element
   certification: { name: '考证培训', icon: CertificateIcon, color: 'text-purple-600', bgColor: 'bg-purple-100' },
 };
 
-interface VideoItem {
-  key: string;
-  fileName: string;
-  category: string;
-  title: string;
-}
+// 视频资源数据
+const videoResources = [
+  { key: 'video-1', title: 'Shopify新手入门教程', category: '基础课程' },
+  { key: 'video-2', title: '如何设置收款方式', category: '支付设置' },
+  { key: 'video-3', title: '产品图片拍摄技巧', category: '运营技巧' },
+  { key: 'video-4', title: '物流渠道选择指南', category: '物流配送' },
+  { key: 'video-5', title: '客户评价管理', category: '客户服务' },
+  { key: 'video-6', title: '节假日促销策划', category: '营销推广' },
+];
 
-interface DocumentItem {
-  key: string;
-  fileName: string;
-  title: string;
-  type: string;
-}
+// 文档资源数据
+const documentResources = [
+  { key: 'doc-1', fileName: 'shopify开店指南.pdf', title: 'Shopify开店完整指南', type: 'pdf' },
+  { key: 'doc-2', fileName: '产品上架手册.pdf', title: '产品上架标准手册', type: 'pdf' },
+  { key: 'doc-3', fileName: '广告投放模板.xlsx', title: 'Facebook广告投放模板', type: 'xlsx' },
+  { key: 'doc-4', fileName: '物流合作伙伴清单.pdf', title: '物流合作伙伴清单', type: 'pdf' },
+];
 
 export default function StudentLearningPage() {
-  const [activeTab, setActiveTab] = useState('courses');
+  const [selectedCategory, setSelectedCategory] = useState<CourseCategory | 'all'>('foundation');
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<CourseCategory | 'all'>('all');
-  
-  // 课程列表
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [isLoadingCourses, setIsLoadingCourses] = useState(false);
-  
-  // 对象存储视频列表
-  const [cloudVideos, setCloudVideos] = useState<VideoItem[]>([]);
-  const [isLoadingVideos, setIsLoadingVideos] = useState(false);
-  
-  // 对象存储文档列表
-  const [cloudDocuments, setCloudDocuments] = useState<DocumentItem[]>([]);
-  const [isLoadingDocs, setIsLoadingDocs] = useState(false);
-  
-  // 当前播放的视频
-  const [playingVideo, setPlayingVideo] = useState<VideoItem | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // 加载课程列表
-  const loadCourses = useCallback(async () => {
-    setIsLoadingCourses(true);
-    try {
-      const response = await fetch('/api/courses');
-      const data = await response.json();
-      if (data.success) {
-        setCourses(data.courses);
-      }
-    } catch (error) {
-      console.error('加载课程失败:', error);
-    } finally {
-      setIsLoadingCourses(false);
-    }
-  }, []);
+  // 获取已发布的课程
+  const publishedCourses = getPublishedCourses();
 
-  // 加载云端视频
-  const loadCloudVideos = useCallback(async () => {
-    setIsLoadingVideos(true);
-    try {
-      const response = await fetch('/api/videos');
-      const data = await response.json();
-      if (data.success) {
-        setCloudVideos(data.videos);
-      }
-    } catch (error) {
-      console.error('加载视频失败:', error);
-    } finally {
-      setIsLoadingVideos(false);
-    }
-  }, []);
-
-  // 加载云端文档
-  const loadCloudDocuments = useCallback(async () => {
-    setIsLoadingDocs(true);
-    try {
-      const response = await fetch('/api/documents');
-      const data = await response.json();
-      if (data.success) {
-        setCloudDocuments(data.documents);
-      }
-    } catch (error) {
-      console.error('加载文档失败:', error);
-    } finally {
-      setIsLoadingDocs(false);
-    }
-  }, []);
-
-  // 初始加载课程
+  // 模拟加载课程数据
   useEffect(() => {
-    loadCourses();
-  }, [loadCourses]);
+    setIsLoading(true);
+    const timer = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, [selectedCategory, selectedCourse]);
 
-  // 切换到视频/文档标签时加载
-  useEffect(() => {
-    if (activeTab === 'videos' && cloudVideos.length === 0) {
-      loadCloudVideos();
-    }
-    if (activeTab === 'knowledge' && cloudDocuments.length === 0) {
-      loadCloudDocuments();
-    }
-  }, [activeTab, cloudVideos.length, cloudDocuments.length]);
+  // 计算课程进度（模拟）
+  const getCourseProgress = (course: Course) => {
+    return course.progress || 0;
+  };
+
+  // 计算总体统计
+  const totalCourses = publishedCourses.length;
+  const totalChapters = publishedCourses.reduce((sum, c) => sum + c.chapters.length, 0);
+  const totalDuration = publishedCourses.reduce((sum, c) => {
+    const hours = parseInt(c.duration.replace(/[^0-9]/g, '')) || 0;
+    return sum + hours;
+  }, 0);
+
+  // 根据分类筛选课程
+  const filteredCourses = selectedCategory === 'all'
+    ? publishedCourses
+    : publishedCourses.filter(c => c.category === selectedCategory);
+
+  // 根据分类筛选课程（用于分类视图）
+  const coursesInCategory = publishedCourses.filter(c => c.category === selectedCategory);
 
   // 打开课程详情
   const openCourse = (course: Course) => {
@@ -140,75 +104,42 @@ export default function StudentLearningPage() {
   };
 
   // 返回课程列表
-  const closeCourse = () => {
+  const backToList = () => {
     setSelectedCourse(null);
     setSelectedChapter(null);
-    setPlayingVideo(null);
   };
 
-  // 播放章节视频
+  // 返回分类选择
+  const backToCategories = () => {
+    setSelectedCourse(null);
+    setSelectedChapter(null);
+  };
+
+  // 播放章节
   const playChapter = (chapter: Chapter) => {
     setSelectedChapter(chapter);
   };
-
-  // 下载文档
-  const downloadDocument = async (doc: DocumentItem) => {
-    try {
-      const response = await fetch(`/api/documents/url?key=${encodeURIComponent(doc.key)}`);
-      const data = await response.json();
-      if (data.success) {
-        const res = await fetch(data.url);
-        const blob = await res.blob();
-        const blobUrl = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = blobUrl;
-        link.download = doc.title + '.' + doc.type;
-        link.click();
-        window.URL.revokeObjectURL(blobUrl);
-      }
-    } catch (error) {
-      console.error('下载失败:', error);
-      alert('下载失败，请重试');
-    }
-  };
-
-  // 播放云端视频
-  const playCloudVideo = (video: VideoItem) => {
-    setPlayingVideo(video);
-  };
-
-  // 根据分类筛选课程
-  const filteredCourses = selectedCategory === 'all' 
-    ? courses 
-    : courses.filter(c => c.category === selectedCategory);
-
-  // 计算学习统计
-  const totalChapters = courses.reduce((sum, c) => sum + c.chapters.length, 0);
-  const totalDuration = courses.reduce((sum, c) => {
-    const hours = parseInt(c.duration.replace(/[^0-9]/g, '')) || 0;
-    return sum + hours;
-  }, 0);
 
   return (
     <StudentLayout activeMenu="learning">
       <div className="p-8">
         {/* 页面标题 */}
-        <div className="mb-8">
+        <div className="mb-6">
           <h2 className="text-2xl font-bold text-slate-800">学习中心</h2>
-          <p className="text-slate-500">系统化学习独立站运营知识</p>
+          <p className="text-slate-500">系统化学习独立站运营知识，提升专业技能</p>
         </div>
 
         {/* 统计卡片 */}
-        <div className="grid grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-4 gap-4 mb-6">
           <Card className="border-0 shadow-lg">
             <CardContent className="p-5">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
-                  <GraduationCap className="h-6 w-6 text-emerald-600" />
+                <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+                  <BookOpen className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-slate-800">{courses.length}</p>
-                  <p className="text-sm text-slate-500">课程数</p>
+                  <p className="text-2xl font-bold text-slate-800">{totalCourses}</p>
+                  <p className="text-xs text-slate-500">课程总数</p>
                 </div>
               </div>
             </CardContent>
@@ -216,12 +147,12 @@ export default function StudentLearningPage() {
           <Card className="border-0 shadow-lg">
             <CardContent className="p-5">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
-                  <Bookmark className="h-6 w-6 text-blue-600" />
+                <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
+                  <Video className="h-5 w-5 text-indigo-600" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-slate-800">{totalChapters}</p>
-                  <p className="text-sm text-slate-500">章节总数</p>
+                  <p className="text-xs text-slate-500">章节总数</p>
                 </div>
               </div>
             </CardContent>
@@ -229,12 +160,12 @@ export default function StudentLearningPage() {
           <Card className="border-0 shadow-lg">
             <CardContent className="p-5">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center">
-                  <Clock className="h-6 w-6 text-amber-600" />
+                <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+                  <Clock className="h-5 w-5 text-amber-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-slate-800">{totalDuration}h</p>
-                  <p className="text-sm text-slate-500">总学时</p>
+                  <p className="text-2xl font-bold text-slate-800">{totalDuration}</p>
+                  <p className="text-xs text-slate-500">总学时</p>
                 </div>
               </div>
             </CardContent>
@@ -242,171 +173,348 @@ export default function StudentLearningPage() {
           <Card className="border-0 shadow-lg">
             <CardContent className="p-5">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
-                  <CheckCircle2 className="h-6 w-6 text-purple-600" />
+                <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-600" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-slate-800">0</p>
-                  <p className="text-sm text-slate-500">已完成</p>
+                  <p className="text-xs text-slate-500">已完成</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* 课程内容 */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-white border shadow-sm mb-6">
-            <TabsTrigger value="courses">课程列表</TabsTrigger>
-            <TabsTrigger value="videos">视频资源</TabsTrigger>
-            <TabsTrigger value="knowledge">知识文档</TabsTrigger>
-          </TabsList>
+        {/* 课程分类视图 */}
+        {!selectedCourse && (
+          <div className="grid grid-cols-2 gap-6">
+            {Object.entries(categoryConfig).map(([key, config]) => {
+              const Icon = config.icon;
+              const chaptersInCategory = coursesInCategory.filter(c => c.category === key).reduce((sum, c) => sum + c.chapters.length, 0);
+              const durationInCategory = coursesInCategory.filter(c => c.category === key).reduce((sum, c) => {
+                const hours = parseInt(c.duration.replace(/[^0-9]/g, '')) || 0;
+                return sum + hours;
+              }, 0);
 
-          <TabsContent value="courses">
-            {/* 分类筛选 */}
-            <div className="flex items-center gap-2 mb-6">
-              <Button
-                variant={selectedCategory === 'all' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setSelectedCategory('all')}
-                className={selectedCategory === 'all' ? 'bg-gradient-to-r from-emerald-500 to-teal-600' : ''}
-              >
-                全部
-              </Button>
-              {Object.entries(categoryConfig).map(([key, config]) => (
-                <Button
+              return (
+                <Card
                   key={key}
-                  variant={selectedCategory === key ? 'default' : 'outline'}
-                  size="sm"
+                  className={`border-0 shadow-lg cursor-pointer transition-all hover:shadow-xl ${
+                    selectedCategory === key ? 'ring-2 ring-emerald-500' : ''
+                  }`}
                   onClick={() => setSelectedCategory(key as CourseCategory)}
-                  className={selectedCategory === key ? 'bg-gradient-to-r from-emerald-500 to-teal-600' : ''}
                 >
-                  <config.icon className="h-4 w-4 mr-1" />
-                  {config.name}
-                </Button>
-              ))}
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-14 h-14 rounded-xl ${config.bgColor} flex items-center justify-center`}>
+                        <Icon className={`h-7 w-7 ${config.color}`} />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <h4 className="font-semibold text-slate-800">{config.name}</h4>
+                          <Badge variant="outline">{coursesInCategory.filter(c => c.category === key).length} 课程</Badge>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm text-slate-500">
+                          <span className="flex items-center gap-1">
+                            <Video className="h-4 w-4" />
+                            {chaptersInCategory} 章节
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-4 w-4" />
+                            {durationInCategory}h
+                          </span>
+                        </div>
+                      </div>
+                      <ChevronRight className="h-5 w-5 text-slate-400" />
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+
+        {/* 课程列表视图 */}
+        {selectedCourse === null && selectedCategory !== 'all' && (
+          <>
+            <Button variant="ghost" onClick={backToCategories} className="mb-4">
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              返回课程分类
+            </Button>
+
+            <div className="mb-4 flex items-center gap-2">
+              <Badge className={`${categoryConfig[selectedCategory].bgColor} ${categoryConfig[selectedCategory].color} px-3 py-1`}>
+                {categoryConfig[selectedCategory].name}
+              </Badge>
+              <span className="text-sm text-slate-500">{filteredCourses.length} 门课程</span>
             </div>
 
-            {/* 课程列表 */}
-            {isLoadingCourses ? (
+            {isLoading ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
               </div>
             ) : (
-              <div className="grid grid-cols-3 gap-6">
+              <div className="space-y-4">
                 {filteredCourses.map((course) => (
                   <Card
                     key={course.id}
                     className="border-0 shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
                     onClick={() => openCourse(course)}
                   >
-                    <CardContent className="p-0">
-                      <div className="h-32 bg-gradient-to-br from-slate-100 to-slate-200 rounded-t-lg flex items-center justify-center">
-                        <span className="text-4xl">📚</span>
-                      </div>
-                      <div className="p-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge className={categoryConfig[course.category].bgColor + ' ' + categoryConfig[course.category].color}>
-                            {categoryConfig[course.category].name}
-                          </Badge>
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-14 h-14 rounded-xl ${categoryConfig[course.category].bgColor} flex items-center justify-center`}>
+                          {(() => {
+                            const Icon = categoryConfig[course.category].icon;
+                            return <Icon className={`h-7 w-7 ${categoryConfig[course.category].color}`} />;
+                          })()}
                         </div>
-                        <h3 className="font-semibold text-slate-800 mb-1">{course.name}</h3>
-                        <p className="text-sm text-slate-500 line-clamp-2">{course.description}</p>
-                        <div className="flex items-center justify-between mt-3 text-sm text-slate-500">
-                          <span>{course.chapters.length} 章节</span>
-                          <span>{course.duration}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="videos">
-            {isLoadingVideos ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
-              </div>
-            ) : (
-              <div className="grid grid-cols-4 gap-4">
-                {cloudVideos.map((video) => (
-                  <Card
-                    key={video.key}
-                    className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                    onClick={() => playCloudVideo(video)}
-                  >
-                    <CardContent className="p-3">
-                      <div className="aspect-video bg-slate-100 rounded-lg flex items-center justify-center mb-2">
-                        <Video className="h-8 w-8 text-slate-400" />
-                      </div>
-                      <p className="text-sm font-medium text-slate-800 truncate">{video.title}</p>
-                      <p className="text-xs text-slate-500">{video.category}</p>
-                    </CardContent>
-                  </Card>
-                ))}
-                {cloudVideos.length === 0 && (
-                  <div className="col-span-4 text-center py-12 text-slate-500">
-                    暂无视频资源
-                  </div>
-                )}
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="knowledge">
-            {isLoadingDocs ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {cloudDocuments.map((doc) => (
-                  <Card key={doc.key} className="border-0 shadow-sm">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                            <Download className="h-5 w-5 text-blue-600" />
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-1">
+                            <h4 className="font-semibold text-slate-800">{course.name}</h4>
+                            <Badge className="bg-emerald-100 text-emerald-700">学习中</Badge>
                           </div>
-                          <div>
-                            <p className="font-medium text-slate-800">{doc.title}</p>
-                            <p className="text-sm text-slate-500">{doc.fileName}</p>
+                          <p className="text-sm text-slate-500 mb-3 line-clamp-2">{course.description}</p>
+                          <div className="flex items-center gap-4 text-sm text-slate-500">
+                            <span className="flex items-center gap-1">
+                              <FolderOpen className="h-4 w-4" />
+                              {course.chapters.length} 章节
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-4 w-4" />
+                              {course.duration}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-3 mt-3">
+                            <Progress value={getCourseProgress(course)} className="flex-1 h-2" />
+                            <span className="text-sm font-medium text-slate-600">{getCourseProgress(course)}%</span>
                           </div>
                         </div>
-                        <Button size="sm" variant="outline" onClick={() => downloadDocument(doc)}>
-                          下载
-                        </Button>
+                        <ChevronRight className="h-5 w-5 text-slate-400" />
                       </div>
                     </CardContent>
                   </Card>
                 ))}
-                {cloudDocuments.length === 0 && (
-                  <div className="text-center py-12 text-slate-500">
-                    暂无知识文档
-                  </div>
-                )}
               </div>
             )}
-          </TabsContent>
-        </Tabs>
+          </>
+        )}
 
-        {/* 视频播放弹窗 */}
-        {playingVideo && (
-          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-            <div className="w-full max-w-4xl">
-              <div className="bg-white rounded-lg p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-slate-800">{playingVideo.title}</h3>
-                  <Button variant="ghost" size="sm" onClick={() => setPlayingVideo(null)}>
-                    ✕
-                  </Button>
-                </div>
-                <VideoPlayer videoKey={playingVideo.key} />
+        {/* 课程详情视图 */}
+        {selectedCourse && !selectedChapter && (
+          <>
+            <Button variant="ghost" onClick={backToList} className="mb-4">
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              返回课程列表
+            </Button>
+
+            <div className="grid grid-cols-3 gap-6">
+              {/* 章节列表 */}
+              <div className="col-span-2">
+                <Card className="border-0 shadow-lg">
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge className={`${categoryConfig[selectedCourse.category].bgColor} ${categoryConfig[selectedCourse.category].color}`}>
+                          {categoryConfig[selectedCourse.category].name}
+                        </Badge>
+                      </div>
+                      <CardTitle>{selectedCourse.name}</CardTitle>
+                      <CardDescription>{selectedCourse.description}</CardDescription>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {selectedCourse.chapters.length > 0 ? (
+                      <div className="space-y-3">
+                        {selectedCourse.chapters.map((chapter, index) => (
+                          <div
+                            key={chapter.id}
+                            className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 hover:border-emerald-300 hover:shadow-sm transition-all cursor-pointer"
+                            onClick={() => playChapter(chapter)}
+                          >
+                            <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
+                              <Play className="h-5 w-5 text-emerald-600" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="font-medium text-slate-800">{index + 1}. {chapter.title}</p>
+                              <div className="flex items-center gap-3 text-sm text-slate-500">
+                                <span className="flex items-center gap-1">
+                                  <Clock className="h-4 w-4" />
+                                  {chapter.duration}
+                                </span>
+                                {chapter.difficulty === 'intermediate' && (
+                                  <Badge className="bg-amber-100 text-amber-700 text-xs">中级</Badge>
+                                )}
+                                {chapter.difficulty === 'advanced' && (
+                                  <Badge className="bg-red-100 text-red-700 text-xs">高级</Badge>
+                                )}
+                                {chapter.difficulty === 'basic' && (
+                                  <Badge className="bg-green-100 text-green-700 text-xs">初级</Badge>
+                                )}
+                              </div>
+                            </div>
+                            <Button size="sm" className="bg-gradient-to-r from-emerald-500 to-teal-600">
+                              <Play className="h-4 w-4 mr-1" />
+                              看课
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <FolderOpen className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+                        <p className="text-slate-500">暂无章节内容</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* 课程信息 */}
+              <div className="space-y-4">
+                <Card className="border-0 shadow-lg">
+                  <CardHeader>
+                    <CardTitle>课程信息</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-slate-500">课程分类</span>
+                      <Badge>{categoryConfig[selectedCourse.category].name}</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-slate-500">章节数</span>
+                      <span className="text-sm font-medium">{selectedCourse.chapters.length}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-slate-500">总时长</span>
+                      <span className="text-sm font-medium">{selectedCourse.duration}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-slate-500">学习进度</span>
+                      <span className="text-sm font-medium">{getCourseProgress(selectedCourse)}%</span>
+                    </div>
+                    <Progress value={getCourseProgress(selectedCourse)} className="h-2" />
+                  </CardContent>
+                </Card>
+
+                {/* 视频资源 */}
+                <Card className="border-0 shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-base">视频资源</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {videoResources.slice(0, 3).map((video) => (
+                        <div key={video.key} className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 text-sm">
+                          <Video className="h-4 w-4 text-emerald-500" />
+                          <span className="flex-1 truncate">{video.title}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* 文档下载 */}
+                <Card className="border-0 shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-base">学习资料</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {documentResources.slice(0, 3).map((doc) => (
+                        <div key={doc.key} className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 text-sm">
+                          <FileText className="h-4 w-4 text-blue-500" />
+                          <span className="flex-1 truncate">{doc.title}</span>
+                          <Button size="icon" variant="ghost" className="h-6 w-6">
+                            <Download className="h-3 w-3 text-slate-400" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </div>
-          </div>
+          </>
+        )}
+
+        {/* 章节播放视图 */}
+        {selectedChapter && selectedCourse && (
+          <>
+            <Button variant="ghost" onClick={() => setSelectedChapter(null)} className="mb-4">
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              返回课程详情
+            </Button>
+
+            <Card className="border-0 shadow-lg">
+              <CardHeader>
+                <div className="flex items-center gap-2 mb-2">
+                  <Badge className={`${categoryConfig[selectedCourse.category].bgColor} ${categoryConfig[selectedCourse.category].color}`}>
+                    {selectedCourse.name}
+                  </Badge>
+                </div>
+                <CardTitle>{selectedChapter.title}</CardTitle>
+                <CardDescription>课时长：{selectedChapter.duration}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {/* 视频播放器占位 */}
+                <div className="aspect-video bg-slate-900 rounded-xl flex items-center justify-center mb-6">
+                  <div className="text-center">
+                    <div className="w-20 h-20 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+                      <Play className="h-10 w-10 text-emerald-400" />
+                    </div>
+                    <p className="text-slate-400">视频播放器区域</p>
+                    <p className="text-slate-500 text-sm mt-2">集成 VideoPlayer 组件</p>
+                  </div>
+                </div>
+
+                {/* 章节信息 */}
+                <div className="bg-slate-50 rounded-xl p-4">
+                  <h4 className="font-medium text-slate-800 mb-2">章节学习指南</h4>
+                  <p className="text-sm text-slate-600 mb-4">
+                    本章节将帮助您了解{selectedChapter.title}的核心知识点。建议您：
+                  </p>
+                  <ul className="text-sm text-slate-600 space-y-1">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500 mt-0.5" />
+                      认真观看视频教程，做好笔记
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500 mt-0.5" />
+                      完成后完成章节测验
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500 mt-0.5" />
+                      如有疑问可在答疑区提问
+                    </li>
+                  </ul>
+                </div>
+
+                {/* 章节导航 */}
+                <div className="mt-6 flex items-center justify-between">
+                  <Button variant="outline" disabled={selectedCourse.chapters.indexOf(selectedChapter) === 0}>
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    上一章
+                  </Button>
+                  <span className="text-sm text-slate-500">
+                    第 {selectedCourse.chapters.indexOf(selectedChapter) + 1} / {selectedCourse.chapters.length} 章
+                  </span>
+                  <Button variant="outline" 
+                    disabled={selectedCourse.chapters.indexOf(selectedChapter) === selectedCourse.chapters.length - 1}
+                    onClick={() => {
+                      const idx = selectedCourse.chapters.indexOf(selectedChapter);
+                      if (idx < selectedCourse.chapters.length - 1) {
+                        setSelectedChapter(selectedCourse.chapters[idx + 1]);
+                      }
+                    }}
+                  >
+                    下一章
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </>
         )}
       </div>
     </StudentLayout>
