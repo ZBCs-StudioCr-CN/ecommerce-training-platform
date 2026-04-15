@@ -185,73 +185,53 @@ export default function StudentLearningPage() {
           </Card>
         </div>
 
-        {/* 课程分类视图 - 与教师端一致的样式 */}
-        {!selectedCourse && (
-          <div className="grid grid-cols-2 gap-4">
-            {Object.entries(categoryConfig).map(([key, config]) => {
-              const Icon = config.icon;
-              const coursesInCat = publishedCourses.filter(c => c.category === key);
-              const chaptersInCat = coursesInCat.reduce((sum, c) => sum + c.chapters.length, 0);
-              const hoursInCat = coursesInCat.reduce((sum, c) => {
-                const hours = parseInt(c.duration.replace(/[^0-9]/g, '')) || 0;
-                return sum + hours;
-              }, 0);
+        {/* 分类标签栏 - 横向一行排列 */}
+        <div className="flex items-center gap-2 flex-wrap mb-6">
+          <button
+            onClick={() => setSelectedCategory('all')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              selectedCategory === 'all'
+                ? 'bg-slate-800 text-white'
+                : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+            }`}
+          >
+            全部课程
+          </button>
+          {Object.entries(categoryConfig).map(([key, config]) => {
+            const Icon = config.icon;
+            return (
+              <button
+                key={key}
+                onClick={() => setSelectedCategory(key as CourseCategory)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+                  selectedCategory === key
+                    ? 'bg-slate-800 text-white'
+                    : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                {config.name}
+              </button>
+            );
+          })}
+        </div>
 
-              return (
-                <div
-                  key={key}
-                  className={`bg-white rounded-xl border-2 p-4 cursor-pointer transition-all hover:shadow-md ${
-                    selectedCategory === key ? 'border-emerald-500 shadow-md' : 'border-transparent shadow-sm hover:border-slate-200'
-                  }`}
-                  onClick={() => setSelectedCategory(key as CourseCategory)}
-                >
-                  <div className="flex items-center gap-4">
-                    {/* 左侧图标 */}
-                    <div className={`w-12 h-12 rounded-xl ${config.bgColor} flex items-center justify-center shrink-0`}>
-                      <Icon className={`h-6 w-6 ${config.color}`} />
-                    </div>
-
-                    {/* 中间内容 */}
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-slate-800">{config.name}</h4>
-                      <div className="flex items-center gap-3 text-xs text-slate-500 mt-1">
-                        <span className="flex items-center gap-1">
-                          <FolderOpen className="h-3 w-3" />
-                          {chaptersInCat} 章节
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {hoursInCat}h
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* 右侧 */}
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-full">
-                        {coursesInCat.length} 课程
-                      </span>
-                      <ChevronRight className={`h-4 w-4 ${selectedCategory === key ? 'text-emerald-500' : 'text-slate-400'}`} />
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* 课程列表视图 */}
-        {selectedCourse === null && selectedCategory !== 'all' && (
+        {/* 课程列表视图 - 直接显示课程 */}
+        {selectedCourse === null && (
           <>
-            <Button variant="ghost" onClick={backToCategories} className="mb-4">
-              <ChevronLeft className="h-4 w-4 mr-1" />
-              返回课程分类
-            </Button>
+            {selectedCategory !== 'all' && (
+              <Button variant="ghost" onClick={() => setSelectedCategory('all')} className="mb-4">
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                返回全部课程
+              </Button>
+            )}
 
             <div className="mb-4 flex items-center gap-2">
-              <Badge className={`${categoryConfig[selectedCategory].bgColor} ${categoryConfig[selectedCategory].color} px-3 py-1`}>
-                {categoryConfig[selectedCategory].name}
-              </Badge>
+              {selectedCategory !== 'all' && (
+                <Badge className={`${categoryConfig[selectedCategory as CourseCategory].bgColor} ${categoryConfig[selectedCategory as CourseCategory].color} px-3 py-1`}>
+                  {categoryConfig[selectedCategory as CourseCategory].name}
+                </Badge>
+              )}
               <span className="text-sm text-slate-500">{filteredCourses.length} 门课程</span>
             </div>
 
