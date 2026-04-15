@@ -219,13 +219,6 @@ export default function StudentLearningPage() {
         {/* 课程列表视图 - 直接显示课程 */}
         {selectedCourse === null && (
           <>
-            {selectedCategory !== 'all' && (
-              <Button variant="ghost" onClick={() => setSelectedCategory('all')} className="mb-4">
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                返回全部课程
-              </Button>
-            )}
-
             <div className="mb-4 flex items-center gap-2">
               {selectedCategory !== 'all' && (
                 <Badge className={`${categoryConfig[selectedCategory as CourseCategory].bgColor} ${categoryConfig[selectedCategory as CourseCategory].color} px-3 py-1`}>
