@@ -3,9 +3,9 @@ import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
 
 export async function POST(request: NextRequest) {
   try {
-    const { platform, apiKey } = await request.json();
+    const { provider, apiKey } = await request.json();
 
-    if (!platform || !apiKey) {
+    if (!provider || !apiKey) {
       return NextResponse.json(
         { success: false, message: '请选择平台并填写API Key' },
         { status: 400 }
