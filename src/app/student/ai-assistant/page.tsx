@@ -266,7 +266,13 @@ export default function AIAssistantPage() {
       // 调用AI API
       const response = await fetch('/api/ai-assistant', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-AI-Provider': localStorage.getItem('ai_provider') || '',
+          'X-AI-Api-Key': localStorage.getItem('ai_api_key') || '',
+          'X-AI-Api-Base': localStorage.getItem('ai_api_base') || '',
+          'X-AI-Model': localStorage.getItem('ai_model') || '',
+        },
         body: JSON.stringify({
           message: content.trim(),
           module: activeModule,
@@ -371,7 +377,13 @@ export default function AIAssistantPage() {
       // 调用AI API（使用 general 模块）
       const response = await fetch('/api/ai-assistant', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-AI-Provider': localStorage.getItem('ai_provider') || '',
+          'X-AI-Api-Key': localStorage.getItem('ai_api_key') || '',
+          'X-AI-Api-Base': localStorage.getItem('ai_api_base') || '',
+          'X-AI-Model': localStorage.getItem('ai_model') || '',
+        },
         body: JSON.stringify({
           message: content.trim(),
           module: 'general',

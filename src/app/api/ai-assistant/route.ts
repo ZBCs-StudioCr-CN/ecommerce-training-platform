@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
 
 // AI模块的系统提示配置
 const moduleSystemPrompts: Record<string, string> = {
@@ -105,8 +104,17 @@ const moduleSystemPrompts: Record<string, string> = {
 
 // 对话消息类型
 interface Message {
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'system';
   content: string;
+}
+
+// AI配置类型
+interface AIConfig {
+  provider: string;
+  apiKey: string;
+  apiBaseUrl: string;
+  model: string;
+  temperature: number;
 }
 
 export async function POST(request: NextRequest) {
@@ -121,36 +129,116 @@ export async function POST(request: NextRequest) {
     }
 
     // 获取模块对应的系统提示
-    const systemPrompt = moduleSystemPrompts[module] || moduleSystemPrompts['market-analysis'];
+    const systemPrompt = moduleSystemPrompts[module] || moduleSystemPrompts['general'];
 
-    // 提取请求头
-    const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
+    // 从请求头获取 AI 配置（由客户端传递）
+    const aiConfigHeader = request.headers.get('x-ai-config');
+    let aiConfig: AIConfig | null = null;
 
-    // 初始化LLM客户端
-    const config = new Config();
-    const client = new LLMClient(config, customHeaders);
+    if (aiConfigHeader) {
+      try {
+        aiConfig = JSON.parse(aiConfigHeader);
+      } catch (e) {
+        console.error('Failed to parse AI config header:', e);
+      }
+    }
 
     // 构建消息列表
     const messages: Message[] = [
-      { role: 'system' as const, content: systemPrompt },
+      { role: 'system', content: systemPrompt },
       ...(history || []),
-      { role: 'user' as const, content: message },
+      { role: 'user', content: message },
     ];
 
-    // 创建流式响应
+    // 如果没有配置，返回错误提示
+    if (!aiConfig || !aiConfig.apiKey || !aiConfig.apiBaseUrl || !aiConfig.model) {
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        start(controller) {
+          controller.enqueue(encoder.encode('⚠️ 请先配置 AI 大模型\n\n'));
+          controller.enqueue(encoder.encode('点击左侧菜单的「AI助手」→「⚙️ 配置」按钮，设置您的 API Key 后即可使用 AI 功能。\n\n'));
+          controller.enqueue(encoder.encode('支持的服务商：\n'));
+          controller.enqueue(encoder.encode('- OpenAI (GPT-4o)\n'));
+          controller.enqueue(encoder.encode('- 豆包 (Doubao)\n'));
+          controller.enqueue(encoder.encode('- DeepSeek\n'));
+          controller.enqueue(encoder.encode('- 智谱 (GLM)\n'));
+          controller.enqueue(encoder.encode('- Kimi (Moonshot)\n'));
+          controller.enqueue(encoder.encode('- 自定义 OpenAI 兼容接口'));
+          controller.close();
+        },
+      });
+
+      return new Response(stream, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+        },
+      });
+    }
+
+    // 使用用户配置的 API 调用大模型
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          const llmStream = client.stream(messages, {
-            model: 'doubao-seed-1-6-251015',
-            temperature: 0.7,
+          const response = await fetch(`${aiConfig!.apiBaseUrl}/chat/completions`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${aiConfig!.apiKey}`,
+            },
+            body: JSON.stringify({
+              model: aiConfig!.model,
+              messages: messages,
+              temperature: aiConfig!.temperature || 0.7,
+              stream: true,
+            }),
           });
 
-          for await (const chunk of llmStream) {
-            if (chunk.content) {
-              const text = chunk.content.toString();
-              controller.enqueue(encoder.encode(text));
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            controller.enqueue(
+              encoder.encode(`\n\n❌ API 调用失败：${errorData.error?.message || `HTTP ${response.status}`}\n\n请检查配置是否正确。`)
+            );
+            controller.close();
+            return;
+          }
+
+          // 处理流式响应
+          const reader = response.body?.getReader();
+          if (!reader) {
+            controller.enqueue(encoder.encode('\n\n❌ 无法读取响应流'));
+            controller.close();
+            return;
+          }
+
+          const decoder = new TextDecoder();
+          let buffer = '';
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
+
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                const data = line.slice(6);
+                if (data === '[DONE]') continue;
+
+                try {
+                  const parsed = JSON.parse(data);
+                  const content = parsed.choices?.[0]?.delta?.content;
+                  if (content) {
+                    controller.enqueue(encoder.encode(content));
+                  }
+                } catch (e) {
+                  // 忽略解析错误
+                }
+              }
             }
           }
 

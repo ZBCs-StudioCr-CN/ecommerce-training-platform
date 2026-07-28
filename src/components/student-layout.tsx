@@ -13,6 +13,7 @@ import {
   LogOut,
   Globe,
   Brain,
+  Settings,
   AlertTriangle,
   Target,
 } from 'lucide-react';
@@ -266,6 +267,18 @@ export function StudentHeader() {
         </div>
 
         <div className="flex items-center gap-4">
+          {/* AI配置按钮 */}
+          <Button
+            variant="outline"
+            size="sm"
+            asChild
+            className="border-purple-200 text-purple-600 hover:bg-purple-50 hover:text-purple-700"
+          >
+            <Link href="/student/ai-config">
+              <Settings className="h-4 w-4 mr-1.5" />
+              AI配置
+            </Link>
+          </Button>
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="h-5 w-5 text-slate-600" />
             <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
