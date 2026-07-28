@@ -1,46 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
 
 export async function POST(request: NextRequest) {
   try {
-    const { provider, apiKey, apiBaseUrl, model } = await request.json();
+    const { platform, apiKey } = await request.json();
 
-    if (!apiKey || !apiBaseUrl || !model) {
+    if (!platform || !apiKey) {
       return NextResponse.json(
-        { success: false, error: '缺少必要参数' },
+        { success: false, message: '请选择平台并填写API Key' },
         { status: 400 }
       );
     }
 
-    // 测试连接 - 发送一个简单的请求
-    const response = await fetch(`${apiBaseUrl}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: model,
-        messages: [{ role: 'user', content: '你好' }],
-        max_tokens: 10,
-      }),
+    // 使用扣子 SDK 测试连接
+    const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
+    const config = new Config({ apiKey });
+    const client = new LLMClient(config, customHeaders);
+
+    const messages = [
+      { role: 'user' as const, content: '你好，请简单介绍一下自己' }
+    ];
+
+    const response = await client.invoke(messages, {
+      model: 'doubao-seed-1-8-251228',
+      temperature: 0.7,
     });
 
-    if (response.ok) {
-      return NextResponse.json({
-        success: true,
-        message: `模型 ${model} 连接正常`,
-      });
-    } else {
-      const errorData = await response.json().catch(() => ({}));
-      return NextResponse.json({
-        success: false,
-        error: errorData.error?.message || `HTTP ${response.status}`,
-      });
-    }
+    return NextResponse.json({
+      success: true,
+      message: '连接成功！',
+      response: response.content
+    });
   } catch (error) {
+    console.error('AI测试连接错误:', error);
     return NextResponse.json({
       success: false,
-      error: '网络请求失败，请检查 Base URL 是否正确',
+      message: '连接失败，请检查API Key是否正确'
     });
   }
 }
