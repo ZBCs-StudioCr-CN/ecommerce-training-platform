@@ -1,363 +1,325 @@
-# projects
+# 🛒 AI时代电商运营决策能力培养平台
 
-这是一个基于 [Next.js 16](https://nextjs.org) + [shadcn/ui](https://ui.shadcn.com) 的全栈应用项目，由扣子编程 CLI 创建。
+<div align="center">
 
-## 快速开始
+![Next.js](https://img.shields.io/badge/Next.js-16.1.1-black?style=for-the-badge&logo=next.js)
+![React](https://img.shields.io/badge/React-19.2.3-61DAFB?style=for-the-badge&logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.x-38B2AC?style=for-the-badge&logo=tailwind-css)
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
-### 启动开发服务器
+**面向中高职、本科院校电商/跨境电商专业的 AI 融合实训平台**
 
-```bash
-coze dev
+[在线演示](https://b483925b-0ed9-4f10-9031-89ecff6258b2.dev.coze.site) · [功能文档](./docs) · [贡献指南](./CONTRIBUTING.md)
+
+</div>
+
+---
+
+##  项目简介
+
+**AI时代电商运营决策能力培养平台** 是一款专为电商教育设计的云端 SaaS 实训系统。平台以"驾驭AI，培养不可替代的核心能力"为核心理念，从传统的"技能端培训"转向"能力端实训"，帮助学生在 AI 时代建立真正的竞争优势。
+
+### 🎯 核心定位
+
+- **培养目标**：培养四大不可替代的核心能力
+  - 🧠 **商业决策能力**（35%）- 自主决策、选品、定价、渠道选择
+  -  **AI辅助应用**（20%）- AI工具选择、内容审核、效率优化
+  - 📊 **数据复盘能力**（20%）- 数据采集、分析、问题诊断、优化迭代
+  - 🛡️ **风险应对能力**（15%）- 风险识别、应对方案、客户投诉处理
+  - ⚖️ **合规与规则意识**（10%）- 平台规则、法律法规、知识产权
+
+### 🌐 三大覆盖场景
+
+| 场景 | 平台 | 特色 |
+|------|------|------|
+| **国内电商** | 淘宝/天猫、拼多多、抖音 | 1:1复刻千牛/抖店后台 |
+| **跨境平台电商** | Amazon、Shopee、Lazada | 英文界面，跨境运营流程 |
+| **外贸独立站** | Shopify、店匠、WooCommerce | SaaS建站平台操作界面 |
+
+---
+
+## ✨ 核心功能
+
+### 🏫 三级角色体系
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  👨‍💼 管理员（院校端）                                        │
+│  ├─ 账号管理 · 班级管理 · 数据报表 · 竞赛管理                │
+├─────────────────────────────────────────────────────────────┤
+│  ‍🏫 教师端                                                  │
+│  ├─ 课程管理 · 实训任务 · 考核评分 · 学情分析 · 答疑互动    │
+├─────────────────────────────────────────────────────────────┤
+│  👨‍ 学生端                                                  │
+│  ├─ 学习中心 · 仿真实训 · 考核中心 · AI助手 · 风险应对      │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-启动后，在浏览器中打开 [http://localhost:5000](http://localhost:5000) 查看应用。
+### 📚 学生端功能模块
 
-开发服务器支持热更新，修改代码后页面会自动刷新。
+| 模块 | 功能说明 |
+|------|---------|
+| **实训控制台** | 五维能力雷达图、实训进度、AI使用统计 |
+| **学习中心** | 分类课程浏览、章节学习、视频播放 |
+| **仿真实训** | 9大平台店铺创建、后台模拟、前台预览 |
+| **考核中心** | 在线考试、自动评分、答案解析 |
+| **能力评估** | 五维能力详细评估、得分来源分析 |
+| **风险应对** | 6大风险类型模拟、AI自动评分点评 |
+| **AI助手** | 9大功能模块、流式对话、快捷问题 |
+| **成果中心** | 实训作品展示、能力成长轨迹 |
+| **答疑提问** | 师生互动、问题解答 |
+
+### 👩‍🏫 教师端功能模块
+
+| 模块 | 功能说明 |
+|------|---------|
+| **课程管理** | 课程创建、章节编辑、分类管理 |
+| **实训管理** | 分项技能实训、综合项目实战发布 |
+| **考核管理** | 试卷创建、考试监控、自动阅卷 |
+| **学情分析** | 班级数据、个人分析、能力评估 |
+| **答疑互动** | 问题回复、学生指导 |
+
+### 👨‍💼 管理员端功能模块
+
+| 模块 | 功能说明 |
+|------|---------|
+| **数据报表** | 多维分类筛选、实时/周/月/学期/年报 |
+| **账号管理** | 教师/学生账号管理 |
+| **班级管理** | 班级创建、学生分配 |
+| **竞赛管理** | 电商竞赛组织、成绩管理 |
+
+---
+
+## 🛠️ 技术栈
+
+### 前端框架
+- **Next.js 16.1.1** (App Router)
+- **React 19.2.3**
+- **TypeScript 5.x**
+
+### UI 组件
+- **shadcn/ui** (基于 Radix UI)
+- **Tailwind CSS 4.x**
+- **Lucide React** (图标库)
+- **Recharts** (数据可视化)
+
+### 表单与验证
+- **React Hook Form** + **Zod**
+
+### 数据库与ORM
+- **Drizzle ORM** + **PostgreSQL**
+
+### 其他
+- **date-fns** (日期处理)
+- **sonner** (Toast通知)
+- **embla-carousel-react** (轮播)
+
+---
+
+## 🚀 快速开始
+
+### 环境要求
+
+- **Node.js**: >= 24.x
+- **pnpm**: >= 9.0.0
+- **Git**: 任意版本
+
+### 安装步骤
+
+```bash
+# 1. 克隆项目
+git clone https://github.com/your-username/ecommerce-training-platform.git
+cd ecommerce-training-platform
+
+# 2. 安装依赖
+pnpm install
+
+# 3. 配置环境变量
+cp .env.example .env.local
+# 编辑 .env.local 填写必要配置
+
+# 4. 启动开发服务器
+pnpm dev
+
+# 5. 打开浏览器访问
+# http://localhost:5000
+```
 
 ### 构建生产版本
 
 ```bash
-coze build
+# 构建
+pnpm build
+
+# 启动生产服务器
+pnpm start
 ```
 
-### 启动生产服务器
+### 代码检查
 
 ```bash
-coze start
+# TypeScript 类型检查
+pnpm ts-check
+
+# ESLint 代码检查
+pnpm lint
+
+# 并行执行所有检查
+pnpm validate
 ```
 
-## 项目结构
+---
+
+## 📁 项目结构
 
 ```
-src/
-├── app/                      # Next.js App Router 目录
-│   ├── layout.tsx           # 根布局组件
-│   ├── page.tsx             # 首页
-│   ├── globals.css          # 全局样式（包含 shadcn 主题变量）
-│   └── [route]/             # 其他路由页面
-├── components/              # React 组件目录
-│   └── ui/                  # shadcn/ui 基础组件（优先使用）
-│       ├── button.tsx
-│       ├── card.tsx
-│       └── ...
-├── lib/                     # 工具函数库
-│   └── utils.ts            # cn() 等工具函数
-└── hooks/                   # 自定义 React Hooks（可选）
-
-server/
-├── index.ts                 # 自定义服务器入口
-├── tsconfig.json           # Server TypeScript 配置
-└── dist/                    # 编译输出目录（自动生成）
+ecommerce-training-platform/
+├── src/
+│   ├── app/                      # Next.js App Router 页面
+│   │   ├── page.tsx              # 首页（产品介绍）
+│   │   ├── login/page.tsx        # 登录页
+│   │   ├── student/              # 学生端页面
+│   │   │   ├── dashboard/        # 实训控制台
+│   │   │   ├── learning/         # 学习中心
+│   │   │   ├── practice/         # 仿真实训
+│   │   │   │   ├── store/[id]/   # 店铺后台模拟
+│   │   │   │   └── preview/[id]/ # 店铺前台预览
+│   │   │   ├── exam/             # 考核中心
+│   │   │   ├── assessment/       # 能力评估
+│   │   │   ├── risk-events/      # 风险应对
+│   │   │   ├── ai-assistant/     # AI助手
+│   │   │   ├── achievement/      # 成果中心
+│   │   │   └── qa/               # 答疑提问
+│   │   ├── teacher/              # 教师端页面
+│   │   │   ├── dashboard/        # 教师仪表盘
+│   │   │   ├── courses/          # 课程管理
+│   │   │   ├── practice/         # 实训管理
+│   │   │   ├── exam/             # 考核管理
+│   │   │   ├── analysis/         # 学情分析
+│   │   │   └── qa/               # 答疑互动
+│   │   ── admin/                # 管理员端页面
+│   │       ├── dashboard/        # 管理员仪表盘
+│   │       ├── accounts/         # 账号管理
+│   │       ├── classes/          # 班级管理
+│   │       ├── reports/          # 数据报表
+│   │       └── competitions/     # 竞赛管理
+│   ├── components/               # React 组件
+│   │   ├── ui/                   # shadcn/ui 基础组件
+│   │   └── student-layout.tsx    # 学生端布局
+│   ├── lib/                      # 工具函数
+│   │   ├── utils.ts              # 通用工具
+│   │   └── auth.ts               # 认证工具
+│   ├── data/                     # 模拟数据
+│   │   ├── courses.ts            # 课程数据
+│   │   └── ability-practice.ts   # 能力实训配置
+│   └── types/                    # TypeScript 类型定义
+├── public/                       # 静态资源
+├── docs/                         # 项目文档
+├── scripts/                      # 构建脚本
+├── .coze                         # Coze 配置文件
+├── package.json
+├── tsconfig.json
+── README.md
 ```
 
-## 核心开发规范
+---
 
-### 1. 组件开发
+##  设计特色
 
-**优先使用 shadcn/ui 基础组件**
+### 1:1 平台复刻
 
-本项目已预装完整的 shadcn/ui 组件库，位于 `src/components/ui/` 目录。开发时应优先使用这些组件作为基础：
+平台后台界面 1:1 复刻真实电商平台的视觉风格：
 
-```tsx
-// ✅ 推荐：使用 shadcn 基础组件
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+| 平台 | 主题色 | 界面风格 |
+|------|--------|---------|
+| 淘宝千牛 |  橙色 | 千牛工作台风格 |
+| 拼多多商家版 | 🔴 红色 | 拼多多商家后台 |
+| 抖音抖店 | ⚫ 黑色 | 抖店后台风格 |
+| Amazon Seller | 🔵 深蓝 | 英文界面，Amazon风格 |
+| Shopee | 🟠 橙色 | Shopee卖家中心 |
+| Lazada | 🔵 蓝色 | Lazada卖家中心 |
+| Shopify | 🟢 绿色 | 英文界面，Shopify风格 |
+| 店匠 | 🟣 紫色 | 店匠后台风格 |
+| WooCommerce | 🟣 蓝紫 | WooCommerce风格 |
 
-export default function MyComponent() {
-  return (
-    <Card>
-      <CardHeader>标题</CardHeader>
-      <CardContent>
-        <Input placeholder="输入内容" />
-        <Button>提交</Button>
-      </CardContent>
-    </Card>
-  );
-}
+### AI 辅助设计原则
+
+- **AI 提供选项，学生做决策**
+- **AI 提供建议，学生承担结果**
+- **全流程模拟，零成本零风险**
+
+---
+
+##  五维能力评估模型
+
+```
+综合评定 = 考试成绩 × 50% + 实训成绩 × 50%
+
+┌─────────────────────────────────────────────────────────┐
+│  自主决策能力 (35%)                                      │
+│  ├─ 市场分析决策 · 选品决策 · 定价策略                   │
+│  ├─ 渠道选择 · 物流供应链管理 · 营销与活动决策           │
+├─────────────────────────────────────────────────────────┤
+│  AI辅助应用 (20%)                                        │
+│  ├─ AI工具选择 · 内容审核 · 效率优化                     │
+│  ├─ AI耦合度控制 · AI视觉策划 · AI文案创意              │
+├─────────────────────────────────────────────────────────┤
+│  数据复盘与优化 (20%)                                    │
+│  ├─ 数据采集 · 数据分析 · 问题诊断 · 优化迭代            │
+├─────────────────────────────────────────────────────────┤
+│  风险应对 (15%)                                          │
+│  ├─ 风险识别 · 应对方案 · 客户投诉处理 · 舆情管理        │
+├─────────────────────────────────────────────────────────┤
+│  合规与规则意识 (10%)                                    │
+│  ├─ 平台规则 · 法律法规 · 知识产权 · 数据合规            │
+└─────────────────────────────────────────────────────────┘
 ```
 
-**可用的 shadcn 组件清单**
+---
 
-- 表单：`button`, `input`, `textarea`, `select`, `checkbox`, `radio-group`, `switch`, `slider`
-- 布局：`card`, `separator`, `tabs`, `accordion`, `collapsible`, `scroll-area`
-- 反馈：`alert`, `alert-dialog`, `dialog`, `toast`, `sonner`, `progress`
-- 导航：`dropdown-menu`, `menubar`, `navigation-menu`, `context-menu`
-- 数据展示：`table`, `avatar`, `badge`, `hover-card`, `tooltip`, `popover`
-- 其他：`calendar`, `command`, `carousel`, `resizable`, `sidebar`
+## 🤝 贡献指南
 
-详见 `src/components/ui/` 目录下的具体组件实现。
+我们欢迎所有形式的贡献！请查看 [CONTRIBUTING.md](./CONTRIBUTING.md) 了解如何参与项目开发。
 
-### 2. 路由开发
+### 贡献流程
 
-Next.js 使用文件系统路由，在 `src/app/` 目录下创建文件夹即可添加路由：
+1. Fork 本仓库
+2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'feat: add some amazing feature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 开启 Pull Request
 
-```bash
-# 创建新路由 /about
-src/app/about/page.tsx
+---
 
-# 创建动态路由 /posts/[id]
-src/app/posts/[id]/page.tsx
+## 📄 许可证
 
-# 创建路由组（不影响 URL）
-src/app/(marketing)/about/page.tsx
+本项目采用 [MIT License](./LICENSE) 开源协议。
 
-# 创建 API 路由
-src/app/api/users/route.ts
-```
+---
 
-**页面组件示例**
+## 🙏 致谢
 
-```tsx
-// src/app/about/page.tsx
-import { Button } from '@/components/ui/button';
+- [Next.js](https://nextjs.org/) - React 框架
+- [shadcn/ui](https://ui.shadcn.com/) - UI 组件库
+- [Tailwind CSS](https://tailwindcss.com/) - CSS 框架
+- [Radix UI](https://www.radix-ui.com/) - 无样式组件库
+- [Lucide](https://lucide.dev/) - 图标库
 
-export const metadata = {
-  title: '关于我们',
-  description: '关于页面描述',
-};
+---
 
-export default function AboutPage() {
-  return (
-    <div>
-      <h1>关于我们</h1>
-      <Button>了解更多</Button>
-    </div>
-  );
-}
-```
+## 📬 联系方式
 
-**动态路由示例**
+- **项目维护**: [你的GitHub用户名]
+- **问题反馈**: [Issues](https://github.com/your-username/ecommerce-training-platform/issues)
+- **功能建议**: [Discussions](https://github.com/your-username/ecommerce-training-platform/discussions)
 
-```tsx
-// src/app/posts/[id]/page.tsx
-export default async function PostPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
+---
 
-  return <div>文章 ID: {id}</div>;
-}
-```
+<div align="center">
 
-**API 路由示例**
+**⭐ 如果这个项目对你有帮助，请给我们一个 Star！**
 
-```tsx
-// src/app/api/users/route.ts
-import { NextResponse } from 'next/server';
+Made with ❤️ for E-commerce Education
 
-export async function GET() {
-  return NextResponse.json({ users: [] });
-}
-
-export async function POST(request: Request) {
-  const body = await request.json();
-  return NextResponse.json({ success: true });
-}
-```
-
-### 3. 依赖管理
-
-**必须使用 pnpm 管理依赖**
-
-```bash
-# ✅ 安装依赖
-pnpm install
-
-# ✅ 添加新依赖
-pnpm add package-name
-
-# ✅ 添加开发依赖
-pnpm add -D package-name
-
-# ❌ 禁止使用 npm 或 yarn
-# npm install  # 错误！
-# yarn add     # 错误！
-```
-
-项目已配置 `preinstall` 脚本，使用其他包管理器会报错。
-
-### 4. 样式开发
-
-**使用 Tailwind CSS v4**
-
-本项目使用 Tailwind CSS v4 进行样式开发，并已配置 shadcn 主题变量。
-
-```tsx
-// 使用 Tailwind 类名
-<div className="flex items-center gap-4 p-4 rounded-lg bg-background">
-  <Button className="bg-primary text-primary-foreground">
-    主要按钮
-  </Button>
 </div>
-
-// 使用 cn() 工具函数合并类名
-import { cn } from '@/lib/utils';
-
-<div className={cn(
-  "base-class",
-  condition && "conditional-class",
-  className
-)}>
-  内容
-</div>
-```
-
-**主题变量**
-
-主题变量定义在 `src/app/globals.css` 中，支持亮色/暗色模式：
-
-- `--background`, `--foreground`
-- `--primary`, `--primary-foreground`
-- `--secondary`, `--secondary-foreground`
-- `--muted`, `--muted-foreground`
-- `--accent`, `--accent-foreground`
-- `--destructive`, `--destructive-foreground`
-- `--border`, `--input`, `--ring`
-
-### 5. 表单开发
-
-推荐使用 `react-hook-form` + `zod` 进行表单开发：
-
-```tsx
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-
-const formSchema = z.object({
-  username: z.string().min(2, '用户名至少 2 个字符'),
-  email: z.string().email('请输入有效的邮箱'),
-});
-
-export default function MyForm() {
-  const form = useForm({
-    resolver: zodResolver(formSchema),
-    defaultValues: { username: '', email: '' },
-  });
-
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
-    console.log(data);
-  };
-
-  return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
-      <Input {...form.register('username')} />
-      <Input {...form.register('email')} />
-      <Button type="submit">提交</Button>
-    </form>
-  );
-}
-```
-
-### 6. 数据获取
-
-**服务端组件（推荐）**
-
-```tsx
-// src/app/posts/page.tsx
-async function getPosts() {
-  const res = await fetch('https://api.example.com/posts', {
-    cache: 'no-store', // 或 'force-cache'
-  });
-  return res.json();
-}
-
-export default async function PostsPage() {
-  const posts = await getPosts();
-
-  return (
-    <div>
-      {posts.map(post => (
-        <div key={post.id}>{post.title}</div>
-      ))}
-    </div>
-  );
-}
-```
-
-**客户端组件**
-
-```tsx
-'use client';
-
-import { useEffect, useState } from 'react';
-
-export default function ClientComponent() {
-  const [data, setData] = useState(null);
-
-  useEffect(() => {
-    fetch('/api/data')
-      .then(res => res.json())
-      .then(setData);
-  }, []);
-
-  return <div>{JSON.stringify(data)}</div>;
-}
-```
-
-## 常见开发场景
-
-### 添加新页面
-
-1. 在 `src/app/` 下创建文件夹和 `page.tsx`
-2. 使用 shadcn 组件构建 UI
-3. 根据需要添加 `layout.tsx` 和 `loading.tsx`
-
-### 创建业务组件
-
-1. 在 `src/components/` 下创建组件文件（非 UI 组件）
-2. 优先组合使用 `src/components/ui/` 中的基础组件
-3. 使用 TypeScript 定义 Props 类型
-
-### 添加全局状态
-
-推荐使用 React Context 或 Zustand：
-
-```tsx
-// src/lib/store.ts
-import { create } from 'zustand';
-
-interface Store {
-  count: number;
-  increment: () => void;
-}
-
-export const useStore = create<Store>((set) => ({
-  count: 0,
-  increment: () => set((state) => ({ count: state.count + 1 })),
-}));
-```
-
-### 集成数据库
-
-推荐使用 Prisma 或 Drizzle ORM，在 `src/lib/db.ts` 中配置。
-
-## 技术栈
-
-- **框架**: Next.js 16.1.1 (App Router)
-- **UI 组件**: shadcn/ui (基于 Radix UI)
-- **样式**: Tailwind CSS v4
-- **表单**: React Hook Form + Zod
-- **图标**: Lucide React
-- **字体**: Geist Sans & Geist Mono
-- **包管理器**: pnpm 9+
-- **TypeScript**: 5.x
-
-## 参考文档
-
-- [Next.js 官方文档](https://nextjs.org/docs)
-- [shadcn/ui 组件文档](https://ui.shadcn.com)
-- [Tailwind CSS 文档](https://tailwindcss.com/docs)
-- [React Hook Form](https://react-hook-form.com)
-
-## 重要提示
-
-1. **必须使用 pnpm** 作为包管理器
-2. **优先使用 shadcn/ui 组件** 而不是从零开发基础组件
-3. **遵循 Next.js App Router 规范**，正确区分服务端/客户端组件
-4. **使用 TypeScript** 进行类型安全开发
-5. **使用 `@/` 路径别名** 导入模块（已配置）

@@ -1,48 +1,36 @@
-.next
-
-# Dependencies
+# 依赖
 node_modules/
 .pnp
 .pnp.js
 
-# Production build
-dist/
-build/
-out/
+# 构建输出
 .next/
-.rsbuild/
+out/
+build/
+dist/
 
-# Testing
-coverage/
-*.lcov
-.nyc_output
-
-# Environment variables
+# 环境变量（敏感信息）
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# Logs
+# 日志
 logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
 
-# Runtime data
+# 运行时数据
 pids
 *.pid
 *.seed
 *.pid.lock
 
-# Diagnostic reports
-report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
-
-# Cache
+# 缓存
 .cache/
 .parcel-cache/
 .eslintcache
@@ -53,8 +41,10 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 .yarn/build-state.yml
 .yarn/install-state.gz
 node-compile-cache/
+.turbo
+.vercel
 
-# Editor directories and files
+# 编辑器
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
@@ -68,7 +58,7 @@ node-compile-cache/
 *.swo
 *~
 
-# OS files
+# 操作系统
 .DS_Store
 .DS_Store?
 ._*
@@ -78,13 +68,11 @@ ehthumbs.db
 Thumbs.db
 Desktop.ini
 
-# Temporary files
+# 临时文件
 *.tmp
 *.temp
 .tmp/
 .temp/
-
-# Optional files
 *.tgz
 *.gz
 *.zip
@@ -93,13 +81,19 @@ Desktop.ini
 # TypeScript
 *.tsbuildinfo
 
-# Misc
-.vercel
-.turbo
-
+# Coze 特定
 .coze-logs
 .cozeproj/reduction
-
-# Preview files
 .preview
 .codegraph
+
+# 测试
+coverage/
+*.lcov
+.nyc_output
+
+# 诊断报告
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Misc
+lerna-debug.log*
