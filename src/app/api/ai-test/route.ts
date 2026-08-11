@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
+import { testLLMConnection, PROVIDER_CONFIGS } from '@/lib/llm';
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,30 +12,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 使用扣子 SDK 测试连接
-    const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
-    const config = new Config({ apiKey });
-    const client = new LLMClient(config, customHeaders);
+    const config = PROVIDER_CONFIGS[provider];
+    if (!config) {
+      return NextResponse.json(
+        { success: false, message: '不支持的平台' },
+        { status: 400 }
+      );
+    }
 
-    const messages = [
-      { role: 'user' as const, content: '你好，请简单介绍一下自己' }
-    ];
-
-    const response = await client.invoke(messages, {
-      model: 'doubao-seed-1-8-251228',
-      temperature: 0.7,
+    // 测试连接
+    const result = await testLLMConnection({
+      provider,
+      apiKey,
+      baseURL: config.baseURL,
+      model: config.defaultModel,
     });
 
-    return NextResponse.json({
-      success: true,
-      message: '连接成功！',
-      response: response.content
-    });
+    return NextResponse.json(result);
   } catch (error) {
-    console.error('AI测试连接错误:', error);
-    return NextResponse.json({
-      success: false,
-      message: '连接失败，请检查API Key是否正确'
-    });
+    console.error('AI test API error:', error);
+    return NextResponse.json(
+      { success: false, message: '测试失败' },
+      { status: 500 }
+    );
   }
 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
+import { getUserAIConfig, callLLM } from '@/lib/llm';
 
 // AI内容检测系统提示
 const aiDetectionSystemPrompt = `你是一位专业的AI内容检测专家。你的任务是判断给定文本是否由AI生成。
@@ -14,9 +14,9 @@ const aiDetectionSystemPrompt = `你是一位专业的AI内容检测专家。你
 请返回JSON格式的结果：
 {
   "isAIGenerated": boolean,
-  "aiCouplingDegree": 数字(0-100), // AI耦合度，0表示完全人工，100表示完全AI生成
+  "aiCouplingDegree": 数字 (0-100), // AI耦合度，0表示完全人工，100表示完全AI生成
   "reasons": ["原因1", "原因2", ...], // 判断依据
-  "confidence": 数字(0-100) // 判断置信度
+  "confidence": 数字 (0-100) // 判断置信度
 }
 
 注意：
@@ -38,12 +38,12 @@ const evaluationSystemPrompt = `你是一位专业的电商风险应对评估专
 请按照以下JSON格式返回评估结果：
 {
   "scores": {
-    "responseSpeed": 数字(0-20),
-    "reasonability": 数字(0-30),
-    "communication": 数字(0-20),
-    "compliance": 数字(0-15),
-    "riskControl": 数字(0-15),
-    "total": 数字(0-100)
+    "responseSpeed": 数字 (0-20),
+    "reasonability": 数字 (0-30),
+    "communication": 数字 (0-20),
+    "compliance": 数字 (0-15),
+    "riskControl": 数字 (0-15),
+    "total": 数字 (0-100)
   },
   "feedback": "具体反馈，指出方案的优点和不足",
   "aiEvaluation": "能力评估建议，帮助学生提升风险应对能力"
@@ -65,12 +65,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 提取请求头
-    const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
+    // 获取用户配置的 AI
+    const aiConfig = getUserAIConfig(request.headers);
 
-    // 初始化LLM客户端
-    const config = new Config();
-    const client = new LLMClient(config, customHeaders);
+    if (!aiConfig) {
+      return NextResponse.json(
+        {
+          error: '请先配置 AI 服务',
+          needConfig: true,
+          configUrl: '/student/ai-config',
+        },
+        { status: 400 }
+      );
+    }
 
     // ============================================
     // 第一步：AI内容检测
@@ -96,12 +103,11 @@ ${solution}
     };
 
     try {
-      const detectionResponse = await client.invoke(detectionMessages, {
-        model: 'doubao-seed-1-6-251015',
+      const detectionResponse = await callLLM(detectionMessages, aiConfig, {
         temperature: 0.1,
       });
 
-      let detectionJsonStr = detectionResponse.content;
+      let detectionJsonStr = detectionResponse;
       const detectionMatch = detectionJsonStr.match(/\{[\s\S]*\}/);
       if (detectionMatch) {
         detectionJsonStr = detectionMatch[0];
@@ -178,15 +184,14 @@ ${solution}
     ];
 
     // 调用LLM
-    const response = await client.invoke(messages, {
-      model: 'doubao-seed-1-6-251015',
+    const response = await callLLM(messages, aiConfig, {
       temperature: 0.3,
     });
 
     // 解析JSON结果
     try {
       // 提取JSON部分
-      let jsonStr = response.content;
+      let jsonStr = response;
       const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         jsonStr = jsonMatch[0];

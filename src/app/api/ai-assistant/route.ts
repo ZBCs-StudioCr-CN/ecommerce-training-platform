@@ -1,266 +1,149 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getUserAIConfig, callLLMStream, Message } from '@/lib/llm';
 
-// AI助手模块系统提示词
-const MODULE_PROMPTS: Record<string, string> = {
-  'market-analysis': `你是电商市场分析专家，专注于行业趋势分析、竞品分析和市场机会洞察。
-你的回答应该：
-1. 基于数据和市场规律给出专业分析
-2. 提供可操作的市场洞察和建议
-3. 结合国内电商和跨境电商的不同特点
-4. 引导学生思考市场背后的逻辑`,
+// 各模块系统提示词
+const moduleSystemPrompts: Record<string, string> = {
+  'market-analysis': `你是一位专业的电商市场分析师，拥有丰富的行业经验和数据洞察力。你的任务是帮助学生分析市场趋势、竞品情况和市场机会。
 
-  'product-selection': `你是电商选品顾问，专注于爆款挖掘、利润分析和供应链评估。
-你的回答应该：
-1. 提供科学的选品方法论
-2. 分析产品的市场潜力和利润空间
-3. 评估供应链可行性
-4. 引导学生建立选品思维框架`,
+回答要求：
+1. 基于电商行业实际情况，给出专业、可操作的分析
+2. 结合具体案例和数据说明
+3. 提供可执行的建议和行动方案
+4. 语言简洁明了，适合学生理解`,
 
-  'store-building': `你是电商店铺搭建专家，专注于店铺装修、页面优化和转化率提升。
-你的回答应该：
-1. 提供店铺视觉设计建议
-2. 分析页面布局和用户体验
-3. 给出转化率优化策略
-4. 结合不同平台的特点给出建议`,
+  'product-selection': `你是一位资深的电商选品专家，精通爆款挖掘、利润分析和供应链评估。你的任务是帮助学生进行科学的选品决策。
 
-  'advertising': `你是电商广告投放专家，专注于广告策略、预算分配和ROI优化。
-你的回答应该：
-1. 分析不同广告平台的特点
-2. 提供预算分配建议
-3. 给出ROI优化策略
-4. 引导学生理解广告数据背后的逻辑`,
+回答要求：
+1. 从市场需求、竞争程度、利润空间、供应链可行性等多维度分析
+2. 提供具体的选品建议和评估方法
+3. 结合真实案例说明
+4. 强调数据驱动的决策思维`,
 
-  'operations': `你是电商运营策略专家，专注于日常运营、活动策划和增长策略。
-你的回答应该：
-1. 提供系统化的运营方法论
-2. 分析运营数据和关键指标
-3. 给出活动策划建议
-4. 引导学生建立运营思维`,
+  'store-building': `你是一位专业的电商店铺运营顾问，精通店铺搭建、页面优化和转化率提升。你的任务是指导学生打造高转化的电商店铺。
 
-  'marketing-copy': `你是电商营销文案专家，专注于文案撰写、话术优化和内容创意。
-你的回答应该：
-1. 提供文案撰写技巧和方法
-2. 分析优秀文案案例
-3. 给出话术优化建议
-4. 引导学生理解消费者心理`,
+回答要求：
+1. 从用户体验、视觉设计、内容策划等角度给出建议
+2. 提供具体的优化方案和操作步骤
+3. 结合成功案例说明
+4. 强调以数据为导向的优化思维`,
 
-  'customer-service': `你是电商客服培训专家，专注于客服培训、投诉处理和满意度提升。
-你的回答应该：
-1. 提供客服沟通技巧
-2. 分析投诉处理案例
-3. 给出满意度提升策略
-4. 引导学生建立服务意识`,
+  'advertising': `你是一位资深的电商广告投放专家，精通各平台广告策略、预算分配和ROI优化。你的任务是帮助学生制定高效的广告投放方案。
 
-  'data-review': `你是电商数据分析专家，专注于数据分析、问题诊断和优化建议。
-你的回答应该：
-1. 提供数据分析方法论
-2. 分析关键指标和趋势
-3. 给出问题诊断思路
-4. 引导学生建立数据驱动思维`,
+回答要求：
+1. 分析不同广告渠道的特点和适用场景
+2. 提供预算分配建议和投放策略
+3. 讲解关键指标（CTR、CVR、ROAS等）的优化方法
+4. 结合实操案例说明`,
 
-  'crisis-management': `你是电商危机管理专家，专注于风险预警、危机应对和舆情管理。
-你的回答应该：
-1. 提供风险识别方法
-2. 分析危机处理案例
-3. 给出舆情管理策略
-4. 引导学生建立风险意识`,
+  'operations': `你是一位经验丰富的电商运营总监，精通日常运营、活动策划和增长策略。你的任务是帮助学生建立系统的运营思维。
 
-  'general': `你是电商实训AI助手，专注于帮助学生提升电商运营能力。
-你的回答应该：
-1. 专业、准确、有建设性
-2. 引导学生独立思考，而不是直接给答案
-3. 结合电商行业实际案例
-4. 鼓励学生实践和应用`
-};
+回答要求：
+1. 从用户生命周期、转化漏斗等角度分析
+2. 提供可执行的运营方案和活动策划思路
+3. 强调数据分析和持续优化的重要性
+4. 结合真实案例说明`,
 
-// 模型配置映射
-const MODEL_CONFIGS: Record<string, { baseUrl: string; model: string }> = {
-  'doubao': { baseUrl: 'https://ark.cn-beijing.volces.com/api/v3', model: 'doubao-seed-2-0-pro-260215' },
-  'deepseek': { baseUrl: 'https://api.deepseek.com', model: 'deepseek-chat' },
-  'zhipu': { baseUrl: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-4' },
-  'qwen': { baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1', model: 'qwen-max' },
-  'openai': { baseUrl: 'https://api.openai.com/v1', model: 'gpt-4o' },
+  'marketing-copy': `你是一位专业的电商文案策划师，精通产品文案、营销话术和内容创意。你的任务是帮助学生撰写高转化的营销文案。
+
+回答要求：
+1. 根据目标受众和场景调整文案风格
+2. 提供具体的文案模板和写作技巧
+3. 讲解文案背后的心理学原理
+4. 给出修改建议和优化方向`,
+
+  'customer-service': `你是一位专业的电商客服培训导师，精通客服技巧、投诉处理和满意度提升。你的任务是帮助学生提升客户服务能力。
+
+回答要求：
+1. 提供标准的客服话术和应对流程
+2. 讲解不同类型客户的沟通技巧
+3. 强调同理心和专业性的平衡
+4. 结合真实案例说明`,
+
+  'data-review': `你是一位资深的电商数据分析师，精通数据采集、分析和问题诊断。你的任务是帮助学生建立数据复盘能力。
+
+回答要求：
+1. 讲解关键数据指标的含义和分析方法
+2. 提供数据分析框架和工具建议
+3. 强调从数据中发现问题和机会
+4. 结合具体案例说明`,
+
+  'crisis-management': `你是一位专业的电商危机管理顾问，精通风险预警、危机应对和舆情管理。你的任务是帮助学生提升危机处理能力。
+
+回答要求：
+1. 分析危机的性质和影响范围
+2. 提供快速响应的处理流程
+3. 强调合规意识和风险控制
+4. 结合真实案例说明教训和经验`,
+
+  'general': `你是一位友好的电商实训AI助手，能够帮助学生解答关于电商运营、跨境电商、独立站建设等各类问题。
+
+回答要求：
+1. 语言亲切友好，适合学生理解
+2. 回答专业准确，有实操价值
+3. 适当使用emoji增加亲和力
+4. 如果问题超出电商范畴，礼貌引导回相关话题`,
 };
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { message, module = 'general', history = [] } = body;
+    const { message, module, history } = await request.json();
 
     if (!message) {
-      return NextResponse.json({ error: '请输入消息' }, { status: 400 });
+      return NextResponse.json(
+        { error: '请输入您的问题' },
+        { status: 400 }
+      );
+    }
+
+    // 获取用户配置的 AI
+    const aiConfig = getUserAIConfig(request.headers);
+
+    if (!aiConfig) {
+      return NextResponse.json(
+        {
+          error: '请先配置 AI 服务',
+          needConfig: true,
+          configUrl: '/student/ai-config',
+        },
+        { status: 400 }
+      );
     }
 
     // 获取系统提示词
-    const systemPrompt = MODULE_PROMPTS[module] || MODULE_PROMPTS['general'];
+    const systemPrompt = moduleSystemPrompts[module] || moduleSystemPrompts['general'];
 
     // 构建消息
-    const messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [
+    const messages: Message[] = [
       { role: 'system', content: systemPrompt },
-      ...history.map((msg: { role: string; content: string }) => ({
-        role: msg.role as 'user' | 'assistant',
-        content: msg.content
-      })),
-      { role: 'user', content: message }
     ];
 
-    // 检查是否有用户配置的 API Key（优先使用）
-    const userProvider = request.headers.get('X-AI-Provider');
-    const userApiKey = request.headers.get('X-AI-Api-Key');
-
-    if (userProvider && userApiKey && MODEL_CONFIGS[userProvider]) {
-      // 使用用户配置的 API
-      return await callUserAPI(userProvider, userApiKey, messages);
+    // 添加历史消息（最多保留最近 10 条）
+    if (history && Array.isArray(history)) {
+      const recentHistory = history.slice(-10);
+      messages.push(...recentHistory);
     }
 
-    // 尝试使用扣子 SDK（仅在沙箱环境可用）
-    try {
-      const { LLMClient, Config, HeaderUtils } = await import('coze-coding-dev-sdk');
-      const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
-      const config = new Config();
-      const client = new LLMClient(config, customHeaders);
+    // 添加当前用户消息
+    messages.push({ role: 'user', content: message });
 
-      const stream = client.stream(messages, {
-        model: 'doubao-seed-1-8-251228',
-        temperature: 0.8,
-      });
+    // 调用 LLM（流式）
+    const stream = await callLLMStream(messages, aiConfig, {
+      temperature: 0.7,
+    });
 
-      const encoder = new TextEncoder();
-      const readableStream = new ReadableStream({
-        async start(controller) {
-          try {
-            for await (const chunk of stream) {
-              if (chunk.content) {
-                const text = chunk.content.toString();
-                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: text })}\n\n`));
-              }
-            }
-            controller.enqueue(encoder.encode('data: [DONE]\n\n'));
-            controller.close();
-          } catch (error) {
-            console.error('Coze SDK stream error:', error);
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: 'AI响应出错，请稍后重试' })}\n\n`));
-            controller.close();
-          }
-        }
-      });
-
-      return new Response(readableStream, {
-        headers: {
-          'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          'Connection': 'keep-alive',
-        },
-      });
-    } catch (sdkError) {
-      // 扣子 SDK 不可用（非沙箱环境）
-      console.log('Coze SDK not available, using fallback');
-      return NextResponse.json(
-        { 
-          error: 'AI服务未配置',
-          message: '请先在"AI配置"页面配置大模型API Key',
-          needConfig: true
-        },
-        { status: 503 }
-      );
-    }
+    // 返回 SSE 流
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    });
   } catch (error) {
-    console.error('AI助手API错误:', error);
+    console.error('AI assistant API error:', error);
     return NextResponse.json(
-      { error: '服务器内部错误' },
+      { error: error instanceof Error ? error.message : 'AI 服务暂时不可用' },
       { status: 500 }
     );
   }
-}
-
-// 调用用户配置的 API
-async function callUserAPI(
-  provider: string,
-  apiKey: string,
-  messages: Array<{ role: string; content: string }>
-) {
-  const config = MODEL_CONFIGS[provider];
-  if (!config) {
-    return NextResponse.json({ error: '不支持的AI平台' }, { status: 400 });
-  }
-
-  const encoder = new TextEncoder();
-  const readableStream = new ReadableStream({
-    async start(controller) {
-      try {
-        const response = await fetch(`${config.baseUrl}/chat/completions`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`,
-          },
-          body: JSON.stringify({
-            model: config.model,
-            messages: messages,
-            stream: true,
-            temperature: 0.8,
-          }),
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: `API调用失败: ${response.status}` })}\n\n`));
-          controller.close();
-          return;
-        }
-
-        const reader = response.body?.getReader();
-        if (!reader) {
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: '无法读取响应流' })}\n\n`));
-          controller.close();
-          return;
-        }
-
-        const decoder = new TextDecoder();
-        let buffer = '';
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || '';
-
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const data = line.slice(6);
-              if (data === '[DONE]') {
-                controller.enqueue(encoder.encode('data: [DONE]\n\n'));
-                continue;
-              }
-              try {
-                const json = JSON.parse(data);
-                const content = json.choices?.[0]?.delta?.content;
-                if (content) {
-                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
-                }
-              } catch (e) {
-                // 忽略解析错误
-              }
-            }
-          }
-        }
-
-        controller.close();
-      } catch (error) {
-        console.error('User API stream error:', error);
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: 'AI响应出错，请稍后重试' })}\n\n`));
-        controller.close();
-      }
-    }
-  });
-
-  return new Response(readableStream, {
-    headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
-    },
-  });
 }
