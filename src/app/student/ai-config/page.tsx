@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Save, TestTube, CheckCircle, AlertCircle, Key, Globe, Cpu } from 'lucide-react';
+import { ArrowLeft, Save, TestTube, CheckCircle, AlertCircle, Key, Globe, Cpu, Info } from 'lucide-react';
 
 interface AIConfig {
   provider: string;
@@ -77,8 +77,12 @@ export default function AIConfigPage() {
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [isSandbox, setIsSandbox] = useState(false);
 
   useEffect(() => {
+    // 检测是否在沙箱环境
+    setIsSandbox(typeof window !== 'undefined' && window.location.hostname.includes('coze.site'));
+
     // 从 localStorage 加载配置
     const savedConfig = localStorage.getItem('ai_config');
     if (savedConfig) {
@@ -200,6 +204,25 @@ export default function AIConfigPage() {
       </div>
 
       <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
+        {/* 沙箱环境提示 */}
+        <div className={`rounded-lg border p-4 ${isSandbox ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200'}`}>
+          <div className="flex items-start gap-3">
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${isSandbox ? 'bg-green-100' : 'bg-blue-100'}`}>
+              {isSandbox ? <CheckCircle className="h-4 w-4 text-green-600" /> : <AlertCircle className="h-4 w-4 text-blue-600" />}
+            </div>
+            <div>
+              <p className={`font-medium ${isSandbox ? 'text-green-800' : 'text-blue-800'}`}>
+                {isSandbox ? '✅ 扣子沙箱环境' : '🌐 外部部署环境'}
+              </p>
+              <p className={`text-sm mt-1 ${isSandbox ? 'text-green-700' : 'text-blue-700'}`}>
+                {isSandbox
+                  ? '可使用内置豆包大模型，也可配置自己的 API Key 使用其他模型'
+                  : '请配置您自己的大模型 API Key 以使用 AI 功能（支持 OpenAI、DeepSeek、智谱等）'}
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* 说明卡片 */}
         <Card>
           <CardContent className="p-6">

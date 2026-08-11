@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
 
 // AI助手模块系统提示词
 const MODULE_PROMPTS: Record<string, string> = {
@@ -74,6 +73,15 @@ const MODULE_PROMPTS: Record<string, string> = {
 4. 鼓励学生实践和应用`
 };
 
+// 模型配置映射
+const MODEL_CONFIGS: Record<string, { baseUrl: string; model: string }> = {
+  'doubao': { baseUrl: 'https://ark.cn-beijing.volces.com/api/v3', model: 'doubao-seed-2-0-pro-260215' },
+  'deepseek': { baseUrl: 'https://api.deepseek.com', model: 'deepseek-chat' },
+  'zhipu': { baseUrl: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-4' },
+  'qwen': { baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1', model: 'qwen-max' },
+  'openai': { baseUrl: 'https://api.openai.com/v1', model: 'gpt-4o' },
+};
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -96,45 +104,66 @@ export async function POST(request: NextRequest) {
       { role: 'user', content: message }
     ];
 
-    // 使用扣子 SDK 调用 LLM
-    const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
-    const config = new Config();
-    const client = new LLMClient(config, customHeaders);
+    // 检查是否有用户配置的 API Key（优先使用）
+    const userProvider = request.headers.get('X-AI-Provider');
+    const userApiKey = request.headers.get('X-AI-Api-Key');
 
-    // 使用流式输出
-    const stream = client.stream(messages, {
-      model: 'doubao-seed-1-8-251228',
-      temperature: 0.8,
-    });
+    if (userProvider && userApiKey && MODEL_CONFIGS[userProvider]) {
+      // 使用用户配置的 API
+      return await callUserAPI(userProvider, userApiKey, messages);
+    }
 
-    // 创建 ReadableStream 用于 SSE
-    const encoder = new TextEncoder();
-    const readableStream = new ReadableStream({
-      async start(controller) {
-        try {
-          for await (const chunk of stream) {
-            if (chunk.content) {
-              const text = chunk.content.toString();
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: text })}\n\n`));
+    // 尝试使用扣子 SDK（仅在沙箱环境可用）
+    try {
+      const { LLMClient, Config, HeaderUtils } = await import('coze-coding-dev-sdk');
+      const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
+      const config = new Config();
+      const client = new LLMClient(config, customHeaders);
+
+      const stream = client.stream(messages, {
+        model: 'doubao-seed-1-8-251228',
+        temperature: 0.8,
+      });
+
+      const encoder = new TextEncoder();
+      const readableStream = new ReadableStream({
+        async start(controller) {
+          try {
+            for await (const chunk of stream) {
+              if (chunk.content) {
+                const text = chunk.content.toString();
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: text })}\n\n`));
+              }
             }
+            controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+            controller.close();
+          } catch (error) {
+            console.error('Coze SDK stream error:', error);
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: 'AI响应出错，请稍后重试' })}\n\n`));
+            controller.close();
           }
-          controller.enqueue(encoder.encode('data: [DONE]\n\n'));
-          controller.close();
-        } catch (error) {
-          console.error('Stream error:', error);
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: 'AI响应出错，请稍后重试' })}\n\n`));
-          controller.close();
         }
-      }
-    });
+      });
 
-    return new Response(readableStream, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-      },
-    });
+      return new Response(readableStream, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+        },
+      });
+    } catch (sdkError) {
+      // 扣子 SDK 不可用（非沙箱环境）
+      console.log('Coze SDK not available, using fallback');
+      return NextResponse.json(
+        { 
+          error: 'AI服务未配置',
+          message: '请先在"AI配置"页面配置大模型API Key',
+          needConfig: true
+        },
+        { status: 503 }
+      );
+    }
   } catch (error) {
     console.error('AI助手API错误:', error);
     return NextResponse.json(
@@ -142,4 +171,96 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+// 调用用户配置的 API
+async function callUserAPI(
+  provider: string,
+  apiKey: string,
+  messages: Array<{ role: string; content: string }>
+) {
+  const config = MODEL_CONFIGS[provider];
+  if (!config) {
+    return NextResponse.json({ error: '不支持的AI平台' }, { status: 400 });
+  }
+
+  const encoder = new TextEncoder();
+  const readableStream = new ReadableStream({
+    async start(controller) {
+      try {
+        const response = await fetch(`${config.baseUrl}/chat/completions`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model: config.model,
+            messages: messages,
+            stream: true,
+            temperature: 0.8,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: `API调用失败: ${response.status}` })}\n\n`));
+          controller.close();
+          return;
+        }
+
+        const reader = response.body?.getReader();
+        if (!reader) {
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: '无法读取响应流' })}\n\n`));
+          controller.close();
+          return;
+        }
+
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6);
+              if (data === '[DONE]') {
+                controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+                continue;
+              }
+              try {
+                const json = JSON.parse(data);
+                const content = json.choices?.[0]?.delta?.content;
+                if (content) {
+                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
+                }
+              } catch (e) {
+                // 忽略解析错误
+              }
+            }
+          }
+        }
+
+        controller.close();
+      } catch (error) {
+        console.error('User API stream error:', error);
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: 'AI响应出错，请稍后重试' })}\n\n`));
+        controller.close();
+      }
+    }
+  });
+
+  return new Response(readableStream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+    },
+  });
 }
