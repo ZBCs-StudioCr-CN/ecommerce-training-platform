@@ -59,7 +59,7 @@ interface S3StorageOptions {
 }
 
 export class S3Storage {
-  private client: S3Client | null = null;
+  private client: any = null;
   private bucket: string;
 
   constructor(options: S3StorageOptions) {
@@ -78,7 +78,7 @@ export class S3Storage {
     }
   }
 
-  async listFiles(params: { prefix?: string; maxKeys?: number }) {
+  async listFiles(params: { prefix?: string; maxKeys?: number }): Promise<{ keys: string[]; isTruncated: boolean }> {
     if (!this.client || !this.bucket) {
       return { keys: [], isTruncated: false };
     }
@@ -88,8 +88,8 @@ export class S3Storage {
         Prefix: params.prefix,
         MaxKeys: params.maxKeys || 100,
       });
-      const res = await this.client.send(cmd);
-      const keys = (res.Contents || []).map((c) => c.Key || '');
+      const res: any = await this.client.send(cmd);
+      const keys = (res.Contents || []).map((c: any) => c.Key || '');
       return { keys, isTruncated: res.IsTruncated || false };
     } catch (e) {
       console.error('S3 listFiles error:', e);
@@ -112,7 +112,7 @@ export class S3Storage {
   async generatePresignedUrl(params: { key: string; expireTime?: number }): Promise<string> {
     if (!this.client || !this.bucket) return '';
     try {
-      const cmd = new HeadObjectCommand({ Bucket: this.bucket, Key: params.key });
+      const cmd: any = new HeadObjectCommand({ Bucket: this.bucket, Key: params.key });
       return await getSignedUrl(this.client, cmd, { expiresIn: params.expireTime || 3600 });
     } catch (e) {
       console.error('S3 generatePresignedUrl error:', e);
