@@ -30,12 +30,13 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Install dependencies
-        run: pnpm install --ignore-scripts
+        run: pnpm install
 
       - name: Build
         env:
           # GitHub Pages 项目站点部署在 /repo-name/ 子路径下
           BASE_PATH: /${{ github.event.repository.name }}
+          NODE_OPTIONS: --max-old-space-size=4096
         run: pnpm run build
 
       - name: Setup Pages

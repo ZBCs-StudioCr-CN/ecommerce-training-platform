@@ -27,7 +27,6 @@
     "build": "next build --webpack",
     "postbuild": "node scripts/postbuild.mjs",
     "dev": "bash ./scripts/dev.sh",
-    "preinstall": "npx only-allow pnpm",
     "lint": "eslint",
     "start": "bash ./scripts/start.sh",
     "ts-check": "tsc -p tsconfig.json",
