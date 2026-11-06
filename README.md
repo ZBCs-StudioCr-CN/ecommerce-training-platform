@@ -10,7 +10,7 @@
 
 **面向中高职、本科院校电商/跨境电商专业的 AI 融合实训平台**
 
-[在线演示](https://b483925b-0ed9-4f10-9031-89ecff6258b2.dev.coze.site) · [功能文档](./docs) · [贡献指南](./CONTRIBUTING.md)
+[🌐 在线演示](https://zbcstudiocr-cn.github.io/ecommerce-training-platform/) · [📚 功能文档](./docs/PROJECT_OVERVIEW.md) · [🚀 部署指南](./docs/DEPLOYMENT.md) · [🤝 贡献指南](./CONTRIBUTING.md)
 
 </div>
 
@@ -107,8 +107,12 @@
 ### 表单与验证
 - **React Hook Form** + **Zod**
 
-### 数据库与ORM
-- **Drizzle ORM** + **PostgreSQL**
+### 数据持久化
+- **localStorage**（纯前端静态架构，无需数据库，数据保存在浏览器本地）
+
+### AI 集成
+- **多服务商 LLM**：兼容 OpenAI 协议（OpenAI / DeepSeek / 智谱 / 通义千问 / Moonshot / Ollama）
+- **SSE 流式对话**：前端直连模型 API，API Key 由用户自行配置
 
 ### 其他
 - **date-fns** (日期处理)
@@ -119,41 +123,63 @@
 
 ## 🚀 快速开始
 
-### 环境要求
+### 方式一：在线体验（无需安装）
 
-- **Node.js**: >= 24.x
-- **pnpm**: >= 9.0.0
-- **Git**: 任意版本
+直接访问 [在线演示地址](https://zbcstudiocr-cn.github.io/ecommerce-training-platform/)，配置 AI 后即可体验全部功能。
 
-### 安装步骤
+### 方式二：本地运行
+
+#### 环境要求
+
+- **Node.js**: >= 18.x
+- **pnpm**: >= 9.0.0（或直接使用下方一键启动脚本）
+
+#### Windows 一键启动
+
+双击项目根目录的 **`启动平台.bat`**，脚本会自动完成依赖安装、构建和启动，并打开浏览器。
+
+#### 手动启动
 
 ```bash
 # 1. 克隆项目
-git clone https://github.com/your-username/ecommerce-training-platform.git
+git clone https://github.com/ZBCs-StudioCr-CN/ecommerce-training-platform.git
 cd ecommerce-training-platform
 
 # 2. 安装依赖
 pnpm install
 
-# 3. 配置环境变量
-cp .env.example .env.local
-# 编辑 .env.local 填写必要配置
+# 3. 构建静态站点
+pnpm build
 
-# 4. 启动开发服务器
-pnpm dev
+# 4. 启动本地静态服务器（任选其一）
+node static-server.js 5000 out   # 零依赖，推荐
+# 或 npx serve out -l 5000
 
 # 5. 打开浏览器访问
 # http://localhost:5000
 ```
 
+### ⚙️ AI 功能配置（必须）
+
+平台所有 AI 功能（AI 助手、风险评分、学情分析等）**需要手动配置大模型 API Key**，配置存储在浏览器 localStorage 中，不上传任何服务器：
+
+1. 进入 **学生端 → AI 配置** 页面（或访问 `/student/ai-config/`）
+2. 填写以下信息：
+   - **服务商**：OpenAI / DeepSeek / 智谱 / 通义千问 / Moonshot / Ollama（本地）
+   - **API Key**：对应服务商的密钥
+   - **Base URL**：默认已填好，可自定义（兼容 OpenAI 协议即可）
+   - **模型**：如 `deepseek-chat`、`glm-4-flash` 等
+3. 点击 **测试连接** 验证配置，保存即可使用
+
+> 💡 国内推荐使用 [DeepSeek](https://platform.deepseek.com/) 或智谱（`glm-4-flash` 免费），配置简单、价格低廉。
+
 ### 构建生产版本
 
 ```bash
-# 构建
+# 构建（自动执行 postbuild 生成 404.html SPA 回退）
 pnpm build
 
-# 启动生产服务器
-pnpm start
+# 产物在 out/ 目录，可部署到任意静态托管服务
 ```
 
 ### 代码检查
@@ -171,6 +197,43 @@ pnpm validate
 
 ---
 
+## 🌍 部署
+
+### GitHub Pages（自动）
+
+推送代码到 `main` 分支后，[GitHub Actions 工作流](./.github/workflows/deploy.yml) 自动构建并部署到 Pages：
+
+- 访问地址：`https://<用户名>.github.io/ecommerce-training-platform/`
+- 首次使用需在仓库 **Settings → Pages → Source** 选择 **GitHub Actions**
+
+### 其他静态托管
+
+构建产物 `out/` 为纯静态文件，可直接部署到 **Vercel / Netlify / Cloudflare Pages / Nginx**：
+
+```bash
+# Vercel / Netlify
+Build Command: pnpm build
+Output Directory: out
+# 部署在根路径时无需设置 BASE_PATH；子路径部署需设置 BASE_PATH=/子路径
+```
+
+### 纯本地 / 离线使用
+
+构建后无需任何服务器依赖：`node static-server.js 5000 out` 即可在完全离线的内网环境运行（AI 功能需能访问模型 API）。
+
+---
+
+## 📖 功能文档
+
+| 文档 | 说明 |
+|------|------|
+| [项目总览](./docs/PROJECT_OVERVIEW.md) | 平台架构与功能全景 |
+| [部署指南](./docs/DEPLOYMENT.md) | 详细部署步骤与环境配置 |
+| [评估框架](./docs/assessment-framework.md) | 五维能力评估体系设计 |
+| [自主决策计算](./docs/autonomous-decision-calculation.md) | 独立决策比例计算方案 |
+
+---
+
 ## 📁 项目结构
 
 ```
@@ -183,8 +246,8 @@ ecommerce-training-platform/
 │   │   │   ├── dashboard/        # 实训控制台
 │   │   │   ├── learning/         # 学习中心
 │   │   │   ├── practice/         # 仿真实训
-│   │   │   │   ├── store/[id]/   # 店铺后台模拟
-│   │   │   │   └── preview/[id]/ # 店铺前台预览
+│   │   │   │   ├── store/        # 店铺后台模拟（?id= 查询参数）
+│   │   │   │   └── preview/      # 店铺前台预览（?id= 查询参数）
 │   │   │   ├── exam/             # 考核中心
 │   │   │   ├── assessment/       # 能力评估
 │   │   │   ├── risk-events/      # 风险应对
@@ -209,14 +272,19 @@ ecommerce-training-platform/
 │   │   └── student-layout.tsx    # 学生端布局
 │   ├── lib/                      # 工具函数
 │   │   ├── utils.ts              # 通用工具
-│   │   └── auth.ts               # 认证工具
+│   │   ├── auth.ts               # 认证工具
+│   │   ├── ai-service.ts         # 前端 AI 服务（流式对话）
+│   │   └── llm.ts                # LLM 多服务商配置
 │   ├── data/                     # 模拟数据
 │   │   ├── courses.ts            # 课程数据
 │   │   └── ability-practice.ts   # 能力实训配置
 │   └── types/                    # TypeScript 类型定义
 ├── public/                       # 静态资源
 ├── docs/                         # 项目文档
-├── scripts/                      # 构建脚本
+├── scripts/                      # 构建脚本（postbuild 生成 SPA 回退）
+├── .github/workflows/deploy.yml  # GitHub Pages 自动部署
+├── static-server.js              # 零依赖本地静态服务器
+├── 启动平台.bat                   # Windows 一键启动脚本
 ├── .coze                         # Coze 配置文件
 ├── package.json
 ├── tsconfig.json
@@ -310,9 +378,9 @@ ecommerce-training-platform/
 
 ## 📬 联系方式
 
-- **项目维护**: [你的GitHub用户名]
-- **问题反馈**: [Issues](https://github.com/your-username/ecommerce-training-platform/issues)
-- **功能建议**: [Discussions](https://github.com/your-username/ecommerce-training-platform/discussions)
+- **项目维护**: [ZBCs-StudioCr-CN](https://github.com/ZBCs-StudioCr-CN)
+- **问题反馈**: [Issues](https://github.com/ZBCs-StudioCr-CN/ecommerce-training-platform/issues)
+- **功能建议**: [Discussions](https://github.com/ZBCs-StudioCr-CN/ecommerce-training-platform/discussions)
 
 ---
 
