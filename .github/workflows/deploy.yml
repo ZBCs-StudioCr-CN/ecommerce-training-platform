@@ -37,7 +37,17 @@ jobs:
           # GitHub Pages 项目站点部署在 /repo-name/ 子路径下
           BASE_PATH: /${{ github.event.repository.name }}
           NODE_OPTIONS: --max-old-space-size=4096
-        run: pnpm run build
+        run: |
+          set +e
+          pnpm run build > build.log 2>&1
+          BUILD_EXIT=$?
+          if [ $BUILD_EXIT -ne 0 ]; then
+            echo "### Build Failed (exit $BUILD_EXIT)" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            tail -n 80 build.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+          exit $BUILD_EXIT
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
