@@ -10,7 +10,7 @@
 
 **面向中高职、本科院校电商/跨境电商专业的 AI 融合实训平台**
 
-[🌐 在线演示](https://zbcstudiocr-cn.github.io/ecommerce-training-platform/) · [📚 功能文档](./docs/PROJECT_OVERVIEW.md) · [🚀 部署指南](./docs/DEPLOYMENT.md) · [🤝 贡献指南](./CONTRIBUTING.md)
+[🌐 在线演示](https://zbcs-studiocr-cn.github.io/ecommerce-training-platform/) · [📚 功能文档](./docs/PROJECT_OVERVIEW.md) · [🚀 部署指南](./docs/DEPLOYMENT.md) · [🤝 贡献指南](./CONTRIBUTING.md)
 
 </div>
 
@@ -125,7 +125,7 @@
 
 ### 方式一：在线体验（无需安装）
 
-直接访问 [在线演示地址](https://zbcstudiocr-cn.github.io/ecommerce-training-platform/)，配置 AI 后即可体验全部功能。
+直接访问 [在线演示地址](https://zbcs-studiocr-cn.github.io/ecommerce-training-platform/)，配置 AI 后即可体验全部功能。
 
 ### 方式二：本地运行
 
