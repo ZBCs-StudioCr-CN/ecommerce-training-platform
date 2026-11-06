@@ -1,3 +1,4 @@
+﻿export const dynamic = 'force-static';
 import { NextRequest, NextResponse } from 'next/server';
 
 // 模拟存储（实际项目中应使用数据库）

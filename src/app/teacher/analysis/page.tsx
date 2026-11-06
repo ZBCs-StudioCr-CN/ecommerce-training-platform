@@ -38,6 +38,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { teacherMenuItems } from '@/config/menu';
 import { useLogout } from '@/lib/auth';
+import { generateAnalysisReport } from '@/lib/ai-service';
 
 // 五维能力评估体系（方案二：考试评估维度，实训评估具体能力）
 const fiveDimensions: Array<{
@@ -409,19 +410,14 @@ export default function TeacherAnalysisPage() {
   const generateAIReport = async () => {
     setIsGeneratingReport(true);
     try {
-      const response = await fetch('/api/teacher/ai-analysis-report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          classPerformance,
-          fiveDimensions,
-          aiUsageStats,
-          alertStudents,
-        }),
+      const report = await generateAnalysisReport({
+        classPerformance,
+        fiveDimensions,
+        aiUsageStats,
+        alertStudents,
       });
-      const data = await response.json();
-      if (data.report) {
-        setAiReport(data.report);
+      if (report) {
+        setAiReport(report);
       }
     } catch (error) {
       console.error('Report generation error:', error);

@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Save, TestTube, CheckCircle, AlertCircle, Key, Globe, Cpu, Info } from 'lucide-react';
+import { testLLMConnection } from '@/lib/llm';
 
 interface AIConfig {
   provider: string;
@@ -136,22 +137,17 @@ export default function AIConfigPage() {
     setTestResult(null);
 
     try {
-      const response = await fetch('/api/ai-test', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          provider: config.provider,
-          apiKey: config.apiKey,
-          apiBaseUrl: config.apiBaseUrl,
-          model: config.model,
-        }),
+      const result = await testLLMConnection({
+        provider: config.provider,
+        apiKey: config.apiKey,
+        baseURL: config.apiBaseUrl,
+        model: config.model,
       });
 
-      const data = await response.json();
-      if (data.success) {
-        setTestResult({ success: true, message: '连接成功！' + (data.message || '') });
+      if (result.success) {
+        setTestResult({ success: true, message: '连接成功！' + (result.message || '') });
       } else {
-        setTestResult({ success: false, message: data.error || '连接失败' });
+        setTestResult({ success: false, message: result.message || '连接失败' });
       }
     } catch (error) {
       setTestResult({ success: false, message: '请求失败，请检查网络' });

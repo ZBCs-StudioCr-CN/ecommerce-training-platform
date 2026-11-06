@@ -36,6 +36,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { teacherMenuItems } from '@/config/menu';
 import { useLogout } from '@/lib/auth';
+import { generateAITask } from '@/lib/ai-service';
 
 const practiceModules = [
   { id: 'market', name: '市场调研与选品', weight: 15, description: '市场分析、竞品调研、选品决策' },
@@ -77,12 +78,7 @@ export default function TeacherPracticePage() {
   
   // AI任务生成相关状态
   const [aiPrompt, setAiPrompt] = useState('');
-  const [generatedTask, setGeneratedTask] = useState<{
-    name: string;
-    description: string;
-    objectives: string[];
-    evaluation: string[];
-  } | null>(null);
+  const [generatedTask, setGeneratedTask] = useState<string | null>(null);
 
   const toggleModule = (id: string) => {
     if (selectedModules.includes(id)) {
@@ -106,19 +102,9 @@ export default function TeacherPracticePage() {
     
     setIsGenerating(true);
     try {
-      const response = await fetch('/api/teacher/ai-generate-task', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: aiPrompt,
-          taskType,
-          selectedModules,
-        }),
-      });
-      
-      const data = await response.json();
-      if (data.success) {
-        setGeneratedTask(data.task);
+      const task = await generateAITask(aiPrompt, taskType, selectedModules);
+      if (task) {
+        setGeneratedTask(task);
       }
     } catch (error) {
       console.error('AI generation error:', error);
@@ -611,41 +597,16 @@ export default function TeacherPracticePage() {
                           生成结果
                         </CardTitle>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={handleGenerateTask}>
                             <RefreshCw className="h-4 w-4 mr-2" />
                             重新生成
-                          </Button>
-                          <Button size="sm">
-                            应用此方案
                           </Button>
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <CardContent>
                       <div className="p-4 rounded-xl bg-white border border-purple-200">
-                        <h4 className="font-semibold text-slate-800 mb-2">{generatedTask.name}</h4>
-                        <p className="text-sm text-slate-600">{generatedTask.description}</p>
-                      </div>
-                      
-                      <div>
-                        <h5 className="font-medium text-slate-700 mb-2">学习目标</h5>
-                        <ul className="space-y-1">
-                          {generatedTask.objectives.map((obj, i) => (
-                            <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
-                              <Target className="h-4 w-4 text-purple-500 mt-0.5 flex-shrink-0" />
-                              {obj}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      <div>
-                        <h5 className="font-medium text-slate-700 mb-2">评分维度</h5>
-                        <div className="flex flex-wrap gap-2">
-                          {generatedTask.evaluation.map((ev, i) => (
-                            <Badge key={i} variant="outline" className="bg-white">{ev}</Badge>
-                          ))}
-                        </div>
+                        <pre className="text-sm text-slate-700 whitespace-pre-wrap font-sans leading-relaxed">{generatedTask}</pre>
                       </div>
                     </CardContent>
                   </Card>

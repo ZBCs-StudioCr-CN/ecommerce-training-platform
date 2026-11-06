@@ -1,3 +1,4 @@
+﻿export const dynamic = 'force-static';
 import { NextRequest, NextResponse } from 'next/server';
 import { SearchClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
 

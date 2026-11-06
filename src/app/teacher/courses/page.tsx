@@ -34,6 +34,7 @@ import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { teacherMenuItems } from '@/config/menu';
 import type { Course, Chapter, CourseCategory } from '@/data/courses';
+import { getPublishedCourses } from '@/data/courses';
 import { useLogout } from '@/lib/auth';
 
 // 课程分类配置
@@ -78,15 +79,11 @@ export default function TeacherCoursesPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  // 加载课程列表
-  const loadCourses = useCallback(async () => {
+  // 加载课程列表（直接使用静态数据）
+  const loadCourses = useCallback(() => {
     setIsLoadingCourses(true);
     try {
-      const response = await fetch('/api/courses');
-      const data = await response.json();
-      if (data.success) {
-        setCourses(data.courses);
-      }
+      setCourses(getPublishedCourses());
     } catch (error) {
       console.error('加载课程失败:', error);
     } finally {
@@ -94,15 +91,13 @@ export default function TeacherCoursesPage() {
     }
   }, []);
 
-  // 加载资源
-  const loadResources = useCallback(async () => {
+  // 加载资源（从 localStorage 读取）
+  const loadResources = useCallback(() => {
     setIsLoadingResources(true);
     try {
-      const response = await fetch('/api/resources');
-      const data = await response.json();
-      if (data.success) {
-        setResources(data.data.resources);
-      }
+      const stored = localStorage.getItem('course_resources');
+      const list = stored ? JSON.parse(stored) : [];
+      setResources(list);
     } catch (error) {
       console.error('加载资源失败:', error);
     } finally {
@@ -124,7 +119,7 @@ export default function TeacherCoursesPage() {
     }
   };
 
-  // 上传文件
+  // 上传文件（纯前端模式：存储元数据到 localStorage）
   const handleUpload = async () => {
     if (!uploadFile) return;
 
@@ -132,34 +127,36 @@ export default function TeacherCoursesPage() {
     setUploadProgress(0);
 
     try {
-      const formData = new FormData();
-      formData.append('file', uploadFile);
-      formData.append('type', uploadFile.type.startsWith('video/') ? 'video' : 'document');
-      formData.append('category', selectedCourse?.id.toString() || 'general');
-      if (uploadTitle) formData.append('title', uploadTitle);
-
       const progressInterval = setInterval(() => {
         setUploadProgress((prev) => Math.min(prev + 10, 90));
       }, 200);
 
-      const response = await fetch('/api/resources/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
+      // 模拟上传过程
+      await new Promise((r) => setTimeout(r, 1000));
       clearInterval(progressInterval);
       setUploadProgress(100);
 
-      const data = await response.json();
-      
-      if (data.success) {
-        await loadResources();
-        setUploadFile(null);
-        setUploadTitle('');
-        setShowUploadModal(false);
-      } else {
-        alert(data.error || '上传失败');
-      }
+      // 存储资源元数据到 localStorage
+      const stored = localStorage.getItem('course_resources');
+      const list = stored ? JSON.parse(stored) : [];
+      const newResource = {
+        key: Date.now().toString(),
+        id: Date.now().toString(),
+        title: uploadTitle || uploadFile.name,
+        type: uploadFile.type.startsWith('video/') ? 'video' : 'document',
+        category: selectedCourse?.id.toString() || 'general',
+        fileName: uploadFile.name,
+        fileSize: uploadFile.size,
+        url: URL.createObjectURL(uploadFile),
+        uploadedAt: new Date().toISOString(),
+      };
+      list.unshift(newResource);
+      localStorage.setItem('course_resources', JSON.stringify(list));
+
+      await loadResources();
+      setUploadFile(null);
+      setUploadTitle('');
+      setShowUploadModal(false);
     } catch (error) {
       console.error('上传失败:', error);
       alert('上传失败，请重试');
@@ -169,18 +166,16 @@ export default function TeacherCoursesPage() {
     }
   };
 
-  // 删除资源
+  // 删除资源（从 localStorage 删除）
   const handleDeleteResource = async (key: string) => {
     if (!confirm('确定要删除这个资源吗？')) return;
     
     try {
-      const response = await fetch(`/api/resources/delete?key=${encodeURIComponent(key)}`, {
-        method: 'DELETE',
-      });
-      const data = await response.json();
-      if (data.success) {
-        setResources(resources.filter(r => r.key !== key));
-      }
+      const stored = localStorage.getItem('course_resources');
+      const list = stored ? JSON.parse(stored) : [];
+      const filtered = list.filter((r: any) => r.key !== key && r.id !== key);
+      localStorage.setItem('course_resources', JSON.stringify(filtered));
+      setResources(filtered);
     } catch (error) {
       console.error('删除失败:', error);
     }

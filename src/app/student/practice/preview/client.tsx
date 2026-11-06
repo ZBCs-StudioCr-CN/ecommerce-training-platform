@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -348,9 +348,9 @@ function getStoreData(storeId: string): any {
 }
 
 export default function StorePreviewPage() {
-  const params = useParams();
+  const searchParams = useSearchParams();
   const router = useRouter();
-  const storeId = params.id as string;
+  const storeId = searchParams.get('id') as string;
   
   // 使用稳定的初始状态，避免 hydration mismatch
   const [store, setStore] = useState(defaultStoreTemplates['shopify']);
@@ -1088,7 +1088,7 @@ export default function StorePreviewPage() {
             <Button 
               variant="ghost" 
               size="sm" 
-              onClick={() => router.push(`/student/practice/store/${storeId}`)}
+              onClick={() => router.push(`/student/practice/store?id=${storeId}`)}
               className="text-slate-300 hover:text-white"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -1134,7 +1134,7 @@ export default function StorePreviewPage() {
             </div>
 
             <button
-              onClick={() => router.push(`/student/practice/store/${storeId}`)}
+              onClick={() => router.push(`/student/practice/store?id=${storeId}`)}
               className="inline-flex items-center justify-center h-8 px-3 rounded-md text-sm font-medium border border-slate-600 text-slate-300 hover:bg-slate-800 transition-colors"
             >
               <Settings className="h-4 w-4 mr-2" />

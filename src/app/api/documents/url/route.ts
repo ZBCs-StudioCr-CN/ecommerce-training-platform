@@ -1,3 +1,4 @@
+﻿export const dynamic = 'force-static';
 import { NextResponse } from 'next/server';
 import { S3Storage } from 'coze-coding-dev-sdk';
 

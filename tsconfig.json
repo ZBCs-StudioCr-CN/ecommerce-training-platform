@@ -19,7 +19,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "coze-coding-dev-sdk": ["./src/lib/coze-compat.ts"]
     }
   },
   "include": [

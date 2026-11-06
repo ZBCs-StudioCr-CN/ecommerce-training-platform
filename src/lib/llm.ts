@@ -142,6 +142,28 @@ export async function callLLMStream(
 }
 
 /**
+ * 从 localStorage 获取用户 AI 配置（前端直接调用时使用）
+ */
+export function getLocalAIConfig(): LLMConfig | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const stored = localStorage.getItem('ai_config');
+    if (!stored) return null;
+    const parsed = JSON.parse(stored);
+    if (!parsed.provider || !parsed.apiKey) return null;
+    const providerConfig = PROVIDER_CONFIGS[parsed.provider];
+    return {
+      provider: parsed.provider,
+      apiKey: parsed.apiKey,
+      baseURL: parsed.baseURL || parsed.apiBaseUrl || providerConfig?.baseURL,
+      model: parsed.model || providerConfig?.defaultModel,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
  * 测试 LLM 连接
  */
 export async function testLLMConnection(config: LLMConfig): Promise<{ success: boolean; message: string; model?: string }> {

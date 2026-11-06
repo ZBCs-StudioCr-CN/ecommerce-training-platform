@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import {
   Home,
   Package,
@@ -626,9 +626,9 @@ const mockTasks = [
 ];
 
 export default function StoreAdminPage() {
-  const params = useParams();
+  const searchParams = useSearchParams();
   const router = useRouter();
-  const storeId = params.id as string;
+  const storeId = searchParams.get('id') as string;
   
   const [activeMenu, setActiveMenu] = useState('home');
   const [expandedMenus, setExpandedMenus] = useState<string[]>(['products']);
@@ -1068,7 +1068,7 @@ export default function StoreAdminPage() {
               </div>
               <Button 
                 variant="secondary" 
-                onClick={() => router.push(`/student/practice/preview/${storeId}`)}
+                onClick={() => router.push(`/student/practice/preview?id=${storeId}`)}
               >
                 <Eye className="h-4 w-4 mr-2" />
                 View store
@@ -1540,7 +1540,7 @@ export default function StoreAdminPage() {
 
           <div className="flex items-center gap-3">
             <button
-              onClick={() => router.push(`/student/practice/preview/${storeId}`)}
+              onClick={() => router.push(`/student/practice/preview?id=${storeId}`)}
               className={`inline-flex items-center justify-center h-8 px-3 rounded-md text-sm font-medium transition-colors ${
                 ['taobao', 'douyin', 'shopify', 'shoplazza', 'woocommerce', 'amazon', 'shopee', 'lazada'].includes(store.platform)
                   ? 'border border-white/30 text-white hover:bg-white/10'

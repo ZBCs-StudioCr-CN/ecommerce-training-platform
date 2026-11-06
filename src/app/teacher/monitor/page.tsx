@@ -42,6 +42,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { teacherMenuItems } from '@/config/menu';
 import { useLogout } from '@/lib/auth';
+import { generateTeachingSuggestion } from '@/lib/ai-service';
 
 // 实时学生数据
 const studentsData = [
@@ -135,17 +136,12 @@ export default function TeacherMonitorPage() {
   const generateAISuggestion = async () => {
     setIsGeneratingSuggestion(true);
     try {
-      const response = await fetch('/api/teacher/ai-teaching-suggestion', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          classStats: stats,
-          students: studentsData,
-        }),
+      const suggestion = await generateTeachingSuggestion({
+        classStats: stats,
+        students: studentsData,
       });
-      const data = await response.json();
-      if (data.suggestion) {
-        setAiSuggestion(data.suggestion);
+      if (suggestion) {
+        setAiSuggestion(suggestion);
       }
     } catch (error) {
       console.error('AI suggestion error:', error);

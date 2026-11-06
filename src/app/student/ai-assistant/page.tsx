@@ -37,6 +37,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StudentSidebar, StudentHeader } from '@/components/student-layout';
+import { chatWithAI, parseSSEStream } from '@/lib/ai-service';
 
 // AI助手功能模块配置
 const aiModules = [
@@ -263,27 +264,9 @@ export default function AIAssistantPage() {
     setIsLoading(true);
 
     try {
-      // 调用AI API
-      const response = await fetch('/api/ai-assistant', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-AI-Provider': localStorage.getItem('ai_provider') || '',
-          'X-AI-Api-Key': localStorage.getItem('ai_api_key') || '',
-          'X-AI-Api-Base': localStorage.getItem('ai_api_base') || '',
-          'X-AI-Model': localStorage.getItem('ai_model') || '',
-        },
-        body: JSON.stringify({
-          message: content.trim(),
-          module: activeModule,
-          history: messages.slice(-10), // 只发送最近10条消息
-        }),
-      });
-
-      if (!response.ok) throw new Error('AI response failed');
-
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
+      // 前端直接调用 AI（流式）
+      const llmHistory = messages.slice(-10).map(m => ({ role: m.role, content: m.content }));
+      const stream = await chatWithAI(content.trim(), activeModule, llmHistory);
 
       let assistantContent = '';
       const assistantMessage: Message = {
@@ -295,40 +278,23 @@ export default function AIAssistantPage() {
 
       setMessages(prev => [...prev, assistantMessage]);
 
-      if (reader) {
-        let buffer = '';
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || '';
-
-          for (const line of lines) {
-            const trimmedLine = line.trim();
-            if (trimmedLine.startsWith('data: ')) {
-              const data = trimmedLine.slice(6);
-              if (data === '[DONE]') continue;
-              try {
-                const parsed = JSON.parse(data);
-                if (parsed.content) {
-                  assistantContent += parsed.content;
-                  setMessages(prev =>
-                    prev.map(m =>
-                      m.id === assistantMessage.id
-                        ? { ...m, content: assistantContent }
-                        : m
-                    )
-                  );
-                }
-              } catch (e) {
-                // 忽略解析错误
-              }
-            }
-          }
-        }
-      }
+      await new Promise<void>((resolve, reject) => {
+        parseSSEStream(
+          stream,
+          (chunk) => {
+            assistantContent += chunk;
+            setMessages(prev =>
+              prev.map(m =>
+                m.id === assistantMessage.id
+                  ? { ...m, content: assistantContent }
+                  : m
+              )
+            );
+          },
+          () => resolve(),
+          (err) => reject(err)
+        );
+      });
 
       // 记录使用历史
       setUsageHistory(prev => [
@@ -391,27 +357,9 @@ export default function AIAssistantPage() {
     setIsGeneralLoading(true);
 
     try {
-      // 调用AI API（使用 general 模块）
-      const response = await fetch('/api/ai-assistant', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-AI-Provider': localStorage.getItem('ai_provider') || '',
-          'X-AI-Api-Key': localStorage.getItem('ai_api_key') || '',
-          'X-AI-Api-Base': localStorage.getItem('ai_api_base') || '',
-          'X-AI-Model': localStorage.getItem('ai_model') || '',
-        },
-        body: JSON.stringify({
-          message: content.trim(),
-          module: 'general',
-          history: generalMessages.slice(-10),
-        }),
-      });
-
-      if (!response.ok) throw new Error('AI response failed');
-
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
+      // 前端直接调用 AI（流式，general 模块）
+      const llmHistory = generalMessages.slice(-10).map(m => ({ role: m.role, content: m.content }));
+      const stream = await chatWithAI(content.trim(), 'general', llmHistory);
 
       let assistantContent = '';
       const assistantMessage: Message = {
@@ -423,40 +371,23 @@ export default function AIAssistantPage() {
 
       setGeneralMessages(prev => [...prev, assistantMessage]);
 
-      if (reader) {
-        let buffer = '';
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || '';
-
-          for (const line of lines) {
-            const trimmedLine = line.trim();
-            if (trimmedLine.startsWith('data: ')) {
-              const data = trimmedLine.slice(6);
-              if (data === '[DONE]') continue;
-              try {
-                const parsed = JSON.parse(data);
-                if (parsed.content) {
-                  assistantContent += parsed.content;
-                  setGeneralMessages(prev =>
-                    prev.map(m =>
-                      m.id === assistantMessage.id
-                        ? { ...m, content: assistantContent }
-                        : m
-                    )
-                  );
-                }
-              } catch (e) {
-                // 忽略解析错误
-              }
-            }
-          }
-        }
-      }
+      await new Promise<void>((resolve, reject) => {
+        parseSSEStream(
+          stream,
+          (chunk) => {
+            assistantContent += chunk;
+            setGeneralMessages(prev =>
+              prev.map(m =>
+                m.id === assistantMessage.id
+                  ? { ...m, content: assistantContent }
+                  : m
+              )
+            );
+          },
+          () => resolve(),
+          (err) => reject(err)
+        );
+      });
 
       // 记录使用历史
       setUsageHistory(prev => [

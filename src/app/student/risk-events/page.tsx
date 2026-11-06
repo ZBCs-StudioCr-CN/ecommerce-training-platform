@@ -47,6 +47,7 @@ import {
 } from '@/components/ui/select';
 import { StudentSidebar, StudentHeader } from '@/components/student-layout';
 import { mockRiskEvents, type RiskEvent } from '@/data/risk-events';
+import { evaluateRiskSolution } from '@/lib/ai-service';
 
 // 风险类型配置
 const riskCategories = [
@@ -198,20 +199,8 @@ export default function RiskEventsPage() {
     setIsSubmitting(true);
 
     try {
-      // 调用AI评分API
-      const response = await fetch('/api/risk-evaluation', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          riskId: selectedRisk.id,
-          solution: solutionText.trim(),
-          riskDetails: selectedRisk,
-        }),
-      });
-
-      if (!response.ok) throw new Error('Evaluation failed');
-
-      const evaluation = await response.json();
+      // 前端直接调用 AI 评估
+      const evaluation = await evaluateRiskSolution(solutionText.trim(), selectedRisk);
 
       const solution: Solution = {
         id: Date.now().toString(),

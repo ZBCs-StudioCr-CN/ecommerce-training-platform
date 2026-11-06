@@ -279,7 +279,7 @@ export default function PracticePage() {
     setSelectedPlatform(null);
 
     // 创建成功后跳转到后台管理
-    router.push(`/student/practice/store/${newId}`);
+    router.push(`/student/practice/store?id=${newId}`);
   };
 
   if (isLoading) {
@@ -493,11 +493,11 @@ export default function PracticePage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => router.push(`/student/practice/store/${store.id}`)}>
+                          <DropdownMenuItem onClick={() => router.push(`/student/practice/store?id=${store.id}`)}>
                             <Settings className="h-4 w-4 mr-2" />
                             进入后台
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => router.push(`/student/practice/preview/${store.id}`)}>
+                          <DropdownMenuItem onClick={() => router.push(`/student/practice/preview?id=${store.id}`)}>
                             <Eye className="h-4 w-4 mr-2" />
                             预览前台
                           </DropdownMenuItem>
@@ -552,7 +552,7 @@ export default function PracticePage() {
                     <div className="flex gap-2 pt-2">
                       <Button 
                         className="flex-1 bg-gradient-to-r from-slate-900 to-slate-700"
-                        onClick={() => router.push(`/student/practice/store/${store.id}`)}
+                        onClick={() => router.push(`/student/practice/store?id=${store.id}`)}
                       >
                         <Settings className="h-4 w-4 mr-2" />
                         后台管理
@@ -560,7 +560,7 @@ export default function PracticePage() {
                       <Button 
                         variant="outline"
                         className="flex-1"
-                        onClick={() => router.push(`/student/practice/preview/${store.id}`)}
+                        onClick={() => router.push(`/student/practice/preview?id=${store.id}`)}
                       >
                         <Eye className="h-4 w-4 mr-2" />
                         前台预览
